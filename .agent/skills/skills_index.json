@@ -1,0 +1,30 @@
+{
+  "manifestVersion": "10.0.0",
+  "updatedAt": "2026-07-26T00:00:00.000Z",
+  "skills": [
+    {
+      "id": "vector-store-local",
+      "name": "Local Vector Memory",
+      "category": "core_engine",
+      "version": "1.0.0",
+      "path": "system_core/tools/VectorStoreTools.js",
+      "description": "Indexación y búsqueda semántica TF-IDF en local."
+    },
+    {
+      "id": "circuit-breaker-rollback",
+      "name": "Circuit Breaker Shield",
+      "category": "resilience",
+      "version": "1.0.0",
+      "path": "system_core/engine/CircuitBreaker.js",
+      "description": "Detección de fallos y auto-rollback a HEAD de git."
+    },
+    {
+      "id": "kanban-v2-parser",
+      "name": "Kanban Master v2.0 Engine",
+      "category": "workflow",
+      "version": "2.0.0",
+      "path": "system_core/dashboard/server.js",
+      "description": "Parser y serializador bidireccional con subtareas y dependencias."
+    }
+  ]
+}

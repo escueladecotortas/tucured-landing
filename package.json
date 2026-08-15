@@ -1,0 +1,16 @@
+{
+  "name": "tucured-landing",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "doctor": "node system_core/vitalis/vitalis_doctor.js"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  },
+  "nexusVersion": "10.0.0"
+}
