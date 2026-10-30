@@ -96,8 +96,22 @@
 
 /* Estados de selección en el Embudo de 3 Pasos */
 .funnel-option-active {
-  border-color: var(--aura-tech-primary) !important;
-  background-color: rgba(99, 102, 241, 0.06) !important;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18);
+  border-color: #4f46e5 !important;
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 4px 12px rgba(99, 102, 241, 0.12) !important;
+  transform: translateY(-1px);
 }
+
+.funnel-step-completed {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.funnel-step-active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
 

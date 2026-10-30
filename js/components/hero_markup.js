@@ -1,12 +1,13 @@
 // Archivo: js/components/hero_markup.js
 /**
- * 🏙️ Tucu Red Web V2 - Hero Markup (Split 60/40 + Mockup Isométrico 3D Extruido)
+ * 🏙️ Tucu Red Web V2 - Hero Markup (Split 60/40 + Escaparate Digital Anamórfico 3D)
+ * Estructura de 4 capas espaciales: Backlight emisivo, chasis Z=0, sheen Z=15px y break-the-glass Z=45-75px.
  */
 
 export function getHeroMarkup() {
   const slices = [-2, -4, -6, -8, -10, -12, -14, -16].map((z, i) => `
-    <div style="transform: translateZ(${z}px);" class="absolute inset-0 rounded-[52px] pointer-events-none ${
-      i === 7 ? 'bg-[#090D16] phone-chassis-shadow border border-slate-700/50' : 'bg-gradient-to-b from-[#1E293B] via-[#0F172A] to-[#1E293B] border border-slate-600/35'
+    <div style="transform: translateZ(${z}px);" class="phone-extrusion-slice ${
+      i === 7 ? 'bg-[#090D16] border border-slate-700/50' : 'bg-gradient-to-b from-[#1E293B] via-[#0F172A] to-[#1E293B] border border-slate-600/35'
     }"></div>
   `).join('');
 
@@ -36,53 +37,53 @@ export function getHeroMarkup() {
           </div>
         </div>
 
-        <!-- 40% Escenario 3D Isométrico Extruido -->
-        <div class="lg:col-span-6 relative flex justify-center items-center py-4 select-none scene-perspective" id="hero-iso-scene">
-          <div class="hero-scale-wrapper preserve-3d flex items-center justify-center">
-            <div id="hero-phone-stage" class="relative w-[326px] h-[656px] preserve-3d phone-iso-stage floating">
-              <!-- Anclaje Ambiental Aura Light -->
-              <div id="hero-ambient-aura" style="transform: translate3d(-50%, -50%, -45px);" class="absolute top-1/2 left-1/2 w-[420px] h-[540px] pointer-events-none hero-ambient-glow aura-pulse"></div>
+        <!-- 40% Escaparate Digital Anamórfico 3D (Efecto Times Square) -->
+        <div class="lg:col-span-6 relative flex justify-center items-center py-4 select-none hero-anamorphic-stage" id="hero-stage">
+          <div class="hero-anamorphic-wrapper preserve-3d">
+            <!-- Capa 0: Backlight Atmosférico Emisivo -->
+            <div id="hero-ambient-backlight" class="hero-backlight-emissive"></div>
 
+            <!-- Capa 1: Chasis & Marco Físico (Z = 0) -->
+            <div id="hero-phone-stage" class="relative w-[326px] h-[656px] hero-chassis-bezel chassis-double-bevel">
               ${slices}
               <div style="transform: translate3d(-3px, 128px, -6px);" class="absolute left-0 w-[4px] h-11 rounded-l-md bg-slate-600 border-l border-white/30 pointer-events-none"></div>
               <div style="transform: translate3d(-3px, 184px, -6px);" class="absolute left-0 w-[4px] h-14 rounded-l-md bg-slate-600 border-l border-white/30 pointer-events-none"></div>
               <div style="transform: translate3d(3px, 156px, -6px);" class="absolute right-0 w-[4px] h-16 rounded-r-md bg-slate-700 border-r border-white/25 pointer-events-none"></div>
 
-              <!-- Front Bezel Surface (translateZ: 0px) -->
-              <div style="transform: translateZ(0px);" class="absolute inset-0 rounded-[52px] p-[11px] bg-gradient-to-br from-[#263248] via-[#0F172A] to-[#090D16] shadow-[inset_0_1px_2px_rgba(255,255,255,0.35)] preserve-3d">
-                <div class="relative w-full h-full rounded-[42px] bg-black p-[2px] overflow-hidden shadow-inner">
-                  <div class="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-slate-800/80 z-30 pointer-events-none"></div>
-                  <div id="phone-screen-container" class="relative w-full h-full rounded-[40px] overflow-hidden bg-[#FAFBFD] flex flex-col justify-between text-slate-900">
-                    <div class="relative h-[200px] w-full overflow-hidden bg-slate-950 shrink-0">
-                      <img src="/assets/showcase/hero_barber.png" alt="Barber Shop" class="w-full h-full object-cover filter brightness-95" />
-                      <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/45 to-black/20"></div>
-                      <div class="relative z-10 pt-4 px-4 flex justify-between"><div class="inline-flex items-center gap-1.5 bg-[#4F46E5] text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase">★ TURNERO ACTIVO</div></div>
-                      <div class="absolute bottom-3 left-4 right-4 z-10"><p class="text-[9.5px] font-bold tracking-[0.14em] text-indigo-300 uppercase">NIVEL 3 • MULTI-STAFF</p><h2 class="text-[21px] font-extrabold tracking-tight text-white leading-tight">The Barber Club</h2></div>
-                    </div>
-                    <div class="flex-1 px-3.5 pt-3.5 pb-3 flex flex-col justify-between bg-[#FAFBFD]">
-                      <div class="rounded-2xl bg-white p-3 border border-slate-100 shadow-[0_4px_16px_-4px_rgba(15,23,42,0.06)] flex items-center justify-between">
-                        <div><p class="text-[10px] font-bold text-slate-400 uppercase">FACTURACIÓN DE HOY</p><p class="text-xl font-extrabold text-slate-900 font-mono tracking-tight">$184.500 <span class="text-xs font-bold text-emerald-600">+28%</span></p></div>
-                        <div class="w-9 h-9 rounded-xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center font-bold"><span class="material-symbols-outlined text-lg">trending_up</span></div>
-                      </div>
-                      <div class="space-y-2 mt-2">
-                        <p class="px-1 text-[10px] font-extrabold text-slate-400 uppercase">PRÓXIMOS TURNOS</p>
-                        <div id="hero-slot-1700" class="rounded-xl bg-white p-2.5 flex items-center gap-2.5 border border-slate-100 transition-all duration-300"><span class="w-9 h-8 rounded-lg bg-emerald-50 text-emerald-600 font-extrabold text-xs flex items-center justify-center">17:00</span><div class="flex-1 min-w-0"><p class="text-xs font-extrabold text-slate-800 truncate">Corte + Barba • Mateo</p><p class="text-[10px] text-slate-400">Seña #TK-92C1</p></div><span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span></div>
-                        <div class="rounded-xl bg-white p-2.5 flex items-center gap-2.5 border border-slate-100"><span class="w-9 h-8 rounded-lg bg-indigo-50 text-indigo-600 font-extrabold text-xs flex items-center justify-center">18:30</span><div class="flex-1 min-w-0"><p class="text-xs font-extrabold text-slate-800 truncate">Perfilado Premium • Lucas</p><p class="text-[10px] text-slate-400">WhatsApp enviado</p></div></div>
-                      </div>
-                      <a href="#showroom" class="w-full mt-2 py-2.5 rounded-xl bg-[#4F46E5] text-white font-bold text-xs text-center shadow-md block">Interactuar en el Showroom ↓</a>
-                    </div>
-                    <!-- Barrido Especular y Reflejo Frontal -->
-                    <div id="hero-screen-sheen" class="screen-specular-sheen"></div>
-                    <div class="absolute inset-0 pointer-events-none z-20" style="background: linear-gradient(125deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 28%, rgba(255,255,255,0.04) 48%);"></div>
+              <!-- Superficie Frontal de Pantalla (Z = 0) -->
+              <div style="transform: translateZ(0px);" class="relative w-full h-full rounded-[42px] bg-black p-[2px] overflow-hidden shadow-inner preserve-3d">
+                <div class="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-slate-800/80 z-30 pointer-events-none"></div>
+                <div id="phone-screen-container" class="relative w-full h-full rounded-[40px] overflow-hidden bg-[#FAFBFD] flex flex-col justify-between text-slate-900">
+                  <div class="relative h-[200px] w-full overflow-hidden bg-slate-950 shrink-0">
+                    <img src="/assets/showcase/hero_barber.png" alt="Barber Shop" class="w-full h-full object-cover filter brightness-95" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/45 to-black/20"></div>
+                    <div class="relative z-10 pt-4 px-4 flex justify-between"><div class="inline-flex items-center gap-1.5 bg-[#4F46E5] text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase">★ TURNERO ACTIVO</div></div>
+                    <div class="absolute bottom-3 left-4 right-4 z-10"><p class="text-[9.5px] font-bold tracking-[0.14em] text-indigo-300 uppercase">NIVEL 3 • MULTI-STAFF</p><h2 class="text-[21px] font-extrabold tracking-tight text-white leading-tight">The Barber Club</h2></div>
                   </div>
+                  <div class="flex-1 px-3.5 pt-3.5 pb-3 flex flex-col justify-between bg-[#FAFBFD]">
+                    <div class="rounded-2xl bg-white p-3 border border-slate-100 shadow-[0_4px_16px_-4px_rgba(15,23,42,0.06)] flex items-center justify-between">
+                      <div><p class="text-[10px] font-bold text-slate-400 uppercase">FACTURACIÓN DE HOY</p><p class="text-xl font-extrabold text-slate-900 font-mono tracking-tight">$184.500 <span class="text-xs font-bold text-emerald-600">+28%</span></p></div>
+                      <div class="w-9 h-9 rounded-xl bg-indigo-50 text-[#4F46E5] flex items-center justify-center font-bold"><span class="material-symbols-outlined text-lg">trending_up</span></div>
+                    </div>
+                    <div class="space-y-2 mt-2">
+                      <p class="px-1 text-[10px] font-extrabold text-slate-400 uppercase">PRÓXIMOS TURNOS</p>
+                      <div id="hero-slot-1700" class="rounded-xl bg-white p-2.5 flex items-center gap-2.5 border border-slate-100 transition-all duration-300"><span class="w-9 h-8 rounded-lg bg-emerald-50 text-emerald-600 font-extrabold text-xs flex items-center justify-center">17:00</span><div class="flex-1 min-w-0"><p class="text-xs font-extrabold text-slate-800 truncate">Corte + Barba • Mateo</p><p class="text-[10px] text-slate-400">Seña #TK-92C1</p></div><span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span></div>
+                      <div class="rounded-xl bg-white p-2.5 flex items-center gap-2.5 border border-slate-100"><span class="w-9 h-8 rounded-lg bg-indigo-50 text-indigo-600 font-extrabold text-xs flex items-center justify-center">18:30</span><div class="flex-1 min-w-0"><p class="text-xs font-extrabold text-slate-800 truncate">Perfilado Premium • Lucas</p><p class="text-[10px] text-slate-400">WhatsApp enviado</p></div></div>
+                    </div>
+                    <a href="#showroom" class="w-full mt-2 py-2.5 rounded-xl bg-[#4F46E5] text-white font-bold text-xs text-center shadow-md block">Interactuar en el Showroom ↓</a>
+                  </div>
+
+                  <!-- Capa 2: Vidrio & Sheen Especular (Z = 15px) -->
+                  <div id="hero-screen-sheen" class="hero-glass-sheen-layer"></div>
+                  <div class="absolute inset-0 pointer-events-none z-20" style="background: linear-gradient(125deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 28%, rgba(255,255,255,0.04) 48%);"></div>
                 </div>
               </div>
 
-              <!-- 3D Glassmorphism Pop-Out Cards (1 Protagónica por Acto) -->
-              <div class="absolute inset-0 pointer-events-none preserve-3d">
+              <!-- Capa 3: Efecto Break-the-Glass (Z = 45px a 75px) -->
+              <div id="hero-cards-stage" class="hero-cards-stage">
                 <!-- Card 1: Revenue Spline Graph (Acto 2) -->
-                <div id="pop-card-revenue" class="hero-pop-card absolute top-[185px] right-[-52px] w-[252px] preserve-3d">
-                  <div class="glass-pop-card p-3.5 relative">
+                <div id="pop-card-revenue" class="hero-floating-card card-slot-revenue">
+                  <div class="glass-pop-surface p-3.5 relative">
                     <div class="flex items-start justify-between gap-2 mb-2">
                       <div><span class="text-[9px] font-extrabold text-indigo-600 uppercase block">FACTURACIÓN EN VIVO</span><div class="flex items-baseline gap-1 mt-0.5"><span id="hero-revenue-val" class="text-[20px] font-extrabold text-slate-900 font-mono">$184.500</span><span class="text-[11px] font-extrabold text-emerald-600">+28%</span></div></div>
                       <div class="w-8 h-8 rounded-xl bg-[#4F46E5] text-white flex items-center justify-center shadow-md"><span class="material-symbols-outlined text-base">trending_up</span></div>
@@ -107,8 +108,8 @@ export function getHeroMarkup() {
                 </div>
 
                 <!-- Card 2: Appointment Reserved (Acto 1) -->
-                <div id="pop-card-appointment" class="hero-pop-card absolute top-[355px] left-[-46px] w-[246px] preserve-3d">
-                  <div class="glass-pop-card p-3 relative">
+                <div id="pop-card-appointment" class="hero-floating-card card-slot-appointment">
+                  <div class="glass-pop-surface p-3 relative">
                     <div class="flex items-center gap-2.5">
                       <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/30 shrink-0"><span class="material-symbols-outlined text-lg">event_available</span></div>
                       <div class="min-w-0 flex-1">
@@ -122,8 +123,8 @@ export function getHeroMarkup() {
                 </div>
 
                 <!-- Card 3: Payment Verified (Acto 3) -->
-                <div id="pop-card-payment" class="hero-pop-card absolute bottom-[92px] right-[-40px] w-[238px] preserve-3d">
-                  <div class="glass-pop-card p-3 relative">
+                <div id="pop-card-payment" class="hero-floating-card card-slot-payment">
+                  <div class="glass-pop-surface p-3 relative">
                     <div class="flex items-center gap-2.5">
                       <div id="hero-shield-icon" class="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-[#4F46E5] to-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-600/35 shrink-0 transition-transform"><span class="material-symbols-outlined text-lg">verified</span></div>
                       <div class="min-w-0 flex-1">

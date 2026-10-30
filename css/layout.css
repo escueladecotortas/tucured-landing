@@ -1,113 +1,90 @@
 /* Archivo: css/layout.css */
 /**
- * 📐 Tucu Red Web V2 - Arquitectura de Layout Fluido & Director de Escena 3D
- * Hardware clipping en GPU, Aura Light ambiental y barrido especular Apple-grade.
+ * 📐 Tucu Red Web V2 - Arquitectura de Layout Fluido & Micro-Efectos
+ * Hardware clipping en GPU, Aura Light ambiental y transiciones optimizadas.
  */
 
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 html {
-  scroll-behavior: smooth; font-family: var(--font-sans);
-  background-color: var(--aura-bg-canvas); color: var(--aura-text-main);
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  background-color: var(--aura-bg-canvas);
+  color: var(--aura-text-main);
 }
 
 body {
-  margin: 0; min-height: 100vh; background-color: var(--aura-bg-canvas);
-  color: var(--aura-text-main); overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--aura-bg-canvas);
+  color: var(--aura-text-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, .font-headline, .font-display { font-family: var(--font-display); }
+h1, h2, h3, h4, .font-headline, .font-display {
+  font-family: var(--font-display);
+}
 
 /* Luces Atmosféricas de Fondo */
-.aura-ambient-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.aura-orb-violet {
-  position: absolute; top: -12%; right: -6%; width: 640px; height: 640px; border-radius: 9999px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.09) 0%, rgba(99, 102, 241, 0) 70%); filter: blur(80px);
+.aura-ambient-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
 }
+
+.aura-orb-violet {
+  position: absolute;
+  top: -12%;
+  right: -6%;
+  width: 640px;
+  height: 640px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.09) 0%, rgba(99, 102, 241, 0) 70%);
+  filter: blur(80px);
+}
+
 .aura-orb-orange {
-  position: absolute; top: 38%; left: -10%; width: 540px; height: 540px; border-radius: 9999px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.07) 0%, rgba(249, 115, 22, 0) 70%); filter: blur(80px);
+  position: absolute;
+  top: 38%;
+  left: -10%;
+  width: 540px;
+  height: 540px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.07) 0%, rgba(249, 115, 22, 0) 70%);
+  filter: blur(80px);
 }
 
 /* Transición de Entrada */
-@keyframes fadeSlideUp { 0% { opacity: 0; transform: translateY(14px); } 100% { opacity: 1; transform: translateY(0); } }
-.component-enter, main > div > section { animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-/* Escenario 3D Isométrico & Escala */
-.scene-perspective { perspective: 1400px; transform-style: preserve-3d; }
-.preserve-3d { transform-style: preserve-3d; }
-@media (min-width: 1024px) { .hero-scale-wrapper { transform: scale(1.08); transform-style: preserve-3d; } }
-
-@keyframes phoneIsoFloat {
-  0%, 100% { transform: rotateX(9deg) rotateY(-14deg) rotateZ(1.5deg) translateY(0); }
-  50% { transform: rotateX(7deg) rotateY(-10deg) rotateZ(0.5deg) translateY(-10px); }
-}
-.phone-iso-stage { transform: rotateX(9deg) rotateY(-14deg) rotateZ(1.5deg); transform-style: preserve-3d; will-change: transform; }
-.phone-iso-stage.floating { animation: phoneIsoFloat 7.5s ease-in-out infinite; }
-.phone-chassis-shadow { box-shadow: -22px 34px 68px rgba(30, 27, 75, 0.38), -8px 14px 28px rgba(15, 23, 42, 0.26), inset 0 0 0 2px rgba(255, 255, 255, 0.22); }
-
-/* Anclaje Ambiental Aura Light */
-.hero-ambient-glow {
-  background: radial-gradient(circle at 50% 45%, rgba(99, 102, 241, 0.32) 0%, rgba(139, 92, 246, 0.20) 38%, rgba(249, 115, 22, 0.10) 65%, transparent 78%);
-  filter: blur(55px); will-change: transform, opacity; border-radius: 9999px;
-}
-@keyframes auraPulse {
-  0%, 100% { opacity: 0.85; transform: translate3d(-50%, -50%, -45px) scale(1.0); }
-  50% { opacity: 1.10; transform: translate3d(-50%, -50%, -45px) scale(1.05); }
-}
-.aura-pulse { animation: auraPulse 6s ease-in-out infinite; }
-
-/* Barrido Especular en Pantalla */
-.screen-specular-sheen { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 30; }
-.screen-specular-sheen::after {
-  content: ''; position: absolute; inset: 0; width: 100%; height: 100%;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.42) 50%, transparent 70%);
-  transform: translateX(-160%) skewX(-20deg); will-change: transform;
-}
-@keyframes sheenSweep { 0% { transform: translateX(-160%) skewX(-20deg); } 100% { transform: translateX(160%) skewX(-20deg); } }
-.sheen-active::after { animation: sheenSweep 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-/* Glassmorphism Especular con Hardware Clipping en GPU */
-.glass-pop-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.82) 100%);
-  backdrop-filter: blur(20px) saturate(190%); -webkit-backdrop-filter: blur(20px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 1.25rem;
-  clip-path: inset(0 round 1.25rem); overflow: hidden;
-}
-.glass-pop-card::before, .glass-pop-card::after,
-.hero-pop-card::before, .hero-pop-card::after { border-radius: inherit; }
-
-/* Tarjetas Flotantes 3D - Estado Durmiente y Actos Protagónicos */
-.hero-pop-card {
-  opacity: 0; transform: translate3d(0, 20px, -60px) scale(0.7); pointer-events: none; border-radius: 1.25rem;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out, filter 0.6s ease;
-  transform-style: preserve-3d; will-change: transform, opacity, filter;
-  filter: drop-shadow(0 12px 20px rgba(15, 23, 42, 0.12));
-}
-.hero-card-active {
-  filter: drop-shadow(0 20px 25px rgba(15, 23, 42, 0.18)) drop-shadow(0 0 16px rgba(99, 102, 241, 0.22)) !important;
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Coordenadas Z Protagónicas por Acto (1 card a la vez) */
-.card-act-1 { transform: translate3d(-20px, 10px, 160px) scale(1.18); opacity: 1 !important; pointer-events: auto !important; }
-.card-act-2 { transform: translate3d(15px, -10px, 175px) scale(1.22); opacity: 1 !important; pointer-events: auto !important; }
-.card-act-3 { transform: translate3d(-10px, 20px, 165px) scale(1.20); opacity: 1 !important; pointer-events: auto !important; }
-
-/* Clamping Responsive Móvil (< 640px) */
-@media (max-width: 640px) {
-  #soluciones { overflow-x: hidden; }
-  .hero-scale-wrapper { transform: scale(0.90); transform-style: preserve-3d; }
-  .hero-pop-card { max-width: min(310px, 88vw) !important; width: 100% !important; left: 50% !important; right: auto !important; }
-  .card-act-1 { transform: translate3d(calc(-50% + 4px), 12px, 110px) scale(0.98) !important; }
-  .card-act-2 { transform: translate3d(calc(-50% + 10px), -12px, 120px) scale(1.0) !important; }
-  .card-act-3 { transform: translate3d(calc(-50% + 0px), 24px, 115px) scale(0.98) !important; }
+.component-enter, main > div > section {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Dibujo Dinámico de Trazo SVG Vivo */
-.rev-spline-path { stroke-dasharray: 300; stroke-dashoffset: 300; transition: stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1); }
-.rev-spline-drawn { stroke-dashoffset: 0; }
+.preserve-3d {
+  transform-style: preserve-3d;
+}
 
-/* Reacciones en el Smartphone (Slot 17:00 & Escudo) */
+/* Trazo SVG Dinámico de Facturación */
+.rev-spline-path {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rev-spline-drawn {
+  stroke-dashoffset: 0;
+}
+
+/* Pulsos de Feedback en Smartphone (Slot 17:00 & Escudo) */
 .slot-pulse-emerald {
   border-color: #10B981 !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25), 0 8px 20px -4px rgba(16, 185, 129, 0.3) !important;
@@ -118,8 +95,17 @@ h1, h2, h3, h4, .font-headline, .font-display { font-family: var(--font-display)
   0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(99, 102, 241, 0)); }
   50% { transform: scale(1.12); filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.8)); }
 }
-.shield-glow-active { animation: shieldPulse 1.2s ease-in-out infinite; }
 
-/* Utilidades */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.shield-glow-active {
+  animation: shieldPulse 1.2s ease-in-out infinite;
+}
+
+/* Utilidades de Scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

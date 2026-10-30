@@ -77,7 +77,7 @@ export const ShowcaseBenefits = {
           </h4>
           <div class="bg-[#0b141a] rounded-xl p-3 border border-white/5 flex flex-col gap-2 shadow-inner">
             <div class="text-center text-[10px] text-white/40 uppercase tracking-wider font-mono">Hoy</div>
-            <div class="bg-[#005c4b] text-[#e9edef] p-3 rounded-2xl rounded-tr-xs max-w-[88%] ml-auto text-xs shadow-sm border border-white/5 whitespace-pre-line leading-relaxed transition-all">
+            <div class="wa-bubble-preview bubble-refresh max-w-[88%] ml-auto whitespace-pre-line leading-relaxed">
               ${state.getFormattedWhatsAppMessage()}
               <div class="text-[10px] text-white/70 text-right mt-1.5 flex justify-end items-center gap-1">
                 <span>10:42 AM</span>

@@ -18,3 +18,4 @@
 - **Google Pomelli / Gemini Vision Asset Studio:** Evaluar herramientas avanzadas de generación visual para producción de mockups de catálogo sin artefactos de tipografía.
 - **Contención Preventiva por Viewport:** Instruir a @Atenea a aplicar contención `min(width, vw)` de forma preventiva en todo componente con traslación 3D en el eje Z.
 - **Narrativas Secuenciales de 1 Solo Evento:** Priorizar la cadencia "1 evento a la vez" en futuros componentes para maximizar foco cognitivo y retención visual.
+

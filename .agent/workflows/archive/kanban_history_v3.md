@@ -64,3 +64,4 @@
   - [x] Desacoplar `stitch_aura_light_v2.html` en 6 componentes Vanilla ES6 y 3 hojas CSS
   - [x] Trasplantar los 9 módulos de `js/showcase_v11/` desde `tucured-engine`
 - [x] **[TASK-016]** Generación de Maqueta Declarativa Aura Light V2 en Google Stitch MCP *(29/10/2026)*
+

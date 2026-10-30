@@ -123,6 +123,11 @@ export const ShowcaseState = {
       this.currentStep = 1;
       this.isSelfService = false;
       this.notify();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tucured:level-selected', {
+          detail: { level: levelId, rubro: this.currentRubro }
+        }));
+      }
     }
   },
 
@@ -134,6 +139,11 @@ export const ShowcaseState = {
       this.selectedStaff = 0;
       this.isSelfService = false;
       this.notify();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tucured:rubro-selected', {
+          detail: { rubro: rubroId, level: this.currentLevel }
+        }));
+      }
     }
   },
 

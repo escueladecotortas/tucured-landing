@@ -40,10 +40,11 @@ export const ShowcaseLevels = {
             return `
               <button 
                 type="button" 
+                data-showroom-level="${lvl.id}"
                 onclick="window.ShowcaseCore.selectLevel('${lvl.id}')"
-                class="w-full text-left p-2.5 rounded-xl transition-all relative overflow-hidden group cursor-pointer flex items-center justify-between gap-2.5 ${
+                class="level-selector-tab w-full text-left p-2.5 rounded-xl transition-all relative overflow-hidden group cursor-pointer flex items-center justify-between gap-2.5 ${
                   isActive 
-                    ? 'bg-[#06c85d]/15 text-[#41e575] border border-[#06c85d]/30 font-semibold shadow-md rim-light' 
+                    ? 'active bg-[#06c85d]/15 text-[#41e575] border border-[#06c85d]/30 font-semibold shadow-md rim-light' 
                     : 'text-on-surface-variant hover:bg-surface-variant/60 hover:text-on-surface border border-transparent'
                 }"
               >

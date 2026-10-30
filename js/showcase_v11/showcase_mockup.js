@@ -20,14 +20,21 @@ export const ShowcaseMockup = {
 
     container.innerHTML = `
       <div class="flex flex-col items-center w-full max-w-[400px] mx-auto gap-2.5">
-        <div class="w-full bg-surface-container-high rounded-full p-1.5 flex justify-between overflow-x-auto no-scrollbar border border-white/5 shadow-inner gap-1.5 scroll-smooth touch-pan-x flex-nowrap">
+        <div class="rubro-tabs-container w-full">
           ${rubros.map(r => `
-            <button type="button" onclick="window.ShowcaseCore.selectRubro('${r.id}')" class="flex-1 min-w-[76px] whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer ${state.currentRubro === r.id ? 'bg-surface-container-lowest text-on-surface font-bold shadow-sm border border-white/10' : 'text-on-surface-variant hover:text-on-surface'}">
-              <span class="material-symbols-outlined text-sm" style="color: ${r.accentColor};">${r.iconSymbol}</span><span>${r.name}</span>
+            <button 
+              type="button" 
+              data-showroom-rubro="${r.id}"
+              data-rubro="${r.id}"
+              onclick="window.ShowcaseCore.selectRubro('${r.id}')" 
+              class="rubro-tab ${state.currentRubro === r.id ? 'active' : ''}"
+            >
+              <span class="material-symbols-outlined text-sm" style="color: ${r.accentColor};">${r.iconSymbol}</span>
+              <span>${r.name}</span>
             </button>
           `).join('')}
         </div>
-        <div class="relative w-full rounded-[2rem] border-[6px] border-surface-container-high bg-background overflow-hidden shadow-2xl flex flex-col ring-1 ring-white/10 shadow-[0_0_40px_rgba(212,175,55,0.12)]">
+        <div class="showroom-mockup-viewport relative w-full rounded-[2rem] border-[6px] border-surface-container-high bg-background overflow-hidden shadow-2xl flex flex-col ring-1 ring-white/10 shadow-[0_0_40px_rgba(212,175,55,0.12)]">
           <div class="h-36 relative shrink-0">
             <img src="${curRubro.heroImage}" alt="${curRubro.bizName}" class="w-full h-full object-cover brightness-75">
             <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>

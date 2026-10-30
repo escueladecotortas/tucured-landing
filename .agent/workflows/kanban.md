@@ -10,13 +10,14 @@ Estructura soberana de orquestación y seguimiento (Ventana Deslizante Activa).
 > - Banco de Ideas & Refactorings: [.agent/workflows/ideas.md](.agent/workflows/ideas.md)  
 
 ## [BACKLOG]
-- [ ] **[TASK-035]** Sincronización del Showroom interactivo de 5 rubros (`#showroom`) con transiciones fluidas
-- [ ] **[TASK-036]** Refinamiento de la arquitectura de conversión del embudo guiado interactivo de 3 pasos (`#funnel`)
 - [ ] **[TASK-037]** Ajuste fino de CTAs finales y pasarelas hacia WhatsApp con pre-llenado de datos de comercio
 
 ## [IN_PROGRESS]
 
 ## [DONE]
+- [x] **[TASK-036]** Refinamiento de la arquitectura de conversión del embudo guiado interactivo de 3 pasos (`#funnel`) *(30/10/2026, 14:44:50)*
+- [x] **[TASK-035]** Sincronización del Showroom interactivo de 5 rubros (`#showroom`) con transiciones fluidas *(30/10/2026, 12:26:40)*
+- [x] **[TASK-038]** Transformación Hero Anamórfico 3D & Auditoría Clínica de Enlace Directo *(30/10/2026, 12:07:45)*
 - [x] **[TASK-034]** Clamping Responsive Móvil en Cards 3D & Cierre Git *(30/10/2026, 00:44:53)*
 - [x] **[TASK-033]** Pulido Cinemático Hero: Aura Light, Glass Sheen & Escala Apple *(30/10/2026, 00:27:00)*
 - [x] **[TASK-032]** Erradicación de Artefacto Rectangular en Cards 3D (Hardware Clipping & Drop-Shadow) *(30/10/2026, 00:15:00)*
