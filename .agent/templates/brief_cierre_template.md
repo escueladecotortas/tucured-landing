@@ -37,4 +37,4 @@
 {{MEJORAS_PROMPT}}
 
 ---
-*Antigravity procesará este reporte para actualizar Kanban Master v2.0, bitácora y skills autónomamente.*
+*Antigravity procesará este reporte para actualizar Kanban Master v2.0, telemetría y skills autónomamente.*

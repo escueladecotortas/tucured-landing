@@ -3,7 +3,7 @@
 
 **Proyecto Activo:** {{PROJECT_NAME}}  
 **Entorno & Persistencia:** {{LOCAL_FIRST_STORAGE}} (DB_TARGET: {{DB_TARGET}})  
-**Versión del Ecosistema:** Nexus OS v10.0 Nivel Dios  
+**Versión del Ecosistema:** Nexus OS v11.1  
 **Fecha & Hora de Apertura:** {{TIMESTAMP}}  
 
 ---

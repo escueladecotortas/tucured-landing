@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5174 --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --port 5174 --host"
   },
   "devDependencies": {
     "vite": "^5.4.0"

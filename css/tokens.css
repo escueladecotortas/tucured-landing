@@ -1,0 +1,59 @@
+/* Archivo: css/tokens.css */
+/**
+ * 🎨 Tucu Red Web V2 - Tokens del Sistema (Aura Light System + Showroom Dark Pod)
+ * Definición de variables CSS nativas, tipografías, sombras multicapa y radios.
+ */
+
+:root {
+  /* Lienzo Base Aura Light */
+  --aura-bg-canvas: #f8fafc;
+  --aura-bg-surface: #ffffff;
+  --aura-bg-subtle: #f1f5f9;
+  --aura-bg-elevated: #e2e8f0;
+
+  /* Grafito Técnico & Texto */
+  --aura-text-main: #0f172a;
+  --aura-text-secondary: #334155;
+  --aura-text-muted: #64748b;
+
+  /* Identidad Tecnológica (Violeta Digital) */
+  --aura-tech-primary: #6366f1;
+  --aura-tech-strong: #4f46e5;
+  --aura-tech-soft: rgba(99, 102, 241, 0.1);
+
+  /* Conversión & Acción (Naranja Enérgico) */
+  --aura-cta-primary: #f97316;
+  --aura-cta-hover: #ea580c;
+  --aura-cta-glow: rgba(249, 115, 22, 0.28);
+
+  /* Estados Semánticos */
+  --aura-success: #10b981;
+  --aura-warning: #f59e0b;
+  --aura-border-light: rgba(15, 23, 42, 0.08);
+  --aura-border-tech: rgba(99, 102, 241, 0.22);
+
+  /* Sombras Difusas Multicapa */
+  --aura-shadow-sm: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+  --aura-shadow-md: 0 16px 40px -8px rgba(15, 23, 42, 0.08);
+  --aura-shadow-xl: 0 28px 64px -12px rgba(15, 23, 42, 0.14);
+  --aura-shadow-3d: -24px 32px 64px -12px rgba(15, 23, 42, 0.22), 0 0 40px 0 rgba(99, 102, 241, 0.12);
+
+  /* Tipografías */
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Scope Oscuro de Alto Contraste para el Motor Interactivo Showcase v11 */
+.showroom-stage-dark {
+  --sh-bg: #0f1117;
+  --sh-surface-lowest: #090b10;
+  --sh-surface-low: #151923;
+  --sh-surface: #1c2230;
+  --sh-surface-high: #252d3f;
+  --sh-text: #f8fafc;
+  --sh-text-muted: #94a3b8;
+  --sh-primary: #f59e0b;
+  --sh-secondary: #10b981;
+}
+

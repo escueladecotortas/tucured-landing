@@ -1,0 +1,103 @@
+/* Archivo: css/components.css */
+/**
+ * 🧩 Tucu Red Web V2 - Componentes Visuales (Aura Light + Consola Showroom v11)
+ * Superficies glassmorphic, botones de acción y adaptación cromática del Showroom.
+ */
+
+/* Superficie Cristalina Aura Light */
+.glass-optic {
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Botón Primario de Conversión (Naranja Enérgico) */
+.btn-aura-cta {
+  background: linear-gradient(135deg, var(--aura-cta-primary) 0%, var(--aura-cta-hover) 100%);
+  color: #ffffff;
+  box-shadow: 0 12px 28px -6px var(--aura-cta-glow);
+  transition: all 0.25s ease;
+}
+
+.btn-aura-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px -6px rgba(249, 115, 22, 0.42);
+}
+
+/* Tarjetas Editoriales de Casos Reales */
+.case-editorial-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  box-shadow: var(--aura-shadow-md);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.case-editorial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--aura-shadow-xl);
+}
+
+/* Adaptación de Clases de Showcase v11 dentro del Pod Interactivo */
+.showroom-stage-dark {
+  background: radial-gradient(circle at 50% 0%, #1e2436 0%, #0d1017 100%);
+  color: var(--sh-text);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--aura-shadow-xl);
+}
+
+.showroom-stage-dark .bg-background {
+  background-color: var(--sh-bg) !important;
+}
+
+.showroom-stage-dark .bg-surface-container-lowest {
+  background-color: var(--sh-surface-lowest) !important;
+}
+
+.showroom-stage-dark .bg-surface-container-low,
+.showroom-stage-dark .bg-surface-container-low\/80 {
+  background-color: rgba(21, 25, 35, 0.88) !important;
+}
+
+.showroom-stage-dark .bg-surface-container,
+.showroom-stage-dark .bg-surface-container\/80 {
+  background-color: var(--sh-surface) !important;
+}
+
+.showroom-stage-dark .bg-surface-container-high {
+  background-color: var(--sh-surface-high) !important;
+}
+
+.showroom-stage-dark .text-on-surface {
+  color: var(--sh-text) !important;
+}
+
+.showroom-stage-dark .text-on-surface-variant {
+  color: var(--sh-text-muted) !important;
+}
+
+.showroom-stage-dark .text-primary {
+  color: #fbbf24 !important;
+}
+
+.showroom-stage-dark .text-secondary {
+  color: #34d399 !important;
+}
+
+.showroom-stage-dark .bg-gold-gradient {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35) !important;
+}
+
+.showroom-stage-dark .rim-light {
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Estados de selección en el Embudo de 3 Pasos */
+.funnel-option-active {
+  border-color: var(--aura-tech-primary) !important;
+  background-color: rgba(99, 102, 241, 0.06) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18);
+}
+
