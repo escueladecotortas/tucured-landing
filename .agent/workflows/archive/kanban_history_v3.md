@@ -1,0 +1,66 @@
+// Archivo: .agent/workflows/archive/kanban_history_v3.md
+# Histórico de Tareas Kanban v3 - tucured-landing
+
+## [DONE] - Hitos Archivados (Transición Hero Cinemático & Showroom Modular)
+
+- [x] **[TASK-029]** Transición a Hero Op-B: Video Anamórfico WebM Transparente & Purga CSS *(29/10/2026)*
+  - [x] Procesar video con FFmpeg: crop 1:1 (1080x1080), chromakey verde (0x00FF00), codec VP9 alfa yuva420p (1.89 MB < 2 MB) en `public/assets/hero_anamorphic.webm`
+  - [x] Extraer poster instantáneo WebP de alta fidelidad en `public/assets/hero_poster.webp`
+  - [x] Refactorizar `hero.js` a 57L (< 60L): purga de listeners/lerp/story loop y montaje de reproductor nativo con IntersectionObserver pasivo
+  - [x] Higienizar `css/layout.css` a 66L (< 90L): remoción de animaciones orbitales obsoletas e incorporación de `.hero-video-container` y `.hero-video-element`
+  - [x] Certificar gobernanza: build de producción limpio en 821ms y sincronización HMR en `http://localhost:5174`
+- [x] **[TASK-028]** Coreografía Cinemática V2: Teléfono Reactivo, Erradicación Z-Clipping y Glassmorphism *(29/10/2026)*
+  - [x] Erradicar recorte 3D (z-clipping) garantizando `transform-style: preserve-3d` continuo sin `overflow: hidden` ni aplanamiento por `backdrop-filter` en contenedores intermedios
+  - [x] Implementar clase `.glass-card-hero` con fondo translúcido (88%), blur(12px), borde especular (75%) y sombra multicapa difusa
+  - [x] Configurar trayectorias orbitales con pausa protagónica frontal fija en `translateZ(185px)` y escala `1.18`
+  - [x] Desarrollar cadencia de 3 actos con respiro (ciclo 14s total) y teléfono reactivo: slot 18:30 verde, micro-contador dinámico ($184.500 -> $209.000) y badge comanda
+  - [x] Certificar gobernanza: `hero.js` (172L < 175L) y `layout.css` (107L < 160L), compilación de producción limpia en 668ms
+- [x] **[TASK-027]** Coreografía Cinemática Orbital 3D en 3 Actos & PhoneReveal *(29/10/2026)*
+  - [x] Configurar escenario 3D con perspectiva amplia de 1000px y animación de entrada `@keyframes phoneReveal` en `css/layout.css`
+  - [x] Definir 3 trayectorias orbitales completas detrás -> frente -> detrás (`@keyframes orbitHorizontal`, `@keyframes orbitVertical`, `@keyframes orbitCurve`)
+  - [x] Orquestar máquina secuencial cíclica en `js/components/hero.js` (1.1s reveal + bucle continuo 12s, 4s por acto)
+  - [x] Implementar aislamiento estricto con `.orbit-hidden` para tarjetas inactivas y preservar seguimiento sutil al cursor del teléfono
+  - [x] Certificar gobernanza: `hero.js` (166L < 175L) y `layout.css` (94L < 160L), build limpio en 468ms
+- [x] **[TASK-026]** Cinemática Balística Secuencial (Story Loop 3.6s & Spring Physics) en Hero Section *(29/10/2026)*
+  - [x] Definir keyframes `@keyframes burstIn` y `@keyframes recedeBack` con interpolación de variables `--tx`, `--ty`, `--tz` en `css/layout.css`
+  - [x] Implementar clases de estado `.card-ejected-active` (halo difuso reactivo) y `.card-ejected-idle` (segundo plano suave)
+  - [x] Construir máquina de estados secuencial en `js/components/hero.js` alternando cada 3.6s (Turno Barber -> Cobro MP -> Envío WhatsApp)
+  - [x] Preservar motor de interpolación elástica lerp (0.12) y rotación anamórfica 3D coordinada
+  - [x] Certificar gobernanza: `hero.js` (170L < 175L) y `layout.css` (108L < 160L), build de Vite limpio en 537ms sin fugas de memoria
+- [x] **[TASK-025]** Calibración Cinemática 3D, Fuga Focal 850px y Parallax Elástico (lerp) *(29/10/2026)*
+  - [x] Reducir perspectiva a 850px en `.perspective-hero` para maximizar fuga tridimensional
+  - [x] Elevar eje Z: capa 1 (45px), capa 2 (85px), capa 3 (115px) con halos difusos multicapa
+  - [x] Inyectar 3 animaciones de flotación multifrecuencia (`floatCardA` 3.2s, `floatCardB` 4.2s, `floatCardC` 2.7s)
+  - [x] Ampliar rotación máxima del escenario a 18°/20° e implementar amortiguación elástica lerp (0.12)
+  - [x] Aplicar traslación reactiva multidireccional por tarjeta con soporte táctil y giroscopio móvil
+  - [x] Auditar gobernanza: `hero.js` (173L) y `layout.css` (138L) < 180L, build de Vite limpio en 557ms
+- [x] **[TASK-024]** Parallax 3D Reactivo & Capas en Eje Z en Hero Section *(29/10/2026)*
+  - [x] Implementar utilidades de perspectiva 3D en `css/layout.css` (`.perspective-hero`, `.parallax-target`, `.depth-layer-1/2/3`)
+  - [x] Enlazar listeners interactivos en `#hero-dynamic-stage` (`mousemove`, `mouseleave`, `touchmove`, `touchend`, `deviceorientation`)
+  - [x] Desacoplar capas en eje Z para tarjetas flotantes (35px, 65px, 90px)
+  - [x] Dejar slot preparado con comentario para swap a `<video>` de la Opción B al finalizar render 3D
+- [x] **[TASK-023]** Rastrillaje Quirúrgico de Textos y Descorporativización *(29/10/2026)*
+  - [x] Actualizar botón de acción principal en Showroom a "Quiero este Turnero en mi negocio" (`showcase_benefits.js`)
+  - [x] Ajustar overline de certezas a "DETALLES QUE IMPORTAN" en `features.js`
+  - [x] Afilar embudo `funnel.js`: overline "Puesta en marcha sin comisiones", titular "Configurá tu propuesta", botón "Quiero empezar ahora" y erradicación de "ecosistema"
+- [x] **[TASK-022]** Pulido Fino de Textos, 5to Caso Salud, Limpieza de Showroom y Unificación de CTAs *(29/10/2026)*
+  - [x] Unificar CTA "Sumar mi negocio" en navbar (desktop y mobile), footer y botón de acción en hero apuntando a `#funnel`
+  - [x] Ajustar estilos tipográficos en bajada de Casos (`text-slate-500 text-sm md:text-base font-normal max-w-xl`)
+  - [x] Incorporar 5ta tarjeta comercial en casos: Centro Médico San Martín (`salud`, `hero_salud.webp`, L3) con grilla asimétrica equilibrada
+  - [x] Purgar badge duplicado y barra redundante `.active-config-bar` en `showroom_view.js`
+- [x] **[TASK-021]** Conversión WebP de Alta Fidelidad & Trasplante de Activos *(29/10/2026)*
+  - [x] Convertir `peluqueria.jpg`, `salud.jpg` y `salon_unas.jpg` de `temp/` a WebP calidad 82 (~85% de reducción promedio)
+  - [x] Depositar WebPs en `assets/showcase/`, `public/assets/showcase/` y `dist/assets/showcase/`
+  - [x] Enlazar `showcase_state.js` para estetica, barberia y salud
+- [x] **[TASK-020]** Saneamiento Integral de Textos, Identidad de Marca y Slot Salud *(29/10/2026)*
+  - [x] Actualizar titular y badge del Hero y ajustar textos de Casos y Footer
+  - [x] Renombrar estética a "Lumina Uñas & Estética" y crear fallback `hero_salud.png`
+- [x] **[TASK-019]** Activación de 5to Rubro Salud & Certezas Reales del Sistema *(29/10/2026)*
+  - [x] Incorporar `salud` en `showcase_state.js`, plantillas L1/L2/L3 y píldora rápida
+  - [x] Inyectar componente Aura Light `features.js` (72L) con las 5 "Certezas Reales del Sistema"
+- [x] **[TASK-018]** Auditoría Funcional del Motor (L1/L2/L3 + Presets) y Saneamiento de Identidad Visual *(29/10/2026)*
+  - [x] Extraer matriz real de reglas de negocio en código y vincular logo oficial SVG en `navbar.js` y `footer.js`
+- [x] **[TASK-017]** Modularización Arquitectónica (< 200L) e Integración de Showroom v11.1 *(29/10/2026)*
+  - [x] Desacoplar `stitch_aura_light_v2.html` en 6 componentes Vanilla ES6 y 3 hojas CSS
+  - [x] Trasplantar los 9 módulos de `js/showcase_v11/` desde `tucured-engine`
+- [x] **[TASK-016]** Generación de Maqueta Declarativa Aura Light V2 en Google Stitch MCP *(29/10/2026)*
