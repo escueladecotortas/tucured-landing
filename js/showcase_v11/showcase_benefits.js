@@ -49,7 +49,7 @@ export const ShowcaseBenefits = {
           </button>
 
           <a 
-            href="https://wa.me/5493815551234?text=Hola,%20quiero%20probar%20el%20panel%20de%20administracion%20del%20${encodeURIComponent(curLvl.name)}%20para%20${encodeURIComponent(curRubro.name)}" 
+            href="https://wa.me/5493814132154?text=Hola,%20quiero%20probar%20el%20panel%20de%20administracion%20del%20${encodeURIComponent(curLvl.name)}%20para%20${encodeURIComponent(curRubro.name)}" 
             target="_blank"
             rel="noopener noreferrer"
             class="w-full bg-surface-container hover:bg-surface-variant text-primary font-semibold text-xs py-2.5 rounded-xl border border-primary/20 hover:border-primary/50 transition-all flex justify-center items-center gap-2 cursor-pointer"

@@ -1,11 +1,12 @@
 // Archivo: js/components/funnel.js
 /**
  * 🧙 Tucu Red Web V2 - Wizard Empático de 3 Pantallas (Kiro Local-First Controller)
- * Asistente visual Kiro, persistencia silenciosa en local_db y cero recarga.
- * Restricción estricta: < 200 líneas.
+ * Asistente visual Kiro, persistencia silenciosa en local_db y pasarela WhatsApp.
+ * Restricción estricta: < 200 líneas (< 180L).
  */
 
 import { getFunnelMarkup, FUNNEL_RUBROS, FUNNEL_LEVELS } from './funnel_markup.js';
+import { getLeadWhatsAppUrl } from '../utils/whatsapp_link.js';
 
 function sanitizeArgentinePhone(raw) {
   let d = String(raw || '').replace(/\D/g, '');
@@ -143,14 +144,18 @@ export function renderFunnel(containerId = 'app-funnel') {
     if (successCard) {
       successCard.classList.remove('hidden');
       const rName = FUNNEL_RUBROS.find(r => r.id === selectedRubro)?.label || selectedRubro;
+      const waUrl = getLeadWhatsAppUrl(payload);
       successCard.innerHTML = `
         <div class="space-y-4 max-w-lg mx-auto py-4">
           <img src="/assets/images/kiro/kiro_exito.webp" alt="Kiro Éxito" class="w-24 h-24 sm:w-28 sm:h-28 mx-auto object-contain drop-shadow-xl animate-bounce" />
           <h4 class="font-headline font-extrabold text-2xl sm:text-3xl text-emerald-950">¡Felicitaciones! El sistema para ${payload.nombre} está en marcha.</h4>
           <p class="text-sm text-emerald-800 leading-relaxed">Registramos tus preferencias para ${rName} en ${payload.ciudad}. En breve nos contactaremos para entregarte tu acceso y cartel de mostrador.</p>
-          <div class="pt-2">
-            <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold font-mono">✓ Guardado en base local (Local-First)</span>
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" id="btn-lead-wa-confirm" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-headline font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-lg">chat</span><span>Avisar a Tucu Red por WhatsApp</span>
+            </a>
           </div>
+          <div class="pt-1"><span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">✓ Guardado en base local (Local-First)</span></div>
         </div>
       `;
     }

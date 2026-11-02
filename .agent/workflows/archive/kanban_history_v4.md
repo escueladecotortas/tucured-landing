@@ -3,6 +3,15 @@
 
 ## [DONE] - Hitos Archivados (Hero Isométrico, Showroom Reactivo & Clamping Móvil)
 
+- [x] **[TASK-040]** Actualización Integral de Copys y Voz de Marca Positiva en Landing & Embudo *(01/11/2026, 23:25:00)*
+  - [x] Reescritura integral de copys con tono optimista, empático y constructivo sin mención de rivales.
+  - [x] Validación de voz positiva en Hero, Casos, Features, Precios y Embudo.
+- [x] **[TASK-039]** Integración de Sección de Precios Transparentes ($1.000 Mes 1) y Conexión Reactiva a `#funnel` *(01/11/2026, 22:44:00)*
+  - [x] Implementación de 3 niveles con gancho de lanzamiento de $1.000 ARS en Mes 1.
+  - [x] Conexión reactiva por CustomEvent hacia `#funnel`.
+- [x] **[TASK-038]** Transformación Hero Anamórfico 3D & Auditoría Clínica de Enlace Directo *(30/10/2026, 12:07:45)*
+  - [x] Implementación de chasis anamórfico 3D con luz ambiental reactiva y marco de perspectiva.
+  - [x] Enlace directo de CTAs y validación clínica de accesibilidad visual.
 - [x] **[TASK-036]** Refinamiento de la arquitectura de conversión del embudo guiado interactivo de 3 pasos (`#funnel`) *(30/10/2026, 14:44:50)*
   - [x] Modularización de lógica y vistas de captura guiada en 3 etapas.
   - [x] Sincronización del selector de rubros y niveles comerciales.

@@ -1,8 +1,11 @@
 // Archivo: js/components/footer.js
 /**
  * 🏛️ Tucu Red Web V2 - Footer Institucional & Créditos
- * Incluye identidad oficial SVG (/assets/tucu_red_logo_full.svg) y accesos rápidos.
+ * Incluye identidad oficial SVG (/assets/tucu_red_logo_full.svg) y pasarela WhatsApp.
+ * Restricción estricta: < 200 líneas (< 180L).
  */
+
+import { WA_FALLBACK_URL } from '../utils/whatsapp_link.js';
 
 export function renderFooter(containerId = 'app-footer') {
   const container = document.getElementById(containerId);
@@ -24,11 +27,15 @@ export function renderFooter(containerId = 'app-footer') {
         </a>
 
         <!-- Enlaces Rápidos -->
-        <div class="flex flex-wrap justify-center gap-6 text-xs font-semibold text-slate-500">
+        <div class="flex flex-wrap justify-center items-center gap-6 text-xs font-semibold text-slate-500">
           <a href="#soluciones" class="hover:text-indigo-600 transition-colors">Soluciones</a>
           <a href="#cases" class="hover:text-indigo-600 transition-colors">Comercios Reales</a>
           <a href="#showroom" class="hover:text-indigo-600 transition-colors">Showroom en Vivo</a>
           <a href="#funnel" class="hover:text-indigo-600 transition-colors">Sumar mi negocio</a>
+          <a href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 text-emerald-700 transition-colors flex items-center gap-1 font-bold">
+            <span class="material-symbols-outlined text-sm">chat</span>
+            <span>WhatsApp Directo</span>
+          </a>
         </div>
 
         <!-- Créditos -->
