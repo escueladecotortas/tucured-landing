@@ -20,14 +20,14 @@ const CERTEZAS = [
   {
     icon: 'timer',
     iconColor: 'bg-emerald-50 text-emerald-600',
-    title: 'Cero turnos superpuestos',
-    desc: 'Si un servicio requiere más tiempo, el sistema calcula los bloques contiguos necesarios para que nadie espere de más.'
+    title: 'Horarios perfectamente sincronizados',
+    desc: 'Si un servicio requiere más tiempo, el sistema asegura los bloques contiguos exactos para garantizar una atención puntual y ordenada.'
   },
   {
     icon: 'event_repeat',
     iconColor: 'bg-rose-50 text-rose-600',
-    title: 'Autogestión para cancelaciones',
-    desc: 'Tus clientes pueden reprogramar o cancelar con su código desde el celular, liberando el lugar automáticamente.'
+    title: 'Autogestión y reprogramación ágil',
+    desc: 'Tus clientes pueden reprogramar o liberar su turno desde el celular con su código, habilitando el lugar al instante para otro cliente.'
   },
   {
     icon: 'tune',

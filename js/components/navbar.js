@@ -29,6 +29,7 @@ export function renderNavbar(containerId = 'app-navbar') {
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Showroom en Vivo</span>
           </a>
+          <a href="#precios" class="hover:text-indigo-600 transition-colors">Precios</a>
         </nav>
 
         <!-- Acciones de Conversión -->
@@ -58,6 +59,7 @@ export function renderNavbar(containerId = 'app-navbar') {
         <a href="#soluciones" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Soluciones</a>
         <a href="#cases" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Comercios Reales</a>
         <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">⚡ Showroom Interactivo en Vivo</a>
+        <a href="#precios" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Planes y Precios</a>
         <div class="pt-2">
           <a href="#funnel" class="w-full py-3 rounded-xl btn-aura-cta text-sm font-bold flex items-center justify-center gap-2">
             <span>Sumar mi negocio</span>

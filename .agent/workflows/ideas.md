@@ -19,3 +19,5 @@
 - **Contención Preventiva por Viewport:** Instruir a @Atenea a aplicar contención `min(width, vw)` de forma preventiva en todo componente con traslación 3D en el eje Z.
 - **Narrativas Secuenciales de 1 Solo Evento:** Priorizar la cadencia "1 evento a la vez" en futuros componentes para maximizar foco cognitivo y retención visual.
 
+### 4. 📦 Tangibilidad Física & Onboarding
+- **[IDEA-009] Mockup 3D y Narrativa del Kit Físico de Mostrador:** Diseñar render 3D interactivo y narrativa visual del kit de bienvenida para comercios (soporte de acrílico con código QR de reservas impreso en alta calidad, tarjeta con llave biométrica digital y manual de onboarding rápido).

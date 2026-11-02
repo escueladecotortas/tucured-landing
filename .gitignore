@@ -7,3 +7,4 @@ dist/
 build/
 .DS_Store
 temp/
+.nexus_trash/

@@ -9,6 +9,7 @@ import { renderHero } from './components/hero.js';
 import { renderCases } from './components/cases.js';
 import { renderShowroomView } from './components/showroom_view.js';
 import { renderFeatures } from './components/features.js';
+import { renderPricing } from './components/pricing.js';
 import { renderFunnel } from './components/funnel.js';
 import { renderFooter } from './components/footer.js';
 import { ShowcaseCore } from './showcase_v11/showcase_core.js';
@@ -21,6 +22,7 @@ function bootApplication() {
   renderCases('app-cases');
   renderShowroomView('app-showroom');
   renderFeatures('app-features');
+  renderPricing('app-pricing');
   renderFunnel('app-funnel');
   renderFooter('app-footer');
 

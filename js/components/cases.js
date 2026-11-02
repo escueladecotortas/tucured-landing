@@ -34,9 +34,9 @@ const REAL_CASES = [
     category: 'Estética & Spa',
     title: 'Lumina Estudio de Uñas & Pestañas',
     location: 'Centro, S.M. de Tucumán',
-    metric: 'Cero llamadas perdidas',
+    metric: '100% reservas autónomas',
     metricColor: 'bg-emerald-600 text-white',
-    description: 'Catálogo de servicios de manicuría y pestañas con turnos sin superposiciones y recordatorios por WhatsApp.',
+    description: 'Catálogo de servicios de manicuría y pestañas con turnos sincronizados y recordatorios automáticos por WhatsApp.',
     image: '/assets/showcase/hero_unas.webp',
     levelId: 'l3',
     spanClass: 'col-span-1 md:col-span-6 lg:col-span-4 h-[360px] sm:h-[400px]'
@@ -48,7 +48,7 @@ const REAL_CASES = [
     location: 'Tafí Viejo, Tucumán',
     metric: '98% ocupación nocturna',
     metricColor: 'bg-indigo-600 text-white',
-    description: 'Grilla de canchas en tiempo real que elimina los huecos libres de último momento desde el celular.',
+    description: 'Grilla de canchas en tiempo real con ocupación máxima y reservas inmediatas desde el celular.',
     image: '/assets/showcase/hero_sports.png',
     levelId: 'l2',
     spanClass: 'col-span-1 md:col-span-6 lg:col-span-4 h-[360px] sm:h-[400px]'
@@ -81,11 +81,11 @@ export function renderCases(containerId = 'app-cases') {
             COMERCIOS EN ACCIÓN
           </span>
           <h2 class="font-headline font-extrabold text-3xl sm:text-4xl lg:text-5xl text-slate-900 tracking-tight leading-tight">
-            Negocios reales que resuelven su día a día con Tucu Red.
+            Negocios reales que potencian su atención y multiplican sus ventas con Tucu Red.
           </h2>
         </div>
         <p class="text-slate-500 text-sm md:text-base font-normal max-w-xl leading-relaxed">
-          Mirá cómo se adapta la experiencia según el ritmo y la atención de cada rubro.
+          Mirá cómo se adapta la experiencia al ritmo operativo y comercial de cada rubro.
         </p>
       </div>
 
