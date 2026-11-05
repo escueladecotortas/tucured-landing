@@ -67,7 +67,7 @@ rubroChecks.forEach(c => {
 console.log('\n🎛️ COMPUERTA 3: Segmented Control de Nivel Compacto (~38px)');
 const segmentChecks = [
   { name: 'Altura ultra-compacta (~38px a 40px: h-[38px] sm:h-10)', test: rubrosZoneCode.includes('h-[38px] sm:h-10') },
-  { name: 'Contenedor Segmented Control estilo iOS (inline-flex, bg-slate-100/90)', test: rubrosZoneCode.includes('inline-flex') && rubrosZoneCode.includes('bg-slate-100/90') },
+  { name: 'Contenedor Segmented Control estilo iOS (inline-flex, bg-slate-200/80 o bg-slate-100/90)', test: rubrosZoneCode.includes('inline-flex') && (rubrosZoneCode.includes('bg-slate-200/80') || rubrosZoneCode.includes('bg-slate-100/90')) },
   { name: '3 Opciones concisas en fila única: Individual, Con Turnos Web, Para Equipos', test: rubrosZoneCode.includes('Individual') && rubrosZoneCode.includes('Con Turnos Web') && rubrosZoneCode.includes('Para Equipos') },
   { name: 'Cero subtítulos largos abultados en la cabecera', test: !rubrosZoneCode.includes('Monousuario, zero backend') }
 ];

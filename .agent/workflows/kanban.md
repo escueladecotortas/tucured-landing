@@ -15,6 +15,7 @@ Estructura soberana de orquestación y seguimiento (Ventana Deslizante Activa).
 ## [IN_PROGRESS]
 
 ## [DONE]
+- [x] **[TASK-056]** Diferenciación cromática de botoneras (pastilla sólida índigo en nivel vs glass en rubro), calendario real dinámico (Vanilla JS Date, mes actual capitalizado y 4 días sin "Octubre") y despliegue a producción Netlify (https://tucured.ar) *(05/11/2026, 14:15:00)*
 - [x] **[TASK-055]** Tipografía pura en botones de rubro (cero emojis), despeje de marcas de comercio en ficha de valor y despliegue exitoso a producción Netlify (https://tucured.ar) *(05/11/2026, 13:28:00)*
 - [x] **[TASK-054]** Barra de Control Glass Fija (Grilla 3/2 Mobile sin scroll), Segmented Control de Nivel horizontal (~38px) y Smartphone con Foto 100% limpia sin textos sobrepuestos *(05/11/2026, 13:10:00)*
 - [x] **[TASK-053]** Reestructuración jerárquica del Escenario (Árbol Natural: Rubro -> Nivel -> Smartphone Aura Light -> Especificaciones 100% Visibles -> CTA Directo) *(05/11/2026, 12:48:00)*

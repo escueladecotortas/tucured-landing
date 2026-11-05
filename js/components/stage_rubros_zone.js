@@ -1,7 +1,7 @@
 // Archivo: js/components/stage_rubros_zone.js
 /**
  * 🎨 Tucu Red Web V2 - Zona 1: Barra de Control Glass Fija (3/2) & Segmented Control de Nivel
- * Rubros en grilla fija 3/2 en mobile (sin scroll/overflow) y segmented control compacto (38px).
+ * Diferenciación cromática contundente: rubros en Glass translúcido y nivel en pastilla sólida índigo.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
@@ -67,7 +67,6 @@ export function renderStageRubrosZone(containerId, state) {
       <div class="grid grid-cols-6 gap-2 sm:flex sm:justify-center sm:items-center sm:gap-2.5 max-w-3xl mx-auto px-1">
         ${STAGE_RUBROS.map((item, idx) => {
           const isActive = curRubroId === item.id;
-          // Mobile 3/2: Primeros 3 con span 2; los 2 últimos centrados (start 2 y span 2)
           let colClasses = 'col-span-2 sm:col-auto sm:flex-initial';
           if (idx === 3) colClasses = 'col-span-2 col-start-2 sm:col-auto sm:col-start-auto sm:flex-initial';
           if (idx === 4) colClasses = 'col-span-2 sm:col-auto sm:flex-initial';
@@ -90,17 +89,17 @@ export function renderStageRubrosZone(containerId, state) {
 
       <!-- Selector de Nivel: Segmented Control Compacto Horizontal (~38px) -->
       <div class="flex justify-center w-full px-1">
-        <div class="inline-flex items-center justify-between p-1 rounded-xl bg-slate-100/90 border border-slate-200/80 h-[38px] sm:h-10 w-full max-w-md gap-1 shadow-2xs">
+        <div class="inline-flex items-center justify-between p-1 rounded-2xl bg-slate-200/80 border border-slate-300/60 h-[38px] sm:h-10 w-full max-w-md gap-1 shadow-inner">
           ${LEVEL_SEGMENTS.map(lvl => {
             const isActive = curLvlId === lvl.id;
             return `
               <button
                 type="button"
                 onclick="window.ShowcaseCore.selectLevel('${lvl.id}')"
-                class="flex-1 h-full rounded-lg text-xs font-bold transition-all duration-150 flex items-center justify-center px-1.5 sm:px-2 cursor-pointer ${
+                class="flex-1 h-full px-3 py-1.5 text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60 font-extrabold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                    ? 'bg-indigo-600 text-white font-bold shadow-sm scale-[1.02]'
+                    : 'text-slate-600 hover:text-slate-900 font-medium'
                 }"
               >
                 <span class="truncate">${lvl.label}</span>
