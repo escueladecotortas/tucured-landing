@@ -1,7 +1,7 @@
 // Archivo: js/showcase_v11/showcase_state.js
 /**
- * ⚡ TucuRed Showcase v11.1 - Estado y Contratos de Datos Canónicos (SSOT v15.0)
- * Sincronizado estrictamente con .agent/specs/turneros_v15_matrix.md y Calendario Dinámico.
+ * ⚡ TucuRed Showcase v11.1 - Estado y Contratos de Datos Canónicos (SSOT v16.0)
+ * Sincronizado con Matriz v16, Regla de Domingo Cerrado y Filtro de Horarios Pasados.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
@@ -13,15 +13,36 @@ export function getSystemCalendar() {
   const diasReales = Array.from({ length: 4 }, (_, i) => {
     const d = new Date(now);
     d.setDate(now.getDate() + i);
+    const diaNum = d.getDay();
     return {
-      diaNombre: diasSemana[d.getDay()],
+      diaNombre: diasSemana[diaNum],
       diaNumero: d.getDate(),
       isToday: i === 0,
+      isSunday: diaNum === 0,
       dateStr: d.toISOString().split('T')[0],
-      fullLabel: `${diasSemana[d.getDay()]} ${d.getDate()} de ${mesActual}`
+      fullLabel: `${diasSemana[diaNum]} ${d.getDate()} de ${mesActual}`
     };
   });
   return { mesActual, diasReales };
+}
+
+export function isSelectedDaySunday(state) {
+  const cal = (state && state.systemCalendar) ? state.systemCalendar : getSystemCalendar();
+  const idx = state ? (state.selectedDay || 0) : 0;
+  const d = (cal.diasReales && cal.diasReales[idx]) ? cal.diasReales[idx] : null;
+  return d ? (d.isSunday || d.diaNombre === 'Dom') : false;
+}
+
+export function isTimePast(timeStr, state) {
+  const cal = (state && state.systemCalendar) ? state.systemCalendar : getSystemCalendar();
+  const idx = state ? (state.selectedDay || 0) : 0;
+  const d = (cal.diasReales && cal.diasReales[idx]) ? cal.diasReales[idx] : null;
+  if (!d || !d.isToday) return false;
+  const now = new Date();
+  const [hStr, mStr] = String(timeStr).split(':');
+  const slotMinutes = (parseInt(hStr, 10) || 0) * 60 + (parseInt(mStr, 10) || 0);
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  return slotMinutes < currentMinutes;
 }
 
 const sysCalendar = getSystemCalendar();
@@ -33,20 +54,20 @@ export const ShowcaseState = {
     l1: {
       id: 'l1', badge: 'Nivel 1 • Autónomo', badgeClass: 'bg-primary/20 text-primary border-primary/30', popularBadge: 'Ideal Emprendedores', iconSymbol: 'bolt',
       name: 'Turnero Autónomo Express', tagline: 'Zero Server Runtime • Reserva en 3 toques directo a WhatsApp',
-      description: 'Opera 100% en el navegador del cliente. Genera el turno formateado y solicita el Alias/CBU para la seña.',
+      description: 'Opera en base multitenant tucured-clients con bloqueo en vivo, Hash #TK-XXXX y cancelación en 1 clic.',
       adminIcon: 'settings', adminButtonLabel: 'Ver Panel Asistente L1', adminUrl: '/admin_l1.html',
       benefits: [
-        '100% autónomo en el navegador del cliente (Zero Server Runtime).',
+        'Alojado en base multitenant tucured-clients con bloqueo en tiempo real.',
         'Reserva directa en 3 toques desde el celular sin contraseñas.',
-        'Cálculo de seña del 50% con Alias o CBU copiable en el mensaje.',
-        'Respeta horario corrido o turno cortado (corte de siesta tucumana).',
+        'Comprobante Hash #TK-XXXX y portal de autogestión/cancelación en 1 clic.',
+        'Cobro de seña con Alias tucured.mp y duración por servicio.',
         'Salteo automático de feriados nacionales argentinos.'
       ]
     },
     l2: {
       id: 'l2', badge: 'Nivel 2 • Central Pro', badgeClass: 'bg-secondary-container/30 text-secondary border-secondary/30', popularBadge: 'Control Operativo Total', iconSymbol: 'settings_suggest',
       name: 'Central Operativa & Agenda Pro', tagline: 'Bloqueo en tiempo real • Comprobante con link de autogestión',
-      description: 'Agenda inteligente con prevención de solapamiento en vivo, comprobante #TK-XXXX y panel de gobernanza.',
+      description: 'Agenda inteligente en instancia dedicada con turnos de mostrador y CRM Anti-No-Show.',
       adminIcon: 'monitoring', adminButtonLabel: 'Ver Panel de Citas L2', adminUrl: '/admin_l2.html',
       benefits: [
         'Prevención de solapamiento y bloqueo de horarios ocupados en tiempo real.',
@@ -57,7 +78,7 @@ export const ShowcaseState = {
       ]
     },
     l3: {
-      id: 'l3', badge: 'Nivel 3 • Multi-Staff', badgeClass: 'bg-primary-container/30 text-primary-fixed border-primary-container/40', popularBadge: 'Equipos, Consultorios y Complejos', iconSymbol: 'groups',
+      id: 'l3', badge: 'Nivel 3 • Multi-Equipo', badgeClass: 'bg-primary-container/30 text-primary-fixed border-primary-container/40', popularBadge: 'Equipos, Consultorios y Complejos', iconSymbol: 'groups',
       name: 'Multi-Staff & Franquicias', tagline: 'Agendas independientes por profesional • Catálogo con duración dinámica',
       description: 'Múltiples especialistas con horarios propios, cálculo de bloques contiguos y recordatorios automáticos cron T-2hs.',
       adminIcon: 'groups', adminButtonLabel: 'Ver Panel Multi-Staff L3', adminUrl: '/admin_l3.html',
@@ -82,23 +103,23 @@ export const ShowcaseState = {
     },
     resto: {
       id: 'resto', name: 'Gastro', bizName: 'La Casona Restó', badgeL1: '🍷 RESERVA GASTRONÓMICA', subCategory: 'Gastronomía & Tragos',
-      accentColor: '#E07A5F', btnClass: 'bg-gradient-to-r from-[#E07A5F] to-[#C85A3F] text-white font-bold shadow-lg shadow-[#E07A5F]/20', focusBorder: 'focus:border-[#E07A5F]', heroImage: '/assets/showcase/hero_resto.png', iconSymbol: 'restaurant',
+      accentColor: '#E07A5F', btnClass: 'bg-gradient-to-r from-[#E07A5F] to-[#C85A3F] text-white font-bold shadow-lg shadow-[#E07A5F]/20', focusBorder: 'focus:border-[#E07A5F]', heroImage: '/assets/showcase/gastronomia.webp', iconSymbol: 'restaurant',
       options: ['2 Personas', '4 Personas', '6 Personas', '+8 Grupo'],
       days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Julián (Sommelier)', 'Automática (Mesa Libre)'],
       catalogL3: [{ name: 'Maridaje Gourmet', dur: '120 min • $45.000' }, { name: 'Degustación de Vinos', dur: '60 min • $25.000' }]
     },
     barberia: {
-      id: 'barberia', name: 'Barbería', bizName: 'The Barber Club', badgeL1: '✂️ CORTE & ESTILO', subCategory: 'Barbería Tradicional',
+      id: 'barberia', name: 'Peluquería', bizName: 'The Hair Club Peluquería', badgeL1: '✂️ CORTE & ESTILO', subCategory: 'Peluquería & Estilo',
       accentColor: '#D97706', btnClass: 'bg-gradient-to-r from-[#D97706] to-[#B45309] text-white font-bold shadow-lg shadow-[#D97706]/20', focusBorder: 'focus:border-[#D97706]', heroImage: '/assets/showcase/hero_peluqueria.webp', iconSymbol: 'content_cut',
-      options: ['Corte Tradicional', 'Corte + Barba', 'Servicio VIP The Barber'],
+      options: ['Corte Tradicional', 'Corte + Barba', 'Servicio VIP The Hair Club'],
       days: sysCalendar.diasReales.map(d => d.fullLabel),
-      staff: ['Franco (Master Fade)', 'Lucas (Barba & Afeitado)', 'Cualquiera (Primer Sillón Libre)'],
-      catalogL3: [{ name: 'Corte Signature + Perfilado', dur: '45 min • $16.000' }, { name: 'Corte + Barba Completa', dur: '60 min • $24.000' }]
+      staff: ['Franco (Master Fade)', 'Lucas (Corte & Estilo)', 'Cualquiera (Primer Sillón Libre)'],
+      catalogL3: [{ name: 'Corte Signature + Perfilado', dur: '45 min • $16.000' }, { name: 'Corte + Color Completo', dur: '60 min • $24.000' }]
     },
     deportes: {
       id: 'deportes', name: 'Deportes', bizName: 'Deportes Club', badgeL1: '⚡ CANCHA ILUMINADA', subCategory: 'Complejo Deportivo',
-      accentColor: '#84CC16', btnClass: 'bg-gradient-to-r from-[#84CC16] to-[#65A30D] text-[#0F0F10] font-bold shadow-lg shadow-[#84CC16]/20', focusBorder: 'focus:border-[#84CC16]', heroImage: '/assets/showcase/hero_sports.png', iconSymbol: 'sports_tennis',
+      accentColor: '#84CC16', btnClass: 'bg-gradient-to-r from-[#84CC16] to-[#65A30D] text-[#0F0F10] font-bold shadow-lg shadow-[#84CC16]/20', focusBorder: 'focus:border-[#84CC16]', heroImage: '/assets/showcase/deportes.webp', iconSymbol: 'sports_tennis',
       options: ['Turno 60 Minutos', 'Turno 90 Minutos', 'Clase Particular'],
       days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Cancha 1 (Panorámica)', 'Cancha 2 (Techada Pro)', 'Cualquiera (Primera Libre)'],
@@ -116,7 +137,7 @@ export const ShowcaseState = {
   },
 
   currentLevel: 'l1',
-  currentRubro: 'estetica',
+  currentRubro: 'barberia',
   currentStep: 1,
   selectedDay: 0,
   selectedTime: '16:30',

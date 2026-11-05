@@ -8,8 +8,8 @@
 export const STAGE_RUBROS = [
   {
     id: 'barberia',
-    name: 'Barbería',
-    emoji: '💈',
+    name: 'Peluquería',
+    emoji: '✂️',
     image: '/assets/showcase/hero_peluqueria.webp',
     titleFont: 'font-mono tracking-tight font-black uppercase text-slate-900',
     badgeClass: 'backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-sm'
@@ -18,7 +18,7 @@ export const STAGE_RUBROS = [
     id: 'resto',
     name: 'Gastronomía',
     emoji: '🍖',
-    image: '/assets/showcase/hero_resto.png',
+    image: '/assets/showcase/gastronomia.webp',
     titleFont: 'font-headline font-extrabold tracking-tight text-slate-900',
     badgeClass: 'backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-sm'
   },
@@ -34,7 +34,7 @@ export const STAGE_RUBROS = [
     id: 'deportes',
     name: 'Deportes',
     emoji: '🎾',
-    image: '/assets/showcase/hero_sports.png',
+    image: '/assets/showcase/deportes.webp',
     titleFont: 'font-headline font-black tracking-tighter uppercase italic text-slate-900',
     badgeClass: 'backdrop-blur-md bg-slate-900/60 border border-blue-400/30 text-blue-200 shadow-sm'
   },
@@ -49,9 +49,9 @@ export const STAGE_RUBROS = [
 ];
 
 export const LEVEL_SEGMENTS = [
-  { id: 'l1', label: 'Individual', fullLabel: 'Nivel 1: Individual' },
-  { id: 'l2', label: 'Con Turnos Web', fullLabel: 'Nivel 2: Con Turnos Online' },
-  { id: 'l3', label: 'Para Equipos', fullLabel: 'Nivel 3: Para Equipos' }
+  { id: 'l1', label: 'Autónomo', fullLabel: 'Nivel 1: Autónomo' },
+  { id: 'l2', label: 'Central Pro', fullLabel: 'Nivel 2: Central Pro' },
+  { id: 'l3', label: 'Multi-Equipo', fullLabel: 'Nivel 3: Multi-Equipo' }
 ];
 
 export function renderStageRubrosZone(containerId, state) {

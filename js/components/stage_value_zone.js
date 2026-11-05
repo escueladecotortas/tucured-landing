@@ -7,7 +7,7 @@
 
 const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Individual • Turnero Autónomo Completo v16.0',
+    badge: 'Nivel 1: Autónomo • Turnero Express Completo v16.0',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
     architecture: "Base Multitenant 'tucured-clients' • Bloqueo en Tiempo Real • Token Hash",
     microMetrica: 'Turnero autónomo listo • Bloqueo de colisiones • Cancelación en 1 clic',
@@ -18,7 +18,7 @@ const LEVEL_MATRIX_V16 = {
     ]
   },
   l2: {
-    badge: 'Nivel 2: Central Operativa Pro • Gobernanza & Agenda v16.0',
+    badge: 'Nivel 2: Central Pro • Gobernanza & Agenda v16.0',
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     architecture: 'Instancia de Alto Rendimiento • Turnos de Mostrador • CRM Anti-No-Show',
     microMetrica: '8 Turnos Confirmados • Ocupación 92% • Lista Negra activa',
@@ -29,7 +29,7 @@ const LEVEL_MATRIX_V16 = {
     ]
   },
   l3: {
-    badge: 'Nivel 3: Para Equipos • Multi-Staff & Franquicias v16.0',
+    badge: 'Nivel 3: Multi-Equipo • Franquicias & Recursos v16.0',
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
     architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Barredora Cron T-2hs',
     microMetrica: '3 Profesionales en simultáneo • Facturación acumulada • Cron T-2hs activo',

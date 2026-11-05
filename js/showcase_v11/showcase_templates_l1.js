@@ -1,11 +1,11 @@
 // Archivo: js/showcase_v11/showcase_templates_l1.js
 /**
  * ⚡ TucuRed Showcase v11.1 - Pieles Temáticas Stitch L1 (Aura Light)
- * Piel clara profesional, fechas dinámicas del sistema y reserva monousuario limpia.
+ * Piel clara profesional, fechas dinámicas del sistema, regla de domingo y filtro horario.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
-import { getSystemCalendar } from './showcase_state.js';
+import { getSystemCalendar, isSelectedDaySunday, isTimePast } from './showcase_state.js';
 
 export const ShowcaseTemplatesL1 = {
   render(rubroId, state, rubro) {
@@ -30,6 +30,21 @@ export const ShowcaseTemplatesL1 = {
     `).join('');
   },
 
+  renderTimeSlots(times, state, activeClass) {
+    if (isSelectedDaySunday(state)) {
+      return '<div class="p-4 text-center bg-slate-100 rounded-xl text-slate-500 font-medium text-xs sm:text-sm border border-slate-200">Local cerrado los domingos</div>';
+    }
+    return `<div class="grid grid-cols-2 gap-1.5">
+      ${times.map(t => {
+        if (isTimePast(t, state)) {
+          return `<button type="button" disabled class="py-2 px-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 opacity-30 line-through pointer-events-none cursor-not-allowed border-dashed flex items-center justify-center gap-1.5 text-xs font-mono"><span class="material-symbols-outlined text-xs">schedule</span><span>${t} hs</span></button>`;
+        }
+        const isSel = state.selectedTime === t;
+        return `<button type="button" onclick="window.ShowcaseCore.selectTime('${t}')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono transition-all cursor-pointer ${isSel ? activeClass : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>${t} hs</span></button>`;
+      }).join('')}
+    </div>`;
+  },
+
   renderEstetica(state, r) {
     return `
       <div class="space-y-3">
@@ -41,12 +56,7 @@ export const ShowcaseTemplatesL1 = {
         </div>
         <div>
           <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="window.ShowcaseCore.selectTime('09:30')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono transition-all cursor-pointer ${state.selectedTime === '09:30' ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#9A7D0A] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>09:30 hs</span></button>
-            <button type="button" disabled class="py-2 px-3 rounded-xl border border-slate-100 bg-slate-100 text-slate-400 opacity-60 flex items-center justify-center gap-1.5 text-xs font-mono line-through cursor-not-allowed"><span class="material-symbols-outlined text-xs">schedule</span><span>11:00 hs</span></button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('16:30')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono transition-all cursor-pointer ${state.selectedTime === '16:30' ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#9A7D0A] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>16:30 hs</span></button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('18:00')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono transition-all cursor-pointer ${state.selectedTime === '18:00' ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#9A7D0A] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>18:00 hs</span></button>
-          </div>
+          ${this.renderTimeSlots(['09:30', '11:00', '16:30', '18:00'], state, 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#9A7D0A] font-bold shadow-xs')}
         </div>
       </div>
       <button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 bg-gradient-to-r from-[#D4AF37] to-[#B18D28] text-[#0F0F10] font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer">
@@ -74,11 +84,7 @@ export const ShowcaseTemplatesL1 = {
         </div>
         <div>
           <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5 flex items-center justify-between"><span>Horario de Noche</span><span class="material-symbols-outlined text-xs text-[#E07A5F]">schedule</span></h4>
-          <div class="flex justify-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button type="button" onclick="window.ShowcaseCore.selectTime('21:00')" class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-medium border cursor-pointer ${state.selectedTime === '21:00' ? 'border-[#E07A5F] bg-[#E07A5F]/15 text-[#C85A3F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">21:00 hs</button>
-            <button type="button" disabled class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-slate-100 bg-slate-100 text-slate-400 opacity-60 line-through cursor-not-allowed">22:30 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('23:15')" class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-medium border cursor-pointer ${state.selectedTime === '23:15' ? 'border-[#E07A5F] bg-[#E07A5F]/15 text-[#C85A3F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">23:15 hs</button>
-          </div>
+          ${this.renderTimeSlots(['21:00', '22:00', '22:30', '23:15'], state, 'border-[#E07A5F] bg-[#E07A5F]/15 text-[#C85A3F] font-bold shadow-xs')}
         </div>
       </div>
       <button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 bg-gradient-to-r from-[#E07A5F] to-[#C85A3F] text-white font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer">
@@ -98,12 +104,7 @@ export const ShowcaseTemplatesL1 = {
         </div>
         <div>
           <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5 flex items-center justify-between"><span>Horario</span><span class="material-symbols-outlined text-xs text-[#D97706]">schedule</span></h4>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="window.ShowcaseCore.selectTime('15:00')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '15:00' ? 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">15:00 hs</button>
-            <button type="button" disabled class="py-1.5 rounded-lg text-xs font-mono border border-slate-100 bg-slate-100 text-slate-400 opacity-60 line-through cursor-not-allowed">16:30 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('17:00')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '17:00' ? 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">17:00 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('18:30')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '18:30' ? 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">18:30 hs</button>
-          </div>
+          ${this.renderTimeSlots(['15:00', '16:30', '17:00', '18:30'], state, 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs')}
         </div>
       </div>
       <button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 bg-gradient-to-r from-[#D97706] to-[#B45309] text-white font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer">
@@ -130,11 +131,7 @@ export const ShowcaseTemplatesL1 = {
         </div>
         <div>
           <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>
-          <div class="grid grid-cols-3 gap-1">
-            <button type="button" onclick="window.ShowcaseCore.selectTime('18:00')" class="py-1.5 rounded-lg text-xs font-mono font-medium border cursor-pointer ${state.selectedTime === '18:00' ? 'border-[#65A30D] bg-[#84CC16]/20 text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">18:00</button>
-            <button type="button" disabled class="py-1.5 rounded-lg text-xs font-mono font-medium border border-slate-100 bg-slate-100 text-slate-400 opacity-60 line-through cursor-not-allowed">19:30</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('21:00')" class="py-1.5 rounded-lg text-xs font-mono font-medium border cursor-pointer ${state.selectedTime === '21:00' ? 'border-[#65A30D] bg-[#84CC16]/20 text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">21:00</button>
-          </div>
+          ${this.renderTimeSlots(['18:00', '19:30', '21:00', '22:30'], state, 'border-[#65A30D] bg-[#84CC16]/20 text-[#4D7C0F] font-bold shadow-xs')}
         </div>
       </div>
       <button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 bg-gradient-to-r from-[#84CC16] to-[#65A30D] text-[#0F0F10] font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer">
@@ -162,12 +159,7 @@ export const ShowcaseTemplatesL1 = {
         </div>
         <div>
           <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="window.ShowcaseCore.selectTime('09:00')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '09:00' ? 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">09:00 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('11:30')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '11:30' ? 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">11:30 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('17:00')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '17:00' ? 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">17:00 hs</button>
-            <button type="button" onclick="window.ShowcaseCore.selectTime('18:30')" class="py-1.5 rounded-lg text-xs font-mono border cursor-pointer ${state.selectedTime === '18:30' ? 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}">18:30 hs</button>
-          </div>
+          ${this.renderTimeSlots(['09:00', '11:30', '17:00', '18:30'], state, 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs')}
         </div>
       </div>
       <button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 bg-gradient-to-r from-[#0D9488] to-[#0F766E] text-white font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer">

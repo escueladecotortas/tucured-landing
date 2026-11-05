@@ -1,11 +1,11 @@
 // Archivo: js/showcase_v11/showcase_templates_l2.js
 /**
  * ⚡ TucuRed Showcase v11.1 - Pieles Temáticas Stitch L2 (Aura Light)
- * Prevención de colisiones en vivo con slots bloqueados, fechas dinámicas y piel clara.
+ * Prevención de colisiones en vivo, fechas dinámicas, regla de domingo y filtro horario.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
-import { getSystemCalendar } from './showcase_state.js';
+import { getSystemCalendar, isSelectedDaySunday, isTimePast } from './showcase_state.js';
 
 export const ShowcaseTemplatesL2 = {
   render(rubroId, state, rubro) {
@@ -30,12 +30,20 @@ export const ShowcaseTemplatesL2 = {
     `).join('');
   },
 
-  renderTimeGrid(times, blockedTime, selectedTime, activeBorder, activeText) {
+  renderTimeGrid(times, blockedTime, selectedTime, activeBorder, activeText, state) {
+    if (isSelectedDaySunday(state)) {
+      return '<div class="p-4 text-center bg-slate-100 rounded-xl text-slate-500 font-medium text-xs sm:text-sm border border-slate-200">Local cerrado los domingos</div>';
+    }
     return `<div class="grid grid-cols-2 gap-1.5">
-      ${times.map(t => t === blockedTime 
-        ? `<button type="button" disabled class="py-2 px-2.5 rounded-xl border border-slate-100 bg-slate-100 text-slate-400 opacity-60 line-through flex items-center justify-between text-xs font-mono cursor-not-allowed"><span>${t} hs</span><span class="text-[9px] no-underline bg-red-50 text-red-600 px-1 py-0.5 rounded font-sans font-bold">Bloqueado</span></button>`
-        : `<button type="button" onclick="window.ShowcaseCore.selectTime('${t}')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono cursor-pointer transition-all ${selectedTime === t ? `${activeBorder} bg-slate-100 ${activeText} font-bold shadow-xs` : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>${t} hs</span></button>`
-      ).join('')}
+      ${times.map(t => {
+        if (isTimePast(t, state)) {
+          return `<button type="button" disabled class="py-2 px-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 opacity-30 line-through pointer-events-none cursor-not-allowed border-dashed flex items-center justify-center text-xs font-mono"><span>${t} hs</span></button>`;
+        }
+        if (t === blockedTime) {
+          return `<button type="button" disabled class="py-2 px-2.5 rounded-xl border border-slate-100 bg-slate-100 text-slate-400 opacity-60 line-through flex items-center justify-between text-xs font-mono cursor-not-allowed"><span>${t} hs</span><span class="text-[9px] no-underline bg-red-50 text-red-600 px-1 py-0.5 rounded font-sans font-bold">Bloqueado</span></button>`;
+        }
+        return `<button type="button" onclick="window.ShowcaseCore.selectTime('${t}')" class="py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-mono cursor-pointer transition-all ${selectedTime === t ? `${activeBorder} bg-slate-100 ${activeText} font-bold shadow-xs` : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-xs">schedule</span><span>${t} hs</span></button>`;
+      }).join('')}
     </div>`;
   },
 
@@ -60,7 +68,7 @@ export const ShowcaseTemplatesL2 = {
         </div>
         <div>
           <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">3. Horario (Bloqueo en Vivo)</h4><span class="text-[10px] text-emerald-600 font-mono font-bold">1 slot reservado</span></div>
-          ${this.renderTimeGrid(['09:30', '11:00', '16:30', '18:00'], '11:00', state.selectedTime, 'border-[#D4AF37]', 'text-[#9A7D0A]')}
+          ${this.renderTimeGrid(['09:30', '11:00', '16:30', '18:00'], '11:00', state.selectedTime, 'border-[#D4AF37]', 'text-[#9A7D0A]', state)}
         </div>
       </div>
       ${this.renderSubmitBtn(r)}
@@ -82,7 +90,7 @@ export const ShowcaseTemplatesL2 = {
         </div>
         <div>
           <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">3. Horario (Colisión Bloqueada)</h4><span class="text-[10px] text-[#0D9488] font-mono font-bold">10:30 hs ocupado</span></div>
-          ${this.renderTimeGrid(['09:00', '10:30', '11:30', '17:00'], '10:30', state.selectedTime, 'border-[#0D9488]', 'text-[#0F766E]')}
+          ${this.renderTimeGrid(['09:00', '10:30', '11:30', '17:00'], '10:30', state.selectedTime, 'border-[#0D9488]', 'text-[#0F766E]', state)}
         </div>
       </div>
       ${this.renderSubmitBtn(r)}
@@ -103,8 +111,8 @@ export const ShowcaseTemplatesL2 = {
           <div class="flex justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#E07A5F]/15 border-2 border-[#E07A5F] text-[#C85A3F] font-bold shadow-xs')}</div>
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Mesa Noche (Bloqueo en Vivo)</h4><span class="text-[10px] text-[#C85A3F] font-mono font-bold">22:30 reservada</span></div>
-          ${this.renderTimeGrid(['21:00', '22:30', '23:15', '00:00'], '22:30', state.selectedTime, 'border-[#E07A5F]', 'text-[#C85A3F]')}
+          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Turno Cena</h4><span class="text-[10px] text-[#E07A5F] font-mono font-bold">22:00 hs sin mesa</span></div>
+          ${this.renderTimeGrid(['20:30', '21:30', '22:00', '23:00'], '22:00', state.selectedTime, 'border-[#E07A5F]', 'text-[#C85A3F]', state)}
         </div>
       </div>
       ${this.renderSubmitBtn(r)}
@@ -112,13 +120,12 @@ export const ShowcaseTemplatesL2 = {
   },
 
   renderBarberia(state, r) {
-    const services = [{ name: 'Corte Tradicional', dur: '45 min' }, { name: 'Corte + Barba', dur: '60 min' }, { name: 'Servicio VIP Premium', dur: '90 min' }];
     return `
       <div class="space-y-2.5">
         <div>
-          <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Servicio</h4>
-          <div class="flex flex-col gap-1.5">
-            ${services.map((s, idx) => `<div onclick="window.ShowcaseCore.selectOption(${idx})" class="rounded-xl p-2 flex items-center justify-between border cursor-pointer ${state.selectedOption === idx ? 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs'}"><span class="text-xs text-slate-900">${s.name}</span><span class="text-[10px] text-[#B45309] font-mono">${s.dur}</span></div>`).join('')}
+          <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Servicio Profesional</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+            ${['Corte Clásico', 'Corte + Barba', 'Color & Estilo'].map((s, idx) => `<button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="px-2 py-1.5 rounded-xl text-xs font-semibold border cursor-pointer ${state.selectedOption === idx ? 'border-[#D97706] bg-[#D97706]/15 text-[#B45309] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">${s}</button>`).join('')}
           </div>
         </div>
         <div>
@@ -126,8 +133,8 @@ export const ShowcaseTemplatesL2 = {
           <div class="flex justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#D97706]/15 border-2 border-[#D97706] text-[#B45309] font-bold shadow-xs')}</div>
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Sillón Horario (En Vivo)</h4><span class="text-[10px] text-[#B45309] font-mono font-bold">16:00 ocupado</span></div>
-          ${this.renderTimeGrid(['15:00', '16:00', '16:30', '18:00'], '16:00', state.selectedTime, 'border-[#D97706]', 'text-[#B45309]')}
+          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Horario</h4><span class="text-[10px] text-[#D97706] font-mono font-bold">16:30 hs reservado</span></div>
+          ${this.renderTimeGrid(['15:00', '16:30', '17:30', '18:30'], '16:30', state.selectedTime, 'border-[#D97706]', 'text-[#B45309]', state)}
         </div>
       </div>
       ${this.renderSubmitBtn(r)}
@@ -138,19 +145,18 @@ export const ShowcaseTemplatesL2 = {
     return `
       <div class="space-y-2.5">
         <div>
-          <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Turno</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="window.ShowcaseCore.selectOption(0)" class="rounded-xl p-2 border cursor-pointer ${state.selectedOption === 0 ? 'bg-[#84CC16]/20 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}"><span class="text-xs font-bold text-slate-900 block">60 MIN</span><span class="text-[9px] text-slate-500">Estándar</span></button>
-            <button type="button" onclick="window.ShowcaseCore.selectOption(1)" class="rounded-xl p-2 border cursor-pointer ${state.selectedOption === 1 ? 'bg-[#84CC16]/20 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}"><span class="text-xs font-bold text-slate-900 block">90 MIN</span><span class="text-[9px] text-[#4D7C0F] font-bold">Recomendado</span></button>
+          <h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Cancha</h4>
+          <div class="grid grid-cols-2 gap-1.5">
+            ${['Cancha 1 (Cristal)', 'Cancha 2 (Pro)'].map((c, idx) => `<button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="p-2 rounded-xl text-xs font-semibold border cursor-pointer ${state.selectedOption === idx ? 'border-[#65A30D] bg-[#84CC16]/20 text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">${c}</button>`).join('')}
           </div>
         </div>
         <div>
-          ${this.renderDateHeader('Fecha', 'text-[#4D7C0F]', state)}
+          ${this.renderDateHeader('Fecha', 'text-[#65A30D]', state)}
           <div class="flex justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#84CC16]/20 border-2 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs')}</div>
         </div>
         <div>
-          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Horario de Cancha</h4><span class="text-[10px] text-[#4D7C0F] font-mono font-bold">19:30 ocupado</span></div>
-          ${this.renderTimeGrid(['18:00', '19:30', '21:00', '22:30'], '19:30', state.selectedTime, 'border-[#65A30D]', 'text-[#4D7C0F]')}
+          <div class="flex items-center justify-between mb-1.5"><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500">Horarios (Cancha Iluminada)</h4><span class="text-[10px] text-[#65A30D] font-mono font-bold">19:30 ocupada</span></div>
+          ${this.renderTimeGrid(['18:00', '19:30', '21:00', '22:30'], '19:30', state.selectedTime, 'border-[#65A30D]', 'text-[#4D7C0F]', state)}
         </div>
       </div>
       ${this.renderSubmitBtn(r)}

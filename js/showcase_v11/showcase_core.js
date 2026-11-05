@@ -1,13 +1,16 @@
 // Archivo: js/showcase_v11/showcase_core.js
 /**
- * ⚡ TucuRed Showcase v11.1 - Orquestador Central (Aura Design System)
- * Preservación estricta de foco en inputs, sanitización en vivo y sincronización dirigida.
+ * ⚡ TucuRed Showcase v11.1 - Orquestador Central del Escenario 3 Zonas
+ * Sincronización reactiva de Vidriera, Smartphone Central y Columna de Valor.
+ * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
 import { ShowcaseState } from './showcase_state.js';
 import { ShowcaseLevels } from './showcase_levels.js';
 import { ShowcaseMockup } from './showcase_mockup.js';
 import { ShowcaseBenefits } from './showcase_benefits.js';
+import { renderStageRubrosZone } from '../components/stage_rubros_zone.js';
+import { renderStageValueZone } from '../components/stage_value_zone.js';
 
 export const ShowcaseCore = {
   _initialized: false,
@@ -18,6 +21,7 @@ export const ShowcaseCore = {
       this._initialized = true;
     }
 
+    window.ShowcaseState = ShowcaseState;
     window.ShowcaseLevels = ShowcaseLevels;
     window.ShowcaseCore = {
       getState: () => ShowcaseState,
@@ -51,16 +55,14 @@ export const ShowcaseCore = {
           if (inputEl && inputEl.value !== cleanVal) inputEl.value = cleanVal;
         }
         ShowcaseState[field] = cleanVal;
-        ShowcaseBenefits.render('benefits-container', ShowcaseState);
+        renderStageValueZone('stage-value-container', ShowcaseState);
       },
       selectReason: (reasonIdx) => {
         ShowcaseState.selectedReason = reasonIdx;
         ShowcaseState.notify();
       },
       toggleSelfService: (show) => ShowcaseState.setSelfService(show),
-      submitL1WhatsApp: () => {
-        ShowcaseState.setStep(3);
-      },
+      submitL1WhatsApp: () => ShowcaseState.setStep(3),
       cancelL2Turno: () => {
         ShowcaseState.setSelfService(false);
         ShowcaseState.setStep(1);
@@ -73,9 +75,13 @@ export const ShowcaseCore = {
   },
 
   renderAll() {
-    ShowcaseLevels.render('levels-container', ShowcaseState);
+    renderStageRubrosZone('stage-rubros-container', ShowcaseState);
     ShowcaseMockup.render('mockup-container', ShowcaseState);
-    ShowcaseBenefits.render('benefits-container', ShowcaseState);
+    renderStageValueZone('stage-value-container', ShowcaseState);
+
+    // Compatibilidad en nodos residuales si existieran
+    if (document.getElementById('levels-container')) ShowcaseLevels.render('levels-container', ShowcaseState);
+    if (document.getElementById('benefits-container')) ShowcaseBenefits.render('benefits-container', ShowcaseState);
   }
 };
 
