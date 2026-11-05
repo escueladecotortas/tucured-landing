@@ -5,38 +5,38 @@
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
-const LEVEL_MATRIX_V15 = {
+const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Individual • Turnero Autónomo Express v15.0',
+    badge: 'Nivel 1: Individual • Turnero Autónomo Completo v16.0',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
-    architecture: 'Monousuario • Zero Server Runtime (100% en cliente sin backend)',
-    microMetrica: 'Snippet HTML listo • Disponibilidad 100% offline de backend',
+    architecture: "Base Multitenant 'tucured-clients' • Bloqueo en Tiempo Real • Token Hash",
+    microMetrica: 'Turnero autónomo listo • Bloqueo de colisiones • Cancelación en 1 clic',
     specs: [
-      { icon: 'person', title: 'Para 1 solo puesto o profesional', desc: 'Configuración simple para profesionales independientes o puesto único.' },
-      { icon: 'chat', title: 'Reserva web en 3 toques directo a WhatsApp', desc: 'El cliente reserva por la web en 3 toques y el turno te llega a tu WhatsApp.' },
-      { icon: 'cloud_off', title: 'Cero costo de servidores ni mantenimiento', desc: 'Cero costo de mantenimiento ni servidores (opera 100% en el celular).' }
+      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Evita colisiones y solapamientos garantizando disponibilidad en tiempo real.' },
+      { icon: 'confirmation_number', title: 'Comprobante digital con enlace de autogestión', desc: 'Ticket con Hash #TK-XXXX y portal para consultar o cancelar en 1 clic.' },
+      { icon: 'payments', title: 'Catálogo con duración variable y cobro de seña', desc: 'Precios, tiempos de atención por servicio y seña configurable al Alias oficial.' }
     ]
   },
   l2: {
-    badge: 'Nivel 2: Con Turnos Online • Central Operativa & Agenda Pro v15.0',
+    badge: 'Nivel 2: Central Operativa Pro • Gobernanza & Agenda v16.0',
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    architecture: 'Prevención Activa de Colisiones • Gateway Baileys • Token Hash',
-    microMetrica: '8 Turnos Confirmados • Ocupación 92% • 1 Cancelación reabsorbida',
+    architecture: 'Instancia de Alto Rendimiento • Turnos de Mostrador • CRM Anti-No-Show',
+    microMetrica: '8 Turnos Confirmados • Ocupación 92% • Lista Negra activa',
     specs: [
-      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Bloqueo automático de turnos ocupados en tiempo real (evita solapamientos).' },
-      { icon: 'confirmation_number', title: 'Comprobante digital con enlace de autogestión', desc: 'Comprobante digital con enlace para que el cliente consulte o cancele solo.' },
-      { icon: 'shield', title: 'Panel con Lista Negra y Lista VIP', desc: 'Panel con Lista Negra para frenar ausencias reiteradas y Lista VIP.' }
+      { icon: 'dashboard', title: 'Panel SPA Administrativo avanzado con 3 vistas', desc: 'Control en vivo de agenda diaria, catálogo de precios y configuración operativa.' },
+      { icon: 'edit_calendar', title: 'Carga ágil de turnos manuales de mostrador', desc: 'Asignación rápida de turnos presenciales o telefónicos sin fricción.' },
+      { icon: 'shield', title: 'CRM con Lista Negra Anti-No-Show y Lista VIP', desc: 'Gobernanza para erradicar ausencias reiteradas y fidelizar clientes VIP.' }
     ]
   },
   l3: {
-    badge: 'Nivel 3: Para Equipos • Multi-Staff & Franquicias v15.0',
+    badge: 'Nivel 3: Para Equipos • Multi-Staff & Franquicias v16.0',
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
-    architecture: 'Multi-Staff Ilimitado • Slots Contiguos • Barredora Cron T-2hs',
-    microMetrica: '3 Profesionales en simultáneo • Facturación estimada en vivo • Cron T-2hs activo',
+    architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Barredora Cron T-2hs',
+    microMetrica: '3 Profesionales en simultáneo • Facturación acumulada • Cron T-2hs activo',
     specs: [
-      { icon: 'groups', title: 'Agendas independientes para múltiples profesionales', desc: 'Agendas independientes para múltiples profesionales, canchas o sillones.' },
-      { icon: 'timer', title: 'Horarios contiguos calculados por duración de servicio', desc: 'Horarios contiguos calculados según la duración real de cada servicio.' },
-      { icon: 'alarm_on', title: 'Barredora desatendida Cron T-2hs por WhatsApp', desc: 'Barredora desatendida que avisa al cliente por WhatsApp 2 horas antes de la cita.' }
+      { icon: 'groups', title: 'Agendas independientes para múltiples profesionales', desc: 'Horarios semanales y agendas separadas para staff ilimitado y sucursales.' },
+      { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Gestión simultánea de sillones, gabinetes, consultorios médicos o canchas.' },
+      { icon: 'alarm_on', title: 'Microservicio Cron T-2hs con aviso WhatsApp', desc: 'Recordatorio desatendido con idempotencia 2 horas antes de cada turno agendado.' }
     ]
   }
 };
@@ -47,13 +47,12 @@ export function renderStageValueZone(containerId, state) {
 
   const curRubro = state.rubros[state.currentRubro] || state.rubros.barberia;
   const curLvlId = state.currentLevel || 'l2';
-  const matrix = LEVEL_MATRIX_V15[curLvlId] || LEVEL_MATRIX_V15.l2;
+  const matrix = LEVEL_MATRIX_V16[curLvlId] || LEVEL_MATRIX_V16.l2;
 
   container.innerHTML = `
     <div class="space-y-4">
       <!-- Tarjeta de Especificaciones Técnicas 100% Visibles en Pantalla -->
       <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden">
-        <!-- Encabezado de la Ficha (Limpia sin marcas redundantes) -->
         <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
           <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full font-mono border ${matrix.themeBadge}">
             ${matrix.badge.split('•')[0].trim()}

@@ -1,8 +1,8 @@
 // Archivo: js/components/pricing.js
 /**
- * 🏷️ Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes
- * 3 Niveles comparativos con gancho $1.000 ARS (Mes 1) y conexión reactiva a #funnel.
- * Restricción estricta: < 200 líneas.
+ * 🏷️ Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes (SSOT v16.0)
+ * 3 Niveles con identidad técnica diferenciada, gancho $1.000 ARS y conexión a #funnel.
+ * Restricción estricta: < 200 líneas (< 180L).
  */
 
 export const PRICING_PLANS = [
@@ -10,20 +10,22 @@ export const PRICING_PLANS = [
     id: 'l1',
     levelNumber: 1,
     title: 'Nivel 1',
-    subtitle: 'Turnero Autónomo Express',
-    badge: 'Solución Completa para Emprendedores',
+    subtitle: 'Turnero Autónomo Completo',
+    badge: 'Bloqueo en Vivo • Token Hash',
+    themeClass: 'border-sky-300/80 shadow-sky-100 hover:border-sky-500',
+    accentText: 'text-sky-700',
+    accentBadge: 'bg-sky-50 text-sky-800 border-sky-200',
     hookPrice: '$1.000 ARS',
     hookPeriod: 'Mes 1 - Lanzamiento',
     regularPrice: '$18.000 ARS / mes',
     commission: '0% comisiones',
-    isFeatured: false,
     ctaText: 'Elegir Nivel 1',
     features: [
-      'Reserva web en 3 toques con bloqueo en tiempo real.',
-      'Comprobante digital #TK-... con cancelación en 1 clic.',
-      'Cobro de seña flexible con alias/CBU copiable.',
-      'Notificaciones WhatsApp por Baileys (confirmación + 2 recordatorios).',
-      'Panel móvil biométrico (Huella / PIN).'
+      'Alojado en base multitenant tucured-clients con bloqueo en tiempo real.',
+      'Reserva directa en 3 toques con comprobante digital Hash #TK-XXXX.',
+      'Portal de autogestión y cancelación en 1 clic para tus clientes.',
+      'Catálogo con duración variable por servicio y cobro de señas (Alias tucured.mp).',
+      'Despacho de confirmación directo y aviso a tu WhatsApp.'
     ]
   },
   {
@@ -31,19 +33,21 @@ export const PRICING_PLANS = [
     levelNumber: 2,
     title: 'Nivel 2',
     subtitle: 'Central Operativa & Agenda Pro',
-    badge: 'Más Elegido por Negocios',
+    badge: 'Gobernanza CRM • Turnos Mostrador',
+    themeClass: 'border-indigo-400 shadow-indigo-100/50 hover:border-indigo-600',
+    accentText: 'text-indigo-700',
+    accentBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200',
     hookPrice: '$1.000 ARS',
     hookPeriod: 'Mes 1 - Lanzamiento',
     regularPrice: '$32.000 ARS / mes',
     commission: '0% comisiones',
-    isFeatured: true,
     ctaText: 'Elegir Nivel 2',
     features: [
-      'Todo lo de Nivel 1 incluido.',
-      'CRM con Lista Negra anti-ausencias (no-shows) y Lista Blanca VIP.',
-      'Tablero de KPIs en vivo (ocupación y facturación estimada).',
-      'Bloqueo manual quirúrgico de franjas y carga de turnos de mostrador.',
-      'Feriados flexibles y multi-alias de cobro.'
+      'Todo lo de Nivel 1 en instancia de alto rendimiento dedicada.',
+      'Panel de control SPA avanzado con 3 vistas operativas en vivo.',
+      'Carga ágil de turnos manuales y telefónicos de mostrador sin fricción.',
+      'Gobernanza Anti-No-Show: Lista Negra de ausencias y Lista VIP de clientes fieles.',
+      'Historial de turnos y métricas de ocupación comercial en tiempo real.'
     ]
   },
   {
@@ -51,19 +55,21 @@ export const PRICING_PLANS = [
     levelNumber: 3,
     title: 'Nivel 3',
     subtitle: 'Multi-Staff & Franquicias',
-    badge: 'Equipos y Complejos',
+    badge: 'Equipos, Canchas y Consultorios',
+    themeClass: 'border-amber-400 shadow-amber-100/50 hover:border-amber-600',
+    accentText: 'text-amber-800',
+    accentBadge: 'bg-amber-50 text-amber-900 border-amber-200',
     hookPrice: '$1.000 ARS',
     hookPeriod: 'Mes 1 - Lanzamiento',
     regularPrice: '$58.000 ARS / mes',
     commission: '0% comisiones',
-    isFeatured: false,
     ctaText: 'Elegir Nivel 3',
     features: [
-      'Todo lo de Nivel 1 y Nivel 2 incluido.',
-      'Selector de profesional / cancha con agendas simultáneas e independientes.',
-      'Control de recurso físico (sillón/cabina) para evitar solapamientos.',
-      'Reportes de rendimiento y liquidación de comisiones por staff.',
-      'Soporte multi-sucursal.'
+      'Todo lo de Nivel 1 y Nivel 2 con arquitectura multi-recurso.',
+      'Agendas simultáneas independientes para staff y colaboradores ilimitados.',
+      'Gestión de recursos físicos: canchas, sillones, gabinetes o consultorios.',
+      'Microservicio Cron T-2hs para recordatorios automáticos con idempotencia.',
+      'CRM financiero con facturación acumulada e historial por cliente.'
     ]
   }
 ];
@@ -101,25 +107,14 @@ export function renderPricing(containerId = 'app-pricing') {
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch max-w-7xl mx-auto">
         ${PRICING_PLANS.map(plan => `
-          <div class="relative rounded-[2rem] transition-all duration-300 flex flex-col justify-between ${
-            plan.isFeatured
-              ? 'bg-white p-7 sm:p-9 border-2 border-indigo-600 shadow-2xl shadow-indigo-200/50 lg:-translate-y-2 z-10'
-              : 'bg-white/95 p-6 sm:p-8 border border-slate-200/90 shadow-md hover:shadow-xl'
-          }">
-            ${plan.isFeatured ? `
-              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[11px] font-extrabold tracking-wider uppercase shadow-md flex items-center gap-1.5 whitespace-nowrap">
-                <span class="material-symbols-outlined text-sm">auto_awesome</span>
-                <span>${plan.badge}</span>
-              </div>
-            ` : ''}
-
+          <div class="relative rounded-[2rem] bg-white p-7 sm:p-9 border-2 transition-all duration-300 flex flex-col justify-between shadow-lg ${plan.themeClass}">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-3 ${plan.isFeatured ? 'pt-1' : ''}">
+              <div class="flex items-center justify-between gap-2 mb-3">
                 <div>
-                  <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 font-headline block">${plan.title}</span>
+                  <span class="text-xs font-bold uppercase tracking-wider ${plan.accentText} font-headline block">${plan.title}</span>
                   <h3 class="font-headline font-extrabold text-xl sm:text-2xl text-slate-900">${plan.subtitle}</h3>
                 </div>
-                ${!plan.isFeatured ? `<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200/70 text-right">${plan.badge}</span>` : ''}
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${plan.accentBadge} text-right">${plan.badge}</span>
               </div>
 
               <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/70 my-4 space-y-1">
@@ -148,11 +143,7 @@ export function renderPricing(containerId = 'app-pricing') {
                 type="button"
                 data-pricing-cta="${plan.id}"
                 data-pricing-num="${plan.levelNumber}"
-                class="w-full py-4 rounded-2xl font-headline font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  plan.isFeatured
-                    ? 'btn-aura-cta shadow-lg'
-                    : 'bg-indigo-50/80 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200/80 hover:border-indigo-600'
-                }"
+                class="w-full py-4 rounded-2xl font-headline font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-900 hover:bg-indigo-600 text-white shadow-md"
               >
                 <span>${plan.ctaText}</span>
                 <span class="material-symbols-outlined text-base">arrow_forward</span>
@@ -172,4 +163,3 @@ export function renderPricing(containerId = 'app-pricing') {
     });
   });
 }
-
