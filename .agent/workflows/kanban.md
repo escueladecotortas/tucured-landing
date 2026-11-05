@@ -15,11 +15,18 @@ Estructura soberana de orquestación y seguimiento (Ventana Deslizante Activa).
 ## [IN_PROGRESS]
 
 ## [DONE]
+- [x] **[TASK-055]** Tipografía pura en botones de rubro (cero emojis), despeje de marcas de comercio en ficha de valor y despliegue exitoso a producción Netlify (https://tucured.ar) *(05/11/2026, 13:28:00)*
+- [x] **[TASK-054]** Barra de Control Glass Fija (Grilla 3/2 Mobile sin scroll), Segmented Control de Nivel horizontal (~38px) y Smartphone con Foto 100% limpia sin textos sobrepuestos *(05/11/2026, 13:10:00)*
+- [x] **[TASK-053]** Reestructuración jerárquica del Escenario (Árbol Natural: Rubro -> Nivel -> Smartphone Aura Light -> Especificaciones 100% Visibles -> CTA Directo) *(05/11/2026, 12:48:00)*
+- [x] **[TASK-052]** Corrección crítica de contraste WCAG AA en rubros desktop con badges micro-tintados y refinamiento de barra de control en Zona 3 *(04/11/2026, 22:27:00)*
+- [x] **[TASK-051]** Compactación Mobile en chips de 44px, despeje minimalista de rubros desktop y ficha técnica colapsable en acordeón *(04/11/2026, 22:19:00)*
+- [x] **[TASK-050]** Sincronización Bidimensional [Nivel x Rubro] en Escenario Central con Matriz Canónica v15.0, colisiones en L2 y recursos en L3 *(04/11/2026, 20:05:00)*
+- [x] **[TASK-049]** Fusión de Vidriera y Simulador en Escenario 3 Zonas continuo y reubicación de FAQs en acordeón minimalista *(04/11/2026, 19:34:00)*
+- [x] **[TASK-048]** Calibración visual quirúrgica de Hero, despeje y tipografía de 5 rubros con carrusel mobile fluido y micro-copy de certezas *(04/11/2026, 11:15:00)*
+- [x] **[TASK-047]** Reingeniería integral de Landing, Showroom v15 con preview /admin y Wizard de 4 pasos con checkout QR *(03/11/2026, 15:48:00)*
+- [x] **[TASK-046]** Auditoría forense de capacidades L1/L2/L3 y creación de Matriz Canónica v15.0 (.agent/specs/turneros_v15_matrix.md) *(03/11/2026, 15:29:00)*
+- [x] **[TASK-045]** Inspección técnica de `temp/3d_app`, poda de avatar Kiro en Wizard y rediseño del Hero como Terminal Física de Mostrador *(02/11/2026, 16:18:00)*
 - [x] **[TASK-044]** Integración de webhook/daemon de Baileys en entorno Sandbox aislado para procesamiento desatendido de leads *(02/11/2026, 14:32:00)*
-- [x] **[TASK-043]** Smoke test integral headless y navegación E2E del circuito completo (Hero -> Precios -> Wizard -> local_db) *(02/11/2026, 13:30:00)*
-- [x] **[TASK-042]** Integración de Assets Kiro (WebP) y Wizard Empático de 3 Pantallas Local-First *(02/11/2026, 02:11:00)*
-- [x] **[TASK-041]** Integración de Hero Anamórfico 3D de Kiro con Audio Interactivo y Copy Positivo *(02/11/2026, 01:48:00)*
-- [x] **[TASK-037]** Ajuste fino de CTAs finales y pasarelas hacia WhatsApp con pre-llenado de datos de comercio *(02/11/2026, 14:43:00)*
 
 ---
 **Estado del Proyecto:** [CONSOLIDATED_V11]
