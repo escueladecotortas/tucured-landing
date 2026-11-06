@@ -15,6 +15,7 @@ Estructura soberana de orquestación y seguimiento (Ventana Deslizante Activa).
 ## [IN_PROGRESS]
 
 ## [DONE]
+- [x] **[TASK-059]** Descontaminación total de Admin L1, arquitectura modular (< 175L por archivo), barra de filtros temporales y de estado con buscador reactivo, botón destacado [+ Nueva Cita] con modal de alta rápida, catálogo de 5 servicios de peluquería, horarios en 2 bloques independientes (Mañana/Tarde), switch de Feriados Oficiales y tarjeta modal QR Baileys *(05/11/2026, 21:05:00)*
 - [x] **[TASK-058]** Nombres canónicos Opción A (Autónomo, Central Pro, Multi-Equipo, Peluquería), optimización e ingesta de fotos WebP diurnas (gastronomia y deportes), regla de domingo cerrado, filtro horario para slots pasados y mockup /admin actualizado *(05/11/2026, 20:15:00)*
 - [x] **[TASK-057]** Consolidación de Matriz v16 (Opción A: L1 Multitenant Completo con Bloqueo, Hash #TK-XXXX y Cancelación), Descontaminación total de Admin L1 y Reingeniería de Wizard Paso 4 (Checkout QR $1.000, Alias tucured.mp y aprovisionamiento Local-First) *(05/11/2026, 15:45:00)*
 - [x] **[TASK-056]** Diferenciación cromática de botoneras (pastilla sólida índigo en nivel vs glass en rubro), calendario real dinámico (Vanilla JS Date, mes actual capitalizado y 4 días sin "Octubre") y despliegue a producción Netlify (https://tucured.ar) *(05/11/2026, 14:15:00)*
