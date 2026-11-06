@@ -24,10 +24,10 @@ export const ShowcaseMockup = {
       <div class="flex flex-col items-center w-full max-w-[390px] mx-auto">
         <!-- Switcher: Ver Turnero del Cliente vs Ver Tu Panel de Dueño -->
         <div class="w-full flex items-center justify-between p-1 rounded-2xl bg-slate-200/90 border border-slate-300/80 shadow-xs mb-3">
-          <button type="button" onclick="window.ShowcaseState.setViewMode('client')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!isAdmin ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+          <button type="button" onclick="window.ShowcaseCore ? window.ShowcaseCore.setViewMode('client') : window.ShowcaseState.setViewMode('client')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${!isAdmin ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
             <span class="material-symbols-outlined text-sm">smartphone</span><span>Ver Turnero del Cliente</span>
           </button>
-          <button type="button" onclick="window.ShowcaseState.setViewMode('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${isAdmin ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+          <button type="button" onclick="window.ShowcaseCore ? window.ShowcaseCore.setViewMode('admin') : window.ShowcaseState.setViewMode('admin')" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${isAdmin ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
             <span class="material-symbols-outlined text-sm">tune</span><span>Ver Tu Panel de Dueño</span>
           </button>
         </div>

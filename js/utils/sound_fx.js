@@ -51,3 +51,4 @@ export function triggerSensoryFeedback() {
   triggerHaptic(12);
   playClickSound();
 }
+

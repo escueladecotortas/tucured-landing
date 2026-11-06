@@ -36,6 +36,10 @@ export const ShowcaseCore = {
         triggerSensoryFeedback();
         ShowcaseState.setRubro(rubro);
       },
+      setViewMode: (mode) => {
+        triggerSensoryFeedback();
+        ShowcaseState.setViewMode(mode);
+      },
       selectStep: (step) => ShowcaseState.setStep(step),
       selectOption: (optIdx) => {
         triggerSensoryFeedback();
