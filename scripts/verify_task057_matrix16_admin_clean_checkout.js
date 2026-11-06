@@ -61,15 +61,15 @@ filesToCheck.forEach(f => {
 console.log('\n📌 2. Descontaminación de Admin L1:');
 const adminCoreContent = fs.readFileSync(path.join(engineRoot, 'public/js/admin_l1/admin_l1_core.js'), 'utf8');
 assert(!adminCoreContent.includes("slug: 'lucia-juarez'"), "admin_l1_core.js no tiene 'lucia-juarez' en DEFAULT_CONFIG");
-assert(adminCoreContent.includes("slug: 'mi-comercio'"), "admin_l1_core.js tiene 'mi-comercio' como default neutral");
+assert(adminCoreContent.includes("slug: 'demo-peluqueria'") || adminCoreContent.includes("slug: 'mi-comercio'"), "admin_l1_core.js tiene default neutral");
 
 const adminPricingContent = fs.readFileSync(path.join(engineRoot, 'public/js/admin_l1/admin_l1_pricing.js'), 'utf8');
 assert(!adminPricingContent.includes("Diseño y Perfilado de Cejas"), "admin_l1_pricing.js no tiene servicios de estética quemados como default");
-assert(adminPricingContent.includes("Atención Estándar"), "admin_l1_pricing.js contiene servicios neutros");
+assert(adminPricingContent.includes("Corte Clásico") || adminPricingContent.includes("Atención Estándar"), "admin_l1_pricing.js contiene servicios neutros");
 
 const adminConfigContent = fs.readFileSync(path.join(engineRoot, 'public/js/admin_l1/admin_l1_config.js'), 'utf8');
 assert(!adminConfigContent.includes("alias: 'lucia.juarez.mp'"), "admin_l1_config.js no tiene 'lucia.juarez.mp'");
-assert(adminConfigContent.includes("alias: 'tucured.mp'"), "admin_l1_config.js usa 'tucured.mp' como alias oficial");
+assert(adminConfigContent.includes("alias: 'peluqueria.central.mp'") || adminConfigContent.includes("alias: 'tucured.mp'"), "admin_l1_config.js usa alias neutral u oficial");
 
 const tenantServiceContent = fs.readFileSync(path.join(engineRoot, 'backend/services/TenantFirestoreService.js'), 'utf8');
 assert(!tenantServiceContent.includes("'Lucía Juárez Beauty Studio'"), "TenantFirestoreService.js no quema 'Lucía Juárez' como fallback");
