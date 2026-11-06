@@ -9,3 +9,6 @@ build/
 .DS_Store
 temp/
 .nexus_trash/
+
+# Local Netlify folder
+.netlify

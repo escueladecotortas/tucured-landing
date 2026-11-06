@@ -1,11 +1,9 @@
 // Archivo: js/components/navbar.js
 /**
  * 🧭 Tucu Red Web V2 - Header Glassmorphic Sticky & Navegación Principal
- * Incluye logo oficial SVG, menú desktop, botón de conversión y pasarela WhatsApp.
- * Restricción estricta: < 200 líneas (< 180L).
+ * Incluye logo oficial SVG, menú desktop y botones de conversión directos.
+ * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
-
-import { WA_FALLBACK_URL } from '../utils/whatsapp_link.js';
 
 export function renderNavbar(containerId = 'app-navbar') {
   const container = document.getElementById(containerId);
@@ -24,28 +22,25 @@ export function renderNavbar(containerId = 'app-navbar') {
           />
         </a>
 
-        <!-- Navegación Desktop -->
-        <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-          <a href="#soluciones" class="text-indigo-600 hover:text-indigo-700 transition-colors">Soluciones</a>
-          <a href="#cases" class="hover:text-indigo-600 transition-colors">Comercios Reales</a>
-          <a href="#showroom" class="hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+        <!-- Navegación Desktop Limpia -->
+        <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
+          <a href="#soluciones" class="hover:text-indigo-600 transition-colors">Soluciones</a>
+          <a href="#showroom" class="text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1.5 font-bold">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Showroom en Vivo</span>
+            <span>Simulador en Vivo</span>
           </a>
+          <a href="#certezas" class="hover:text-indigo-600 transition-colors">Certezas</a>
           <a href="#precios" class="hover:text-indigo-600 transition-colors">Precios</a>
+          <a href="#faq" class="hover:text-indigo-600 transition-colors">FAQ</a>
         </nav>
 
-        <!-- Acciones de Conversión -->
+        <!-- Acciones de Conversión Directas -->
         <div class="hidden sm:flex items-center gap-3">
-          <a href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl border border-emerald-200/80 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-1.5 text-xs font-bold" title="Consultar por WhatsApp">
-            <span class="material-symbols-outlined text-base">chat</span>
-            <span class="hidden lg:inline">WhatsApp</span>
-          </a>
           <a href="#showroom" class="px-4 py-2.5 text-sm font-bold text-slate-700 hover:text-indigo-600 transition-colors">
             Probar Turnero
           </a>
-          <a href="#funnel" class="px-5 py-2.5 rounded-xl btn-aura-cta text-sm font-bold flex items-center gap-2">
-            <span>Sumar mi negocio</span>
+          <a href="#precios" class="px-5 py-2.5 rounded-xl btn-aura-cta text-sm font-bold flex items-center gap-2">
+            <span>Activar por $1.000*</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </a>
         </div>
@@ -64,17 +59,14 @@ export function renderNavbar(containerId = 'app-navbar') {
       <!-- Menú Desplegable Mobile -->
       <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-slate-900/5 bg-white/95 backdrop-blur-xl px-6 py-5 space-y-3 shadow-xl">
         <a href="#soluciones" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Soluciones</a>
-        <a href="#cases" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Comercios Reales</a>
-        <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">⚡ Showroom Interactivo en Vivo</a>
+        <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">⚡ Simulador Interactivo en Vivo</a>
+        <a href="#certezas" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Certezas del Sistema</a>
         <a href="#precios" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Planes y Precios</a>
-        <div class="pt-2 flex flex-col gap-2">
-          <a href="#funnel" class="w-full py-3 rounded-xl btn-aura-cta text-sm font-bold flex items-center justify-center gap-2">
-            <span>Sumar mi negocio</span>
+        <a href="#faq" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Preguntas Frecuentes</a>
+        <div class="pt-2">
+          <a href="#precios" class="w-full py-3 rounded-xl btn-aura-cta text-sm font-bold flex items-center justify-center gap-2">
+            <span>Activar por $1.000*</span>
             <span class="material-symbols-outlined text-sm">rocket_launch</span>
-          </a>
-          <a href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 text-sm font-bold flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-base">chat</span>
-            <span>Consultar por WhatsApp</span>
           </a>
         </div>
       </div>

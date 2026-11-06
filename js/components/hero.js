@@ -1,8 +1,8 @@
 // Archivo: js/components/hero.js
 /**
- * 🏙️ Tucu Red Web V2 - Director del Hero Anamórfico 3D & Audio Interactivo
- * Control de reproducción de video Kiro, conmutación de audio y perspectiva forzada.
- * Restricción estricta: < 200 líneas.
+ * 🏙️ Tucu Red Web V2 - Director del Hero & Terminal Física de Mostrador
+ * Control del chasis de mostrador Kiosk Pro, perspectiva 3D interactiva y navegación.
+ * Restricción estricta: < 200 líneas (< 180L).
  */
 
 import { getHeroMarkup } from './hero_markup.js';
@@ -21,13 +21,10 @@ export function renderHero(containerId = 'app-hero') {
   container.innerHTML = getHeroMarkup();
 
   const stage = document.getElementById('hero-stage');
-  const video = document.getElementById('kiro-hero-video');
-  const audioBtn = document.getElementById('kiro-audio-toggle');
-  const audioIcon = document.getElementById('kiro-audio-icon');
-  const audioLabel = document.getElementById('kiro-audio-label');
   const ctaPrimary = document.getElementById('hero-cta-primary');
+  const terminalCta = document.getElementById('hero-terminal-cta');
 
-  // Inicializar Motor Anamórfico 3D sobre el Chasis de Kiro
+  // Inicializar Motor Anamórfico 3D sobre el Chasis de la Terminal
   let anamorphic = null;
   if (stage) {
     anamorphic = initHeroAnamorphic({
@@ -38,40 +35,33 @@ export function renderHero(containerId = 'app-hero') {
     window._heroAnamorphicInstance = anamorphic;
   }
 
-  // Lógica de Conmutación de Audio Interactivo (Glassmorphic)
-  if (video && audioBtn) {
-    audioBtn.addEventListener('click', () => {
-      video.muted = !video.muted;
-      if (!video.muted) {
-        video.play().catch(() => {});
-        if (audioIcon) audioIcon.textContent = 'volume_up';
-        if (audioLabel) audioLabel.textContent = 'Silenciar';
-        audioBtn.setAttribute('aria-label', 'Silenciar sonido');
-        audioBtn.classList.add('bg-indigo-950/90', 'border-indigo-400/50');
-      } else {
-        if (audioIcon) audioIcon.textContent = 'volume_off';
-        if (audioLabel) audioLabel.textContent = 'Activar sonido';
-        audioBtn.setAttribute('aria-label', 'Activar sonido');
-        audioBtn.classList.remove('bg-indigo-950/90', 'border-indigo-400/50');
+  // Interacción en Pantalla Táctil: Selección de slots de horario
+  container.querySelectorAll('.terminal-slot-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      container.querySelectorAll('.terminal-slot-chip').forEach(c => c.classList.remove('terminal-slot-active'));
+      chip.classList.add('terminal-slot-active');
+      if (anamorphic && typeof anamorphic.pulseBacklight === 'function') {
+        anamorphic.pulseBacklight();
       }
     });
-  }
+  });
 
-  // Botón CTA Primario: Pre-seleccionar Nivel 2 y scroll fluido a #precios
-  if (ctaPrimary) {
-    ctaPrimary.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('tucured:level-selected', {
-          detail: { level: 'l2', levelNumber: 2 }
-        }));
-      }
-      const target = document.getElementById('precios') || document.getElementById('app-pricing');
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  }
+  const navigateToPrecios = (e) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tucured:level-selected', {
+        detail: { level: 'l2', levelNumber: 2 }
+      }));
+    }
+    const target = document.getElementById('precios') || document.getElementById('app-pricing');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Botones CTAs hacia Precios y Activación de Nivel 2
+  ctaPrimary?.addEventListener('click', navigateToPrecios);
+  terminalCta?.addEventListener('click', navigateToPrecios);
 
   return anamorphic;
 }

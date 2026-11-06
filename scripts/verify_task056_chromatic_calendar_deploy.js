@@ -91,3 +91,4 @@ if (!allPassed) {
   console.log('Jerarquía Cromática, Calendario Real Dinámico y Ley de 200L aprobados.');
   process.exit(0);
 }
+
