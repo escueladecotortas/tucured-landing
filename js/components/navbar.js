@@ -29,7 +29,7 @@ export function renderNavbar(containerId = 'app-navbar') {
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Simulador en Vivo</span>
           </a>
-          <a href="#certezas" class="hover:text-indigo-600 transition-colors">Certezas</a>
+          <a href="#certezas" class="hover:text-indigo-600 transition-colors">Qué Incluye</a>
           <a href="#precios" class="hover:text-indigo-600 transition-colors">Precios</a>
           <a href="#faq" class="hover:text-indigo-600 transition-colors">FAQ</a>
         </nav>
@@ -60,7 +60,7 @@ export function renderNavbar(containerId = 'app-navbar') {
       <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-slate-900/5 bg-white/95 backdrop-blur-xl px-6 py-5 space-y-3 shadow-xl">
         <a href="#soluciones" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Soluciones</a>
         <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">⚡ Simulador Interactivo en Vivo</a>
-        <a href="#certezas" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Certezas del Sistema</a>
+        <a href="#certezas" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Qué Incluye</a>
         <a href="#precios" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Planes y Precios</a>
         <a href="#faq" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Preguntas Frecuentes</a>
         <div class="pt-2">

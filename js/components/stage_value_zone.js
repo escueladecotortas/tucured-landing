@@ -1,8 +1,8 @@
 // Archivo: js/components/stage_value_zone.js
 /**
- * ⚡ Tucu Red Web V2 - Zona 3: Especificaciones Siempre Visibles (Chau Acordeón) y CTA Directo
- * 3 Certezas técnicas 100% visibles en pantalla en todo momento y botón de activación directa.
- * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
+ * ⚡ Tucu Red Web V2 - Zona 3: Especificaciones Siempre Visibles (2 Bloques Canónicos) y CTA
+ * Ficha técnica en 2 bloques: Para tus Clientes y Tu Panel de Control (/admin).
+ * Restricción estricta: < 200 líneas (< 175L) y Protocolo PEAC.
  */
 
 const LEVEL_MATRIX_V16 = {
@@ -11,10 +11,15 @@ const LEVEL_MATRIX_V16 = {
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
     architecture: "Base Multitenant 'tucured-clients' • Bloqueo en Tiempo Real • Token Hash",
     microMetrica: 'Turnero autónomo listo • Bloqueo de colisiones • Cancelación en 1 clic',
-    specs: [
-      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Evita colisiones y solapamientos garantizando disponibilidad en tiempo real.' },
-      { icon: 'confirmation_number', title: 'Comprobante digital con enlace de autogestión', desc: 'Ticket con Hash #TK-XXXX y portal para consultar o cancelar en 1 clic.' },
-      { icon: 'payments', title: 'Catálogo con duración variable y cobro de seña', desc: 'Precios, tiempos de atención por servicio y seña configurable al Alias oficial.' }
+    clientFeatures: [
+      { icon: 'touch_app', title: 'Turnero web de 3 toques', desc: 'Reserva ágil desde el celular sin descargas ni contraseñas.' },
+      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Previene colisiones y solapamientos en vivo con base multitenant.' },
+      { icon: 'confirmation_number', title: 'Ticket digital con código Hash #TK-XXXX', desc: 'Comprobante y portal de cancelación/autogestión en 1 clic.' }
+    ],
+    adminFeatures: [
+      { icon: 'calendar_month', title: 'Agenda operativa en vivo y citas manuales', desc: 'Alta de mostrador, botón para pausar/abrir recepción y catálogo con duración.' },
+      { icon: 'schedule', title: 'Turno partido (siesta) y feriados oficiales', desc: 'Horarios configurables con salteo automático de feriados nacionales.' },
+      { icon: 'chat', title: 'WhatsApp oficial conectado vía Gateway', desc: 'Despacho directo de confirmaciones y cobro de seña al Alias oficial.' }
     ]
   },
   l2: {
@@ -22,10 +27,14 @@ const LEVEL_MATRIX_V16 = {
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     architecture: 'Instancia de Alto Rendimiento • Turnos de Mostrador • CRM Anti-No-Show',
     microMetrica: '8 Turnos Confirmados • Ocupación 92% • Lista Negra activa',
-    specs: [
-      { icon: 'dashboard', title: 'Panel SPA Administrativo avanzado con 3 vistas', desc: 'Control en vivo de agenda diaria, catálogo de precios y configuración operativa.' },
-      { icon: 'edit_calendar', title: 'Carga ágil de turnos manuales de mostrador', desc: 'Asignación rápida de turnos presenciales o telefónicos sin fricción.' },
-      { icon: 'shield', title: 'CRM con Lista Negra Anti-No-Show y Lista VIP', desc: 'Gobernanza para erradicar ausencias reiteradas y fidelizar clientes VIP.' }
+    clientFeatures: [
+      { icon: 'verified', title: 'Todo lo de Nivel 1 optimizado', desc: 'Bloqueo en vivo, comprobante Hash y enlace público de autogestión.' },
+      { icon: 'notifications_active', title: 'Confirmación y recordatorios por WhatsApp', desc: 'Avisos directos sin fricción y validación de seña en línea.' }
+    ],
+    adminFeatures: [
+      { icon: 'dashboard', title: 'SPA Administrativa avanzada de 3 vistas', desc: 'Control en tiempo real de agenda diaria, catálogo de precios y configuración.' },
+      { icon: 'point_of_sale', title: 'Gestión ágil de turnos telefónicos y mostrador', desc: 'Carga inmediata de citas presenciales con bloqueo instantáneo.' },
+      { icon: 'shield', title: 'Gobernanza CRM Anti-No-Show y Lista VIP', desc: 'Lista Negra para clientes ausentes y fidelización de clientes VIP.' }
     ]
   },
   l3: {
@@ -33,10 +42,14 @@ const LEVEL_MATRIX_V16 = {
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
     architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Barredora Cron T-2hs',
     microMetrica: '3 Profesionales en simultáneo • Facturación acumulada • Cron T-2hs activo',
-    specs: [
-      { icon: 'groups', title: 'Agendas independientes para múltiples profesionales', desc: 'Horarios semanales y agendas separadas para staff ilimitado y sucursales.' },
-      { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Gestión simultánea de sillones, gabinetes, consultorios médicos o canchas.' },
-      { icon: 'alarm_on', title: 'Microservicio Cron T-2hs con aviso WhatsApp', desc: 'Recordatorio desatendido con idempotencia 2 horas antes de cada turno agendado.' }
+    clientFeatures: [
+      { icon: 'group_work', title: 'Selección de especialista o primer libre', desc: 'El cliente elige a su profesional preferido o el turno más próximo disponible.' },
+      { icon: 'more_time', title: 'Cálculo de bloques contiguos por servicio', desc: 'Disponibilidad exacta según la duración acumulada del catálogo.' }
+    ],
+    adminFeatures: [
+      { icon: 'groups', title: 'Múltiples profesionales con agendas individuales', desc: 'Horarios semanales diferenciados para staff, terapeutas o colaboradores.' },
+      { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Sillones, gabinetes, consultorios médicos o canchas deportivas.' },
+      { icon: 'alarm_on', title: 'Barredora Cron automática T-2hs por WhatsApp', desc: 'Recordatorio desatendido con idempotencia 2 horas antes de cada cita.' }
     ]
   }
 };
@@ -45,13 +58,11 @@ export function renderStageValueZone(containerId, state) {
   const container = document.getElementById(containerId);
   if (!container || !state) return;
 
-  const curRubro = state.rubros[state.currentRubro] || state.rubros.barberia;
   const curLvlId = state.currentLevel || 'l2';
   const matrix = LEVEL_MATRIX_V16[curLvlId] || LEVEL_MATRIX_V16.l2;
 
   container.innerHTML = `
     <div class="space-y-4">
-      <!-- Tarjeta de Especificaciones Técnicas 100% Visibles en Pantalla -->
       <div class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4 relative overflow-hidden">
         <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
           <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full font-mono border ${matrix.themeBadge}">
@@ -63,18 +74,43 @@ export function renderStageValueZone(containerId, state) {
           ${matrix.architecture}
         </p>
 
-        <!-- 3 Certezas Técnicas Siempre Visibles -->
-        <ul class="space-y-3 pt-1">
-          ${matrix.specs.map(sp => `
-            <li class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-indigo-600 text-base mt-0.5 shrink-0">${sp.icon}</span>
-              <div class="text-xs leading-relaxed">
-                <strong class="text-slate-900 block font-semibold text-xs sm:text-sm mb-0.5">${sp.title}</strong>
-                <span class="text-slate-600">${sp.desc}</span>
-              </div>
-            </li>
-          `).join('')}
-        </ul>
+        <!-- Bloque 1: Para tus Clientes -->
+        <div class="space-y-2 pt-1 border-t border-slate-100">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider font-headline">
+            <span class="material-symbols-outlined text-sm text-indigo-600">smartphone</span>
+            <span>Para tus Clientes</span>
+          </div>
+          <ul class="space-y-2.5">
+            ${matrix.clientFeatures.map(item => `
+              <li class="flex items-start gap-2.5 text-xs">
+                <span class="material-symbols-outlined text-indigo-600 text-sm mt-0.5 shrink-0 select-none">${item.icon}</span>
+                <div class="leading-snug">
+                  <strong class="text-slate-900 block font-semibold text-xs">${item.title}</strong>
+                  <span class="text-slate-600 text-[11px]">${item.desc}</span>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <!-- Bloque 2: Tu Panel de Control (/admin) -->
+        <div class="space-y-2 pt-3 border-t border-slate-100">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider font-headline">
+            <span class="material-symbols-outlined text-sm text-emerald-600">admin_panel_settings</span>
+            <span>Tu Panel de Control (/admin)</span>
+          </div>
+          <ul class="space-y-2.5">
+            ${matrix.adminFeatures.map(item => `
+              <li class="flex items-start gap-2.5 text-xs">
+                <span class="material-symbols-outlined text-emerald-600 text-sm mt-0.5 shrink-0 select-none">${item.icon}</span>
+                <div class="leading-snug">
+                  <strong class="text-slate-900 block font-semibold text-xs">${item.title}</strong>
+                  <span class="text-slate-600 text-[11px]">${item.desc}</span>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
 
         <!-- Micro-Métrica en Trastienda -->
         <div class="pt-3 border-t border-slate-100">

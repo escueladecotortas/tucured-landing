@@ -1,16 +1,17 @@
 // Archivo: js/showcase_v11/showcase_core.js
 /**
  * ⚡ TucuRed Showcase v11.1 - Orquestador Central del Escenario 3 Zonas
- * Sincronización reactiva de Vidriera, Smartphone Central y Columna de Valor.
+ * Sincronización reactiva de Vidriera, Smartphone Central y Columna de Valor con Haptics y Preload.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
-import { ShowcaseState } from './showcase_state.js';
+import { ShowcaseState, preloadShowcaseAssets } from './showcase_state.js';
 import { ShowcaseLevels } from './showcase_levels.js';
 import { ShowcaseMockup } from './showcase_mockup.js';
 import { ShowcaseBenefits } from './showcase_benefits.js';
 import { renderStageRubrosZone } from '../components/stage_rubros_zone.js';
 import { renderStageValueZone } from '../components/stage_value_zone.js';
+import { triggerSensoryFeedback } from '../utils/sound_fx.js';
 
 export const ShowcaseCore = {
   _initialized: false,
@@ -21,26 +22,38 @@ export const ShowcaseCore = {
       this._initialized = true;
     }
 
+    preloadShowcaseAssets();
+
     window.ShowcaseState = ShowcaseState;
     window.ShowcaseLevels = ShowcaseLevels;
     window.ShowcaseCore = {
       getState: () => ShowcaseState,
-      selectLevel: (lvl) => ShowcaseState.setLevel(lvl),
-      selectRubro: (rubro) => ShowcaseState.setRubro(rubro),
+      selectLevel: (lvl) => {
+        triggerSensoryFeedback();
+        ShowcaseState.setLevel(lvl);
+      },
+      selectRubro: (rubro) => {
+        triggerSensoryFeedback();
+        ShowcaseState.setRubro(rubro);
+      },
       selectStep: (step) => ShowcaseState.setStep(step),
       selectOption: (optIdx) => {
+        triggerSensoryFeedback();
         ShowcaseState.selectedOption = optIdx;
         ShowcaseState.notify();
       },
       selectStaff: (staffIdx) => {
+        triggerSensoryFeedback();
         ShowcaseState.selectedStaff = staffIdx;
         ShowcaseState.notify();
       },
       selectDay: (dayIdx) => {
+        triggerSensoryFeedback();
         ShowcaseState.selectedDay = dayIdx;
         ShowcaseState.notify();
       },
       selectTime: (time) => {
+        triggerSensoryFeedback();
         ShowcaseState.selectedTime = time;
         ShowcaseState.notify();
       },

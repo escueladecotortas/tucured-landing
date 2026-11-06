@@ -1,8 +1,8 @@
 // Archivo: js/showcase_v11/showcase_state.js
 /**
  * ⚡ TucuRed Showcase v11.1 - Estado y Contratos de Datos Canónicos (SSOT v16.0)
- * Sincronizado con Matriz v16, Regla de Domingo Cerrado y Filtro de Horarios Pasados.
- * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
+ * Sincronizado con Matriz v16, Regla de Domingo Cerrado, Preload WebP y Filtro de Horarios.
+ * Restricción estricta: < 200 líneas (< 175L) y Protocolo PEAC.
  */
 
 export function getSystemCalendar() {
@@ -15,10 +15,8 @@ export function getSystemCalendar() {
     d.setDate(now.getDate() + i);
     const diaNum = d.getDay();
     return {
-      diaNombre: diasSemana[diaNum],
-      diaNumero: d.getDate(),
-      isToday: i === 0,
-      isSunday: diaNum === 0,
+      diaNombre: diasSemana[diaNum], diaNumero: d.getDate(),
+      isToday: i === 0, isSunday: diaNum === 0,
       dateStr: d.toISOString().split('T')[0],
       fullLabel: `${diasSemana[diaNum]} ${d.getDate()} de ${mesActual}`
     };
@@ -41,8 +39,14 @@ export function isTimePast(timeStr, state) {
   const now = new Date();
   const [hStr, mStr] = String(timeStr).split(':');
   const slotMinutes = (parseInt(hStr, 10) || 0) * 60 + (parseInt(mStr, 10) || 0);
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  return slotMinutes < currentMinutes;
+  return slotMinutes < (now.getHours() * 60 + now.getMinutes());
+}
+
+export function preloadShowcaseAssets() {
+  if (typeof window === 'undefined') return;
+  Object.values(ShowcaseState.rubros).forEach(r => {
+    if (r.heroImage) { const img = new Image(); img.src = r.heroImage; }
+  });
 }
 
 const sysCalendar = getSystemCalendar();
@@ -56,39 +60,21 @@ export const ShowcaseState = {
       name: 'Turnero Autónomo Express', tagline: 'Zero Server Runtime • Reserva en 3 toques directo a WhatsApp',
       description: 'Opera en base multitenant tucured-clients con bloqueo en vivo, Hash #TK-XXXX y cancelación en 1 clic.',
       adminIcon: 'settings', adminButtonLabel: 'Ver Panel Asistente L1', adminUrl: '/admin_l1.html',
-      benefits: [
-        'Alojado en base multitenant tucured-clients con bloqueo en tiempo real.',
-        'Reserva directa en 3 toques desde el celular sin contraseñas.',
-        'Comprobante Hash #TK-XXXX y portal de autogestión/cancelación en 1 clic.',
-        'Cobro de seña con Alias tucured.mp y duración por servicio.',
-        'Salteo automático de feriados nacionales argentinos.'
-      ]
+      benefits: ['Alojado en base multitenant tucured-clients con bloqueo en tiempo real.', 'Reserva directa en 3 toques desde el celular sin contraseñas.', 'Comprobante Hash #TK-XXXX y portal de autogestión/cancelación en 1 clic.', 'Cobro de seña con Alias tucured.mp y duración por servicio.', 'Salteo automático de feriados nacionales argentinos.']
     },
     l2: {
       id: 'l2', badge: 'Nivel 2 • Central Pro', badgeClass: 'bg-secondary-container/30 text-secondary border-secondary/30', popularBadge: 'Control Operativo Total', iconSymbol: 'settings_suggest',
       name: 'Central Operativa & Agenda Pro', tagline: 'Bloqueo en tiempo real • Comprobante con link de autogestión',
       description: 'Agenda inteligente en instancia dedicada con turnos de mostrador y CRM Anti-No-Show.',
       adminIcon: 'monitoring', adminButtonLabel: 'Ver Panel de Citas L2', adminUrl: '/admin_l2.html',
-      benefits: [
-        'Prevención de solapamiento y bloqueo de horarios ocupados en tiempo real.',
-        'Comprobante Hash #TK-XXXX con link de autogestión y cancelación en 1 clic.',
-        'Panel de gobernanza con Lista Negra anti-ausencias y Lista Blanca VIP.',
-        'Despacho automático desatendido por WhatsApp (Baileys) con fallback.',
-        'Tablero de KPIs en vivo: ocupación diaria y total histórico de citas.'
-      ]
+      benefits: ['Prevención de solapamiento y bloqueo de horarios ocupados en tiempo real.', 'Comprobante Hash #TK-XXXX con link de autogestión y cancelación en 1 clic.', 'Panel de gobernanza con Lista Negra anti-ausencias y Lista Blanca VIP.', 'Despacho automático desatendido por WhatsApp (Baileys) con fallback.', 'Tablero de KPIs en vivo: ocupación diaria y total histórico de citas.']
     },
     l3: {
       id: 'l3', badge: 'Nivel 3 • Multi-Equipo', badgeClass: 'bg-primary-container/30 text-primary-fixed border-primary-container/40', popularBadge: 'Equipos, Consultorios y Complejos', iconSymbol: 'groups',
       name: 'Multi-Staff & Franquicias', tagline: 'Agendas independientes por profesional • Catálogo con duración dinámica',
       description: 'Múltiples especialistas con horarios propios, cálculo de bloques contiguos y recordatorios automáticos cron T-2hs.',
       adminIcon: 'groups', adminButtonLabel: 'Ver Panel Multi-Staff L3', adminUrl: '/admin_l3.html',
-      benefits: [
-        'Agendas multi-profesional independientes con horarios semanales propios.',
-        'Modelado de recursos físicos por rubro (sillones, consultorios, canchas).',
-        'Catálogo con cálculo automático de bloques contiguos por duración.',
-        'Microservicio Cron T-2hs para recordatorios desatendidos con idempotencia.',
-        'CRM de clientes VIP con historial de citas y gasto total acumulado.'
-      ]
+      benefits: ['Agendas multi-profesional independientes con horarios semanales propios.', 'Modelado de recursos físicos por rubro (sillones, consultorios, canchas).', 'Catálogo con cálculo automático de bloques contiguos por duración.', 'Microservicio Cron T-2hs para recordatorios desatendidos con idempotencia.', 'CRM de clientes VIP con historial de citas y gasto total acumulado.']
     }
   },
 
@@ -128,8 +114,7 @@ export const ShowcaseState = {
     salud: {
       id: 'salud', name: 'Salud', label: 'Salud & Consultorios', bizName: 'Centro Médico & Especialidades', badgeL1: '🩺 CONSULTORIO MÉDICO', subCategory: 'Medicina General & Odontología',
       accentColor: '#0D9488', btnClass: 'bg-gradient-to-r from-[#0D9488] to-[#0F766E] text-white font-bold shadow-lg shadow-[#0D9488]/20', focusBorder: 'focus:border-[#0D9488]', heroImage: '/assets/showcase/hero_salud.webp', iconSymbol: 'medical_services',
-      requireInsurance: true,
-      options: ['Consulta Clínica General', 'Control Odontológico', 'Evaluación Diagnóstica'],
+      requireInsurance: true, options: ['Consulta Clínica General', 'Control Odontológico', 'Evaluación Diagnóstica'],
       days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Dra. Sofía Mendoza (Clínica)', 'Dr. Carlos Ruiz (Diagnóstico)', 'Dra. Lucía Albarracín (Odonto)'],
       catalogL3: [{ name: 'Consulta Médica General', dur: '20 min • $20.000' }, { name: 'Evaluación Diagnóstica Completa', dur: '40 min • $35.000' }]
@@ -177,3 +162,5 @@ export const ShowcaseState = {
     return `¡Hola ${r.bizName}! Quiero reservar un turno para *${srv}* el día *${day}* a las *${this.selectedTime} hs*.\n\nNombre: *${this.clientFirstName} ${this.clientLastName}*.\nSé que la reserva requiere una seña del 50%. ¿Me pasás tu Alias o CBU para transferir?`;
   }
 };
+
+preloadShowcaseAssets();

@@ -101,7 +101,7 @@ export function renderPricing(containerId = 'app-pricing') {
           Inversión clara y predecible. Lanzamiento por solo $1.000.
         </h2>
         <p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto">
-          Elegí la potencia que tu comercio necesita. 0% comisiones por turno y puesta en marcha guiada en el día.
+          0% comisiones por turno. Te lo entregamos 100% configurado y listo para usar, con soporte directo.
         </p>
       </div>
 
