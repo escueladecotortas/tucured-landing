@@ -10,8 +10,8 @@ export const PRICING_PLANS = [
     id: 'l1',
     levelNumber: 1,
     title: 'Nivel 1',
-    subtitle: 'Turnero Autónomo Completo',
-    badge: 'Bloqueo en Vivo • Token Hash',
+    subtitle: 'Turnero Autónomo Express',
+    badge: 'Cero Turnos Superpuestos',
     themeClass: 'border-sky-300/80 shadow-sky-100 hover:border-sky-500',
     accentText: 'text-sky-700',
     accentBadge: 'bg-sky-50 text-sky-800 border-sky-200',
@@ -21,11 +21,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 1',
     features: [
-      'Alojado en base multitenant tucured-clients con bloqueo en tiempo real.',
-      'Reserva directa en 3 toques con comprobante digital Hash #TK-XXXX.',
-      'Portal de autogestión y cancelación en 1 clic para tus clientes.',
-      'Catálogo con duración variable por servicio y cobro de señas (Alias tucured.mp).',
-      'Despacho de confirmación directo y aviso a tu WhatsApp.'
+      'Reserva ágil en 4 pasos desde el celular sin descargas ni contraseñas.',
+      'Comprobante digital #TK con botón para agendar en Google/Apple Calendar.',
+      'Portal de autogestión: el cliente cancela o reprograma en 1 clic y libera el slot.',
+      'Panel de dueño en vivo para pausar o abrir recepción y cargar citas al instante.',
+      'Respeta tu horario de siesta, feriados oficiales y cobro de seña a tu Alias.'
     ]
   },
   {
@@ -33,7 +33,7 @@ export const PRICING_PLANS = [
     levelNumber: 2,
     title: 'Nivel 2',
     subtitle: 'Central Operativa & Agenda Pro',
-    badge: 'Gobernanza CRM • Turnos Mostrador',
+    badge: 'Control Total de Ausencias',
     themeClass: 'border-indigo-400 shadow-indigo-100/50 hover:border-indigo-600',
     accentText: 'text-indigo-700',
     accentBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200',
@@ -43,11 +43,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 2',
     features: [
-      'Todo lo de Nivel 1 en instancia de alto rendimiento dedicada.',
-      'Panel de control SPA avanzado con 3 vistas operativas en vivo.',
-      'Carga ágil de turnos manuales y telefónicos de mostrador sin fricción.',
+      'Todo lo de Nivel 1 con velocidad de respuesta instantánea y soporte prioritario.',
+      'Carga ágil de citas telefónicas y mostrador sin riesgo de doble turno.',
       'Gobernanza Anti-No-Show: Lista Negra de ausencias y Lista VIP de clientes fieles.',
-      'Historial de turnos y métricas de ocupación comercial en tiempo real.'
+      'Tablero de métricas en vivo: porcentaje de ocupación diaria y facturación.',
+      'Confirmaciones y recordatorios automáticos para asegurar la asistencia.'
     ]
   },
   {
@@ -55,7 +55,7 @@ export const PRICING_PLANS = [
     levelNumber: 3,
     title: 'Nivel 3',
     subtitle: 'Multi-Staff & Franquicias',
-    badge: 'Equipos, Canchas y Consultorios',
+    badge: 'Equipos, Canchas y Clínicas',
     themeClass: 'border-amber-400 shadow-amber-100/50 hover:border-amber-600',
     accentText: 'text-amber-800',
     accentBadge: 'bg-amber-50 text-amber-900 border-amber-200',
@@ -65,11 +65,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 3',
     features: [
-      'Todo lo de Nivel 1 y Nivel 2 con arquitectura multi-recurso.',
-      'Agendas simultáneas independientes para staff y colaboradores ilimitados.',
-      'Gestión de recursos físicos: canchas, sillones, gabinetes o consultorios.',
-      'Microservicio Cron T-2hs para recordatorios automáticos con idempotencia.',
-      'CRM financiero con facturación acumulada e historial por cliente.'
+      'Todo lo de Nivel 1 y Nivel 2 con gestión multi-recurso en simultáneo.',
+      'Agendas independientes por cada profesional con horarios y pausas propias.',
+      'Modelado de recursos físicos: canchas de pádel, consultorios médicos o sillones.',
+      'Selección de profesional preferido o primer turno disponible para el cliente.',
+      'Recordatorios automáticos 2 horas antes de cada cita para erradicar olvidos.'
     ]
   }
 ];

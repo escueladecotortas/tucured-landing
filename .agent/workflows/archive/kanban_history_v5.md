@@ -18,3 +18,4 @@
 - [x] **[TASK-046]** Auditoría forense de capacidades L1/L2/L3 y creación de Matriz Canónica v15.0 (.agent/specs/turneros_v15_matrix.md) *(03/11/2026, 15:29:00)*
 - [x] **[TASK-045]** Inspección técnica de `temp/3d_app`, poda de avatar Kiro en Wizard y rediseño del Hero como Terminal Física de Mostrador *(02/11/2026, 16:18:00)*
 - [x] **[TASK-044]** Integración de webhook/daemon de Baileys en entorno Sandbox aislado para procesamiento desatendido de leads *(02/11/2026, 14:32:00)*
+

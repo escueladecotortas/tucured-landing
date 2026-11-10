@@ -40,19 +40,19 @@ export const FUNNEL_LEVELS = [
   { 
     id: 'l1', 
     title: 'Nivel 1: Turnero Autónomo Express', 
-    desc: 'Reserva web en 3 toques, seña 50% y despacho wa.me sin backend.', 
+    desc: 'Turnero web en 4 pasos, comprobante digital #TK y control de agenda sin colisiones.', 
     badge: 'Nivel 1' 
   },
   { 
     id: 'l2', 
     title: 'Nivel 2: Central Operativa & Agenda Pro', 
-    desc: 'Bloqueo en tiempo real, Hash #TK-XXXX, autogestión y Lista Negra/VIP.', 
+    desc: 'Panel de dueño en vivo, bloqueo de ausencias reiteradas y turnos de mostrador.', 
     badge: 'Nivel 2' 
   },
   { 
     id: 'l3', 
     title: 'Nivel 3: Multi-Staff & Franquicias', 
-    desc: 'Agendas independientes por profesional, recursos y recordatorios T-2hs.', 
+    desc: 'Agendas independientes por profesional, canchas/consultorios y recordatorios automáticos.', 
     badge: 'Nivel 3' 
   }
 ];

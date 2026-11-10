@@ -7,28 +7,28 @@
 
 const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Autónomo • Turnero Express Completo v16.0',
+    badge: 'Nivel 1: Autónomo • Cero Turnos Superpuestos',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
-    architecture: "Base Multitenant 'tucured-clients' • Bloqueo en Tiempo Real • Token Hash",
-    microMetrica: 'Turnero autónomo listo • Bloqueo de colisiones • Cancelación en 1 clic',
+    architecture: 'Turnero Autónomo • Cero Turnos Superpuestos • Comprobante Digital #TK',
+    microMetrica: 'Turnero activo 24/7 • Bloqueo de colisiones • Cancelación en 1 clic',
     clientFeatures: [
-      { icon: 'touch_app', title: 'Turnero web de 3 toques', desc: 'Reserva ágil desde el celular sin descargas ni contraseñas.' },
-      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Previene colisiones y solapamientos en vivo con base multitenant.' },
-      { icon: 'confirmation_number', title: 'Ticket digital con código Hash #TK-XXXX', desc: 'Comprobante y portal de cancelación/autogestión en 1 clic.' }
+      { icon: 'touch_app', title: 'Turnero web de 3 toques (4 pasos guiados)', desc: 'Reserva ágil desde el celular sin descargas, sin registros ni contraseñas.' },
+      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Previene colisiones y solapamientos en vivo para evitar turnos duplicados.' },
+      { icon: 'confirmation_number', title: 'Comprobante digital con botón de calendario', desc: 'Descarga directa de recordatorio (.ics) y autogestión/cancelación en 1 clic.' }
     ],
     adminFeatures: [
       { icon: 'calendar_month', title: 'Agenda operativa en vivo y citas manuales', desc: 'Alta de mostrador, botón para pausar/abrir recepción y catálogo con duración.' },
       { icon: 'schedule', title: 'Turno partido (siesta) y feriados oficiales', desc: 'Horarios configurables con salteo automático de feriados nacionales.' },
-      { icon: 'chat', title: 'WhatsApp oficial conectado vía Gateway', desc: 'Despacho directo de confirmaciones y cobro de seña al Alias oficial.' }
+      { icon: 'payments', title: 'Confirmaciones directas y cobro de seña oficial', desc: 'Avisos directos al cliente y validación de seña con tu propio Alias CBU/CVU.' }
     ]
   },
   l2: {
-    badge: 'Nivel 2: Central Pro • Gobernanza & Agenda v16.0',
+    badge: 'Nivel 2: Central Pro • Control Total de Ausencias',
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    architecture: 'Instancia de Alto Rendimiento • Turnos de Mostrador • CRM Anti-No-Show',
-    microMetrica: '8 Turnos Confirmados • Ocupación 92% • Lista Negra activa',
+    architecture: 'Central Operativa • Carga Ágil de Mostrador • Control Anti-Ausencias',
+    microMetrica: 'Ocupación comercial en vivo • Lista Negra activa • Mostrador sincronizado',
     clientFeatures: [
-      { icon: 'verified', title: 'Todo lo de Nivel 1 optimizado', desc: 'Bloqueo en vivo, comprobante Hash y enlace público de autogestión.' },
+      { icon: 'verified', title: 'Experiencia premium para tus clientes', desc: 'Bloqueo en vivo, comprobante digital y enlace público de autogestión.' },
       { icon: 'notifications_active', title: 'Confirmación y recordatorios por WhatsApp', desc: 'Avisos directos sin fricción y validación de seña en línea.' }
     ],
     adminFeatures: [
@@ -38,10 +38,10 @@ const LEVEL_MATRIX_V16 = {
     ]
   },
   l3: {
-    badge: 'Nivel 3: Multi-Equipo • Franquicias & Recursos v16.0',
+    badge: 'Nivel 3: Multi-Equipo • Canchas, Consultorios y Franquicias',
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
-    architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Barredora Cron T-2hs',
-    microMetrica: '3 Profesionales en simultáneo • Facturación acumulada • Cron T-2hs activo',
+    architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Recordatorios Automáticos',
+    microMetrica: 'Múltiples agendas en paralelo • Recursos modelados • Recordatorios T-2hs',
     clientFeatures: [
       { icon: 'group_work', title: 'Selección de especialista o primer libre', desc: 'El cliente elige a su profesional preferido o el turno más próximo disponible.' },
       { icon: 'more_time', title: 'Cálculo de bloques contiguos por servicio', desc: 'Disponibilidad exacta según la duración acumulada del catálogo.' }
@@ -49,7 +49,7 @@ const LEVEL_MATRIX_V16 = {
     adminFeatures: [
       { icon: 'groups', title: 'Múltiples profesionales con agendas individuales', desc: 'Horarios semanales diferenciados para staff, terapeutas o colaboradores.' },
       { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Sillones, gabinetes, consultorios médicos o canchas deportivas.' },
-      { icon: 'alarm_on', title: 'Barredora Cron automática T-2hs por WhatsApp', desc: 'Recordatorio desatendido con idempotencia 2 horas antes de cada cita.' }
+      { icon: 'alarm_on', title: 'Barredora Cron automática T-2hs por WhatsApp', desc: 'Recordatorio desatendido con confirmación 2 horas antes de cada cita.' }
     ]
   }
 };

@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_l1/admin_l1_agenda.js
-// Agenda L1: Filtros Avanzados, Modal +Nueva Cita & Semilla Demo (Nexus OS v11.1 - < 175 líneas)
+// Agenda L1: Filtros Avanzados, Modal +Nueva Cita & Semilla Demo (Nexus OS v11.1 - < 170 líneas)
 
 (function (global) {
   let bookings = [];
@@ -70,24 +70,24 @@
 
     const list = getFilteredBookings();
     if (list.length === 0) {
-      box.innerHTML = '<div class="p-8 text-center text-[#7A766E] dark:text-[#9E9A93] text-xs rounded-2xl bg-white dark:bg-[#1C1A19] border border-[#E8E6DF] dark:border-[#2D2A28]">No se encontraron turnos con el filtro seleccionado.</div>';
+      box.innerHTML = '<div class="p-8 text-center text-slate-500 dark:text-slate-400 text-xs rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">No se encontraron turnos con el filtro seleccionado.</div>';
       return;
     }
     box.innerHTML = list.map(bk => {
       const st = bk.status || 'pendiente', isDone = st === 'completado', isCancel = st === 'cancelado';
-      const stBadge = isDone ? 'bg-[#EFECE6] dark:bg-[#262422] text-[#7A766E]' : (st === 'confirmado' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20' : (st === 'en_atencion' ? 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20' : (isCancel ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20')));
+      const stBadge = isDone ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : (st === 'confirmado' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : (st === 'en_atencion' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : (isCancel ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800')));
       const stLabel = isDone ? 'Finalizado' : (st === 'confirmado' ? 'Confirmado' : (st === 'en_atencion' ? 'En Atención' : (isCancel ? 'Cancelado' : 'Pendiente Seña')));
       const actBtn = isDone || isCancel ? '' : (st === 'pendiente'
         ? `<button onclick="adminL1Agenda.updateStatus('${bk.id}','en_atencion')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 cursor-pointer shadow-xs">Acreditar Seña</button>`
         : `<button onclick="adminL1Agenda.updateStatus('${bk.id}','completado')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-xs">Marcar Atendido</button>`);
-      return `<article class="p-4 sm:p-5 rounded-2xl border border-[#E8E6DF] dark:border-[#2D2A28] bg-white dark:bg-[#1C1A19] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isDone || isCancel ? 'opacity-40 grayscale' : ''}">
+      return `<article class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isDone || isCancel ? 'opacity-40 grayscale' : ''}">
         <div class="flex items-center gap-3.5">
-          <div class="w-14 h-14 rounded-2xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] flex flex-col items-center justify-center shrink-0">
-            <span class="text-sm font-bold text-[#1C1A17] dark:text-[#F5F3EF] font-mono">${bk.time}</span><span class="text-[9px] text-[#7A766E] dark:text-[#9E9A93] uppercase">${bk.day}</span>
+          <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center shrink-0">
+            <span class="text-sm font-bold text-slate-800 dark:text-slate-100 font-mono">${bk.time}</span><span class="text-[9px] text-slate-400 uppercase">${bk.day}</span>
           </div>
           <div>
-            <div class="flex items-center gap-2"><h4 class="text-sm font-bold text-[#1C1A17] dark:text-[#F5F3EF]">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#EFECE6] dark:bg-[#262422] text-[#7A766E]">${bk.token}</span></div>
-            <p class="text-xs text-[#7A766E] dark:text-[#9E9A93] mt-0.5">${bk.service} · <span class="font-mono">${bk.clientPhone}</span></p>
+            <div class="flex items-center gap-2"><h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${bk.token}</span></div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${bk.service} · <span class="font-mono">${bk.clientPhone}</span></p>
           </div>
         </div>
         <div class="flex items-center gap-3 self-end sm:self-center">
@@ -110,18 +110,18 @@
     const root = document.getElementById('dynamicModalRoot');
     if (!root) return;
     root.innerHTML = `
-      <div id="newBookingModal" class="fixed inset-0 z-50 bg-[#121110]/80 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="w-full max-w-md rounded-2xl border border-[#E8E6DF] dark:border-[#2D2A28] bg-white dark:bg-[#1C1A19] p-5 space-y-4 shadow-2xl">
-          <div class="flex items-center justify-between"><h3 class="text-base font-bold text-[#1C1A17] dark:text-[#F5F3EF]">+ Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">&times;</button></div>
+      <div id="newBookingModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-4 shadow-2xl">
+          <div class="flex items-center justify-between"><h3 class="text-base font-bold text-slate-900 dark:text-slate-100">+ Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">&times;</button></div>
           <form id="formNewBooking" onsubmit="adminL1Agenda.saveManualBooking(event)" class="space-y-3 text-xs">
-            <div><label class="block text-[10px] uppercase text-[#7A766E] mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] outline-none text-[#1C1A17] dark:text-[#F5F3EF]">${srvs.map(s => `<option value="${s.name}" data-dep="${s.depositAmount}">${s.name} (${fmt(s.priceNumeric)})</option>`).join('')}</select></div>
+            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100">${srvs.map(s => `<option value="${s.name}" data-dep="${s.depositAmount}">${s.name} (${fmt(s.priceNumeric)})</option>`).join('')}</select></div>
             <div class="grid grid-cols-2 gap-2">
-              <div><label class="block text-[10px] uppercase text-[#7A766E] mb-1">Fecha</label><input type="date" id="nb-date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2.5 rounded-xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] outline-none text-[#1C1A17] dark:text-[#F5F3EF]"></div>
-              <div><label class="block text-[10px] uppercase text-[#7A766E] mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] outline-none text-[#1C1A17] dark:text-[#F5F3EF]"><option>10:00</option><option>11:30</option><option>15:00</option><option>16:30</option><option>18:00</option><option>19:30</option></select></div>
+              <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Fecha</label><input type="date" id="nb-date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
+              <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"><option>10:00</option><option>11:30</option><option>15:00</option><option>16:30</option><option>18:00</option><option>19:30</option></select></div>
             </div>
-            <div><label class="block text-[10px] uppercase text-[#7A766E] mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] outline-none text-[#1C1A17] dark:text-[#F5F3EF]"></div>
-            <div><label class="block text-[10px] uppercase text-[#7A766E] mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#E8E6DF] dark:border-[#2D2A28] outline-none text-[#1C1A17] dark:text-[#F5F3EF]"></div>
-            <div class="flex gap-2 pt-2"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full border border-[#E8E6DF] dark:border-[#2D2A28] font-bold text-[#7A766E] cursor-pointer">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer">Guardar Turno</button></div>
+            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
+            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
+            <div class="flex gap-2 pt-2"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 font-bold text-slate-500 cursor-pointer">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer shadow-xs">Guardar Turno</button></div>
           </form>
         </div>
       </div>`;
@@ -152,13 +152,13 @@
     const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
     loadBookings(slug);
     document.querySelectorAll('[data-tfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-tfilter]').forEach(x => { x.className = 'px-3 py-1.5 rounded-lg text-[#7A766E] dark:text-[#9E9A93] hover:bg-[#EFECE6] dark:hover:bg-[#262422]'; });
+      document.querySelectorAll('[data-tfilter]').forEach(x => { x.className = 'px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'; });
       b.className = 'px-3 py-1.5 rounded-lg font-bold bg-indigo-600 text-white shadow-xs';
       filterTime = b.getAttribute('data-tfilter'); renderAgenda();
     }));
     document.querySelectorAll('[data-sfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-sfilter]').forEach(x => { x.className = 'px-2.5 py-1 rounded-full text-[#7A766E] dark:text-[#9E9A93]'; });
-      b.className = 'px-2.5 py-1 rounded-full font-bold bg-[#EFECE6] dark:bg-[#262422] text-[#1C1A17] dark:text-white';
+      document.querySelectorAll('[data-sfilter]').forEach(x => { x.className = 'px-2.5 py-1 rounded-full text-slate-500'; });
+      b.className = 'px-2.5 py-1 rounded-full font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white';
       filterStatus = b.getAttribute('data-sfilter'); renderAgenda();
     }));
     document.getElementById('inputSearchBooking')?.addEventListener('input', (e) => {
@@ -168,4 +168,3 @@
 
   global.adminL1Agenda = { init, loadBookings, renderAgenda, updateStatus, openNewBookingModal, closeModal, saveManualBooking };
 })(typeof window !== 'undefined' ? window : global);
-

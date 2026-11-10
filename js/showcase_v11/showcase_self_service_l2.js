@@ -9,7 +9,8 @@ export const ShowcaseSelfServiceL2 = {
   render(state, rubro) {
     const reasons = ['Motivo Personal', 'Incompatibilidad Horaria', 'Otro'];
     const isL3 = state.currentLevel === 'l3';
-    const token = isL3 ? '#TK-92C1' : '#TK-84B2';
+    const isL1 = state.currentLevel === 'l1';
+    const token = isL3 ? '#TK-92C1' : (isL1 ? '#TK-71A0' : '#TK-84B2');
     const serviceName = isL3 && rubro.catalogL3 ? rubro.catalogL3[state.selectedOption || 0].name : rubro.options[state.selectedOption || 0];
     const clientName = `${state.clientFirstName} ${state.clientLastName}`.trim() || 'Martín Rodríguez';
     const dayLabel = state.getSelectedDayLabel();

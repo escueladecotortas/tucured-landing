@@ -69,17 +69,22 @@ export const ShowcaseBenefits = {
       return `
         <div class="bg-surface-container-low/80 backdrop-blur-xl rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col gap-2.5">
           <h4 class="text-xs sm:text-sm font-bold font-display text-on-surface flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-base">notifications_active</span>
-            <span>Mensaje listo en tu WhatsApp</span>
+            <span class="material-symbols-outlined text-primary text-base">confirmation_number</span>
+            <span>Ticket Digital Confirmado #TK-71A0</span>
           </h4>
-          <div class="bg-[#0b141a] rounded-xl p-3 border border-white/5 flex flex-col gap-2 shadow-inner">
-            <div class="text-center text-[10px] text-white/40 uppercase tracking-wider font-mono">Hoy</div>
-            <div class="wa-bubble-preview bubble-refresh max-w-[88%] ml-auto whitespace-pre-line leading-relaxed text-xs text-white">
-              ${state.getFormattedWhatsAppMessage()}
-              <div class="text-[10px] text-white/70 text-right mt-1.5 flex justify-end items-center gap-1">
-                <span>10:42 AM</span>
-                <span class="material-symbols-outlined text-sm text-[#53bdeb]">done_all</span>
-              </div>
+          <div class="bg-surface-container-lowest rounded-xl p-3.5 border border-white/10 space-y-2 wa-bubble-preview">
+            <div class="flex justify-between items-center pb-2 border-b border-white/5 text-xs text-slate-300">
+              <span class="font-bold text-white">${rubro.bizName}</span>
+              <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">CONFIRMADO</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Reserva 100% confirmada sin colisiones. Tu cliente recibe su comprobante digital con botón de calendario y portal de autogestión.</p>
+            <div class="flex items-center gap-2 pt-1 text-[11px]">
+              <span class="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 flex items-center gap-1 font-medium">
+                <span class="material-symbols-outlined text-xs text-primary">calendar_month</span><span>Agendar (.ics)</span>
+              </span>
+              <span class="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 flex items-center gap-1 font-medium">
+                <span class="material-symbols-outlined text-xs text-secondary">event_repeat</span><span>Autogestión 1 Clic</span>
+              </span>
             </div>
           </div>
         </div>

@@ -1,8 +1,7 @@
 // Archivo: js/showcase_v11/showcase_core.js
 /**
  * ⚡ TucuRed Showcase v11.1 - Orquestador Central del Escenario 3 Zonas
- * Sincronización reactiva de Vidriera, Smartphone Central y Columna de Valor con Haptics y Preload.
- * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
+ * Paginación semanal, conversión 4 pasos, Local-First y Protocolo PEAC (< 150L).
  */
 
 import { ShowcaseState, preloadShowcaseAssets } from './showcase_state.js';
@@ -28,39 +27,16 @@ export const ShowcaseCore = {
     window.ShowcaseLevels = ShowcaseLevels;
     window.ShowcaseCore = {
       getState: () => ShowcaseState,
-      selectLevel: (lvl) => {
-        triggerSensoryFeedback();
-        ShowcaseState.setLevel(lvl);
-      },
-      selectRubro: (rubro) => {
-        triggerSensoryFeedback();
-        ShowcaseState.setRubro(rubro);
-      },
-      setViewMode: (mode) => {
-        triggerSensoryFeedback();
-        ShowcaseState.setViewMode(mode);
-      },
-      selectStep: (step) => ShowcaseState.setStep(step),
-      selectOption: (optIdx) => {
-        triggerSensoryFeedback();
-        ShowcaseState.selectedOption = optIdx;
-        ShowcaseState.notify();
-      },
-      selectStaff: (staffIdx) => {
-        triggerSensoryFeedback();
-        ShowcaseState.selectedStaff = staffIdx;
-        ShowcaseState.notify();
-      },
-      selectDay: (dayIdx) => {
-        triggerSensoryFeedback();
-        ShowcaseState.selectedDay = dayIdx;
-        ShowcaseState.notify();
-      },
-      selectTime: (time) => {
-        triggerSensoryFeedback();
-        ShowcaseState.selectedTime = time;
-        ShowcaseState.notify();
-      },
+      selectLevel: (lvl) => { triggerSensoryFeedback(); ShowcaseState.setLevel(lvl); },
+      selectRubro: (rubro) => { triggerSensoryFeedback(); ShowcaseState.setRubro(rubro); },
+      setViewMode: (mode) => { triggerSensoryFeedback(); ShowcaseState.setViewMode(mode); },
+      selectStep: (step) => { ShowcaseState.setSelfService(false); ShowcaseState.setStep(step); },
+      selectOption: (optIdx) => { triggerSensoryFeedback(); ShowcaseState.selectedOption = optIdx; ShowcaseState.notify(); },
+      selectStaff: (staffIdx) => { triggerSensoryFeedback(); ShowcaseState.selectedStaff = staffIdx; ShowcaseState.notify(); },
+      selectDay: (dayIdx) => { triggerSensoryFeedback(); ShowcaseState.selectDay(dayIdx); },
+      prevDayPage: () => { triggerSensoryFeedback(); ShowcaseState.prevDayPage(); },
+      nextDayPage: () => { triggerSensoryFeedback(); ShowcaseState.nextDayPage(); },
+      selectTime: (time) => { triggerSensoryFeedback(); ShowcaseState.selectedTime = time; ShowcaseState.notify(); },
       updateClientData: (field, val, inputEl) => {
         if (!field) return;
         let cleanVal = String(val || '');
@@ -74,16 +50,25 @@ export const ShowcaseCore = {
         ShowcaseState[field] = cleanVal;
         renderStageValueZone('stage-value-container', ShowcaseState);
       },
-      selectReason: (reasonIdx) => {
-        ShowcaseState.selectedReason = reasonIdx;
-        ShowcaseState.notify();
-      },
+      selectReason: (reasonIdx) => { ShowcaseState.selectedReason = reasonIdx; ShowcaseState.notify(); },
       toggleSelfService: (show) => ShowcaseState.setSelfService(show),
-      submitL1WhatsApp: () => ShowcaseState.setStep(3),
-      cancelL2Turno: () => {
-        ShowcaseState.setSelfService(false);
-        ShowcaseState.setStep(1);
+      confirmBooking: () => { triggerSensoryFeedback(); ShowcaseState.setStep(4); },
+      addToCalendar: () => {
+        try {
+          const s = ShowcaseState, r = s.rubros[s.currentRubro] || s.rubros.barberia;
+          const srv = s.currentLevel === 'l3' && r.catalogL3 ? r.catalogL3[s.selectedOption || 0].name : r.options[s.selectedOption || 0];
+          const day = s.getSelectedDayLabel();
+          const token = s.currentLevel === 'l3' ? '#TK-92C1' : (s.currentLevel === 'l1' ? '#TK-71A0' : '#TK-84B2');
+          const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TucuRed//Turnero Autonomo//ES\r\nBEGIN:VEVENT\r\nSUMMARY:${srv} - ${r.bizName}\r\nDESCRIPTION:Turno ${token} para ${s.clientFirstName} ${s.clientLastName}. Fecha: ${day} a las ${s.selectedTime} hs.\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+          const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
+          const url = URL.createObjectURL(blob), a = document.createElement('a');
+          a.href = url; a.setAttribute('download', `turno_${token.replace('#', '')}.ics`);
+          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        } catch (_) {}
       },
+      submitL1WhatsApp: () => ShowcaseState.setStep(3),
+      cancelTurno: () => { ShowcaseState.setSelfService(false); ShowcaseState.setStep(1); },
+      cancelL2Turno: () => { ShowcaseState.setSelfService(false); ShowcaseState.setStep(1); },
       nextStep: () => ShowcaseState.setStep(ShowcaseState.currentStep + 1),
       prevStep: () => ShowcaseState.setStep(ShowcaseState.currentStep - 1)
     };
@@ -96,7 +81,6 @@ export const ShowcaseCore = {
     ShowcaseMockup.render('mockup-container', ShowcaseState);
     renderStageValueZone('stage-value-container', ShowcaseState);
 
-    // Compatibilidad en nodos residuales si existieran
     if (document.getElementById('levels-container')) ShowcaseLevels.render('levels-container', ShowcaseState);
     if (document.getElementById('benefits-container')) ShowcaseBenefits.render('benefits-container', ShowcaseState);
   }

@@ -32,7 +32,7 @@
     updateThemeIcons(isDark);
   }
   function initTheme() {
-    const isDark = (localStorage.getItem('tucu_theme') || 'dark') === 'dark';
+    const isDark = (localStorage.getItem('tucu_theme') || 'light') === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
     updateThemeIcons(isDark);
   }

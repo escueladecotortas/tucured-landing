@@ -30,3 +30,8 @@
 
 - **Conexión Socket Baileys en Nodo HP Mini:** Enlace con socket real de Baileys en nodo de infraestructura local una vez validada la sesión y el túnel seguro de Cloudflare.
 - **Sesión Estratégica con @tucured-marketing:** Definición y debate del calendario de lanzamiento comercial y distribución para el Plan $1.000 Mes 1.
+
+### 6. 📱 Experiencia Responsive & Calidad QA (Sesión 2026-11-10)
+
+- **[IDEA-010] Auditoría Exploratoria Mobile Viewport Angosto (< 380px):** Verificar ergonomía de uso en viewports angostos (ej. iPhone SE 375px) sobre las 3 consolas de administración Aura Light (L1, L2, L3) y en iframe embebido.
+- **[IDEA-011] Compuerta Automática de Enlaces Locales en Argus:** Integrar en las suites de pruebas la detección estricta de rutas de archivos inexistentes (ej. 404s en enlaces backoffice) antes de autorizar el cierre de tareas.

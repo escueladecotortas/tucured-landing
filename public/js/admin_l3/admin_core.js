@@ -1,94 +1,117 @@
 // Archivo: public/js/admin_l3/admin_core.js
 /**
- * ⚡ NEXUS ADMIN L3: ORQUESTADOR PRINCIPAL DEL PANEL OPERATIVO
- * - Gestión reactiva del estado, switch de rubros y navegación por 5 pestañas SPA
- * - Aislamiento de namespaces de persistencia Local-First (tucu_l3_*)
- * - Audio Chime sintético con Web Audio API y sincronización Baileys
+ * ⚡ NEXUS ADMIN L3: ORQUESTADOR PRINCIPAL AURA LIGHT (< 175 líneas)
+ * - Estado reactivo, switch de rubros, navegación SPA de 7 pestañas
+ * - Modelado dual: Staff Humano y Recursos Físicos (Canchas, Consultorios, Sillones)
+ * - Motor de telemetría Daemon Cron T-2hs, Local-First Storage y Audio Chime
  */
 
 window.AdminL3Core = (function () {
-  const state = {
-    rubro: 'barberia',
-    activeTab: 'agenda',
-    selectedDate: new Date().toISOString().split('T')[0],
-    presets: {},
-    staff: [],
-    services: [],
-    categories: [],
-    bookings: [],
-    config: {},
-    holidays: [],
-    blocks: []
-  };
-
   const DEFAULT_PRESETS = {
-    barberia: { id: "barberia", name: "Barbería & Estudio", icon: "💈", labels: { staffSingular: "Barbero", staffPlural: "Barberos", serviceSingular: "Servicio", servicePlural: "Servicios" }, config: { slotIntervalMinutes: 30, requireInsuranceField: false, maxAdvanceDays: 14 }, categories: [{ id: "cat-1", name: "Cortes", icon: "✂️" }, { id: "cat-2", name: "Barba & Afeitado", icon: "🪒" }], staff: [{ id: "st-1", name: "Mateo Silva", role: "Master Barber", photo: "✂️", email: "mateo@nexus.ar", phone: "3815111111", active: true, serviceIds: ["srv-1", "srv-2"], workingHours: { 1: { active: true, start: "09:00", end: "19:00" }, 2: { active: true, start: "09:00", end: "19:00" }, 3: { active: true, start: "09:00", end: "19:00" }, 4: { active: true, start: "09:00", end: "19:00" }, 5: { active: true, start: "09:00", end: "19:00" }, 6: { active: true, start: "09:00", end: "14:00" }, 0: { active: false, start: "09:00", end: "13:00" } } }, { id: "st-2", name: "Lucas Gómez", role: "Fade & Estilo", photo: "🪒", email: "lucas@nexus.ar", phone: "3815222222", active: true, serviceIds: ["srv-1"], workingHours: { 1: { active: true, start: "10:00", end: "20:00" }, 2: { active: true, start: "10:00", end: "20:00" }, 3: { active: true, start: "10:00", end: "20:00" }, 4: { active: true, start: "10:00", end: "20:00" }, 5: { active: true, start: "10:00", end: "20:00" }, 6: { active: true, start: "10:00", end: "16:00" }, 0: { active: false, start: "09:00", end: "13:00" } } }], services: [{ id: "srv-1", name: "Corte Clásico & Fade", category: "Cortes", duration: 30, price: 12000, advanceHours: 2, icon: "✂️", showPrice: true, showDuration: true }, { id: "srv-2", name: "Ritual de Barba", category: "Barba & Afeitado", duration: 20, price: 9000, advanceHours: 1, icon: "🪒", showPrice: true, showDuration: true }] },
-    peluqueria_estetica: { id: "peluqueria_estetica", name: "Peluquería & Estética", icon: "💇‍♀️", labels: { staffSingular: "Estilista", staffPlural: "Estilistas", serviceSingular: "Tratamiento", servicePlural: "Tratamientos" }, config: { slotIntervalMinutes: 30, requireInsuranceField: false, maxAdvanceDays: 21 }, categories: [{ id: "cat-1", name: "Peluquería", icon: "💇‍♀️" }, { id: "cat-2", name: "Color & Nutrición", icon: "🎨" }], staff: [{ id: "st-1", name: "Valeria Rossi", role: "Estilista Senior", photo: "💇‍♀️", active: true, serviceIds: ["srv-1"], workingHours: { 1: { active: true, start: "09:00", end: "19:00" }, 2: { active: true, start: "09:00", end: "19:00" }, 3: { active: true, start: "09:00", end: "19:00" }, 4: { active: true, start: "09:00", end: "19:00" }, 5: { active: true, start: "09:00", end: "19:00" }, 6: { active: true, start: "09:00", end: "15:00" }, 0: { active: false, start: "09:00", end: "13:00" } } }], services: [{ id: "srv-1", name: "Corte & Brushing", category: "Peluquería", duration: 45, price: 16000, advanceHours: 2, icon: "💇‍♀️", showPrice: true, showDuration: true }] },
-    salud_consultorio: { id: "salud_consultorio", name: "Consultorio Médico & Salud", icon: "🩺", labels: { staffSingular: "Profesional", staffPlural: "Profesionales Médicos", serviceSingular: "Consulta / Estudio", servicePlural: "Consultas & Prácticas" }, config: { slotIntervalMinutes: 20, requireInsuranceField: true, maxAdvanceDays: 30 }, categories: [{ id: "cat-1", name: "Consultas Médicas", icon: "🩺" }, { id: "cat-2", name: "Estudios Clínicos", icon: "🔬" }], staff: [{ id: "st-1", name: "Dra. Sofía Mendoza", role: "Médica Clínica", photo: "🩺", active: true, serviceIds: ["srv-1"], workingHours: { 1: { active: true, start: "08:00", end: "16:00" }, 2: { active: true, start: "08:00", end: "16:00" }, 3: { active: true, start: "08:00", end: "16:00" }, 4: { active: true, start: "08:00", end: "16:00" }, 5: { active: true, start: "08:00", end: "16:00" }, 6: { active: false, start: "08:00", end: "12:00" }, 0: { active: false, start: "08:00", end: "12:00" } } }], services: [{ id: "srv-1", name: "Consulta Clínica General", category: "Consultas Médicas", duration: 20, price: 20000, advanceHours: 4, icon: "🩺", showPrice: true, showDuration: true }] },
-    profesional_servicios: { id: "profesional_servicios", name: "Estudio Profesional & Consultoría", icon: "⚖️", labels: { staffSingular: "Consultor", staffPlural: "Consultores", serviceSingular: "Asesoría", servicePlural: "Servicios" }, config: { slotIntervalMinutes: 60, requireInsuranceField: false, maxAdvanceDays: 30 }, categories: [{ id: "cat-1", name: "Asesoría Legal", icon: "⚖️" }, { id: "cat-2", name: "Estrategia", icon: "📊" }], staff: [{ id: "st-1", name: "Lic. Martín Paz", role: "Consultor Senior", photo: "⚖️", active: true, serviceIds: ["srv-1"], workingHours: { 1: { active: true, start: "09:00", end: "18:00" }, 2: { active: true, start: "09:00", end: "18:00" }, 3: { active: true, start: "09:00", end: "18:00" }, 4: { active: true, start: "09:00", end: "18:00" }, 5: { active: true, start: "09:00", end: "18:00" }, 6: { active: false, start: "09:00", end: "13:00" }, 0: { active: false, start: "09:00", end: "13:00" } } }], services: [{ id: "srv-1", name: "Asesoría Inicial", category: "Asesoría Legal", duration: 60, price: 40000, advanceHours: 6, icon: "⚖️", showPrice: true, showDuration: true }] }
+    barberia: {
+      id: "barberia", name: "Barbería & Spa", icon: "💈",
+      labels: { staffSingular: "Barbero", staffPlural: "Barberos", resourceSingular: "Sillón / Box", resourcePlural: "Sillones & Boxes", serviceSingular: "Servicio", servicePlural: "Servicios" },
+      staff: [{ id: "st-1", name: "Mateo Silva", role: "Master Barber", photo: "✂️", phone: "3815111111", email: "mateo@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }, { id: "st-2", name: "Lucas Gómez", role: "Fade & Estilo", photo: "🪒", phone: "3815222222", email: "lucas@nexus.ar", active: true, serviceIds: ["srv-1"] }, { id: "st-3", name: "Juan Bianchi", role: "Color & Spa", photo: "💈", phone: "3815333333", email: "juan@nexus.ar", active: true, serviceIds: ["srv-3"] }],
+      resources: [{ id: "res-1", name: "Sillón Principal #1", type: "Sillón", icon: "💺", active: true }, { id: "res-2", name: "Sillón Secundario #2", type: "Sillón", icon: "💺", active: true }, { id: "res-3", name: "Box VIP Lavado & Spa", type: "Box", icon: "🚿", active: true }],
+      services: [{ id: "srv-1", name: "Corte Clásico & Fade", duration: 30, price: 12000, resourceType: "Sillón", icon: "✂️" }, { id: "srv-2", name: "Ritual de Barba", duration: 20, price: 9000, resourceType: "Sillón", icon: "🪒" }, { id: "srv-3", name: "Spa Capilar VIP", duration: 45, price: 18000, resourceType: "Box", icon: "💈" }]
+    },
+    peluqueria_estetica: {
+      id: "peluqueria_estetica", name: "Peluquería & Estética", icon: "💇‍♀️",
+      labels: { staffSingular: "Estilista", staffPlural: "Estilistas", resourceSingular: "Puesto / Gabinete", resourcePlural: "Puestos & Gabinetes", serviceSingular: "Tratamiento", servicePlural: "Tratamientos" },
+      staff: [{ id: "st-1", name: "Valeria Rossi", role: "Estilista Senior", photo: "💇‍♀️", phone: "3815444444", email: "valeria@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }, { id: "st-2", name: "Micaela Flores", role: "Color & Lash", photo: "💅", phone: "3815555555", email: "mica@nexus.ar", active: true, serviceIds: ["srv-2", "srv-3"] }],
+      resources: [{ id: "res-1", name: "Estación Peinado A", type: "Sillón", icon: "💺", active: true }, { id: "res-2", name: "Estación Peinado B", type: "Sillón", icon: "💺", active: true }, { id: "res-3", name: "Gabinete Facial & Láser", type: "Gabinete", icon: "✨", active: true }],
+      services: [{ id: "srv-1", name: "Corte & Brushing", duration: 45, price: 16000, resourceType: "Sillón", icon: "💇‍♀️" }, { id: "srv-2", name: "Color & Nutrición", duration: 90, price: 28000, resourceType: "Sillón", icon: "🎨" }, { id: "srv-3", name: "Lifting de Pestañas", duration: 60, price: 14000, resourceType: "Gabinete", icon: "✨" }]
+    },
+    salud_consultorio: {
+      id: "salud_consultorio", name: "Consultorio Médico & Salud", icon: "🩺",
+      labels: { staffSingular: "Profesional", staffPlural: "Profesionales Médicos", resourceSingular: "Consultorio", resourcePlural: "Consultorios Físicos", serviceSingular: "Consulta", servicePlural: "Consultas & Prácticas" },
+      staff: [{ id: "st-1", name: "Dra. Sofía Mendoza", role: "Médica Clínica", photo: "🩺", phone: "3815666666", email: "dra.mendoza@nexus.ar", active: true, serviceIds: ["srv-1"] }, { id: "st-2", name: "Dr. Alejandro Rossi", role: "Traumatólogo", photo: "👨‍⚕️", phone: "3815777777", email: "dr.rossi@nexus.ar", active: true, serviceIds: ["srv-2"] }],
+      resources: [{ id: "res-1", name: "Consultorio 101 - Clínica", type: "Consultorio", icon: "🚪", active: true }, { id: "res-2", name: "Consultorio 102 - Traumatología", type: "Consultorio", icon: "🚪", active: true }, { id: "res-3", name: "Sala de Yesos & Curaciones", type: "Sala", icon: "🏥", active: true }],
+      services: [{ id: "srv-1", name: "Consulta Clínica General", duration: 20, price: 22000, resourceType: "Consultorio", icon: "🩺" }, { id: "srv-2", name: "Consulta Traumatología", duration: 30, price: 25000, resourceType: "Consultorio", icon: "🦴" }]
+    },
+    deportes_clubes: {
+      id: "deportes_clubes", name: "Club Deportivo & Canchas", icon: "🎾",
+      labels: { staffSingular: "Profesor / Árbitro", staffPlural: "Staff Deportivo", resourceSingular: "Cancha", resourcePlural: "Canchas & Espacios", serviceSingular: "Turno / Clase", servicePlural: "Turnos de Cancha" },
+      staff: [{ id: "st-1", name: "Prof. Carlos Vega", role: "Instructor Pádel", photo: "🎾", phone: "3815888888", email: "vega@nexus.ar", active: true, serviceIds: ["srv-2"] }, { id: "st-2", name: "Prof. Ignacio Ruiz", role: "Coordinador Turnos", photo: "⚽", phone: "3815999999", email: "ruiz@nexus.ar", active: true, serviceIds: ["srv-1", "srv-3"] }],
+      resources: [{ id: "res-1", name: "Cancha Pádel Vidrio #1", type: "Cancha", icon: "🎾", active: true }, { id: "res-2", name: "Cancha Pádel Césped #2", type: "Cancha", icon: "🎾", active: true }, { id: "res-3", name: "Cancha Fútbol 5 Sintético", type: "Cancha", icon: "⚽", active: true }],
+      services: [{ id: "srv-1", name: "Alquiler Cancha Pádel 90m", duration: 90, price: 24000, resourceType: "Cancha", icon: "🎾" }, { id: "srv-2", name: "Clase Particular Pádel 60m", duration: 60, price: 18000, resourceType: "Cancha", icon: "🎾" }, { id: "srv-3", name: "Alquiler Fútbol 5 (60m)", duration: 60, price: 32000, resourceType: "Cancha", icon: "⚽" }]
+    }
   };
 
-  const getStorage = (k, f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } };
-  const setStorage = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const todayStr = new Date().toISOString().split('T')[0];
+  const state = {
+    rubro: 'barberia', activeTab: 'agenda', selectedDate: todayStr, agendaViewTarget: 'staff',
+    presets: DEFAULT_PRESETS, staff: [], resources: [], services: [], bookings: [],
+    telemetry: { daemonStatus: 'ACTIVE', lastSweep: 'Hace 4 minutos', inspected: 18, confirmed: 16, released: 2, logs: [] }
+  };
+
+  const getStorage = (k, f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (_) { return f; } };
+  const setStorage = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
 
   function playDingSound() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
-    } catch (e) {}
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(650, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.08);
+    } catch (_) {}
   }
 
-  async function loadPresets() {
-    try {
-      const res = await fetch('/api/stitch/presets');
-      const data = await res.json();
-      state.presets = (data && data.presets) ? data.presets : DEFAULT_PRESETS;
-    } catch (e) {
-      state.presets = DEFAULT_PRESETS;
-    }
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast-notification'), msgEl = document.getElementById('toast-message'), iconEl = document.getElementById('toast-icon');
+    if (!toast) return;
+    if (msgEl) msgEl.textContent = msg;
+    if (iconEl) iconEl.textContent = type === 'success' ? '✓' : '⚡';
+    toast.className = `fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl text-xs font-semibold transition-all duration-300 pointer-events-auto ${type === 'success' ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400' : 'bg-indigo-50 dark:bg-indigo-950/80 border-indigo-200 dark:border-indigo-800 text-indigo-700'}`;
+    setTimeout(() => { toast.className = 'fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-800'; }, 3000);
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('tucu_theme', isDark ? 'dark' : 'light'); } catch (_) {}
+    updateThemeIcons(isDark);
+  }
+
+  function updateThemeIcons(isDark) {
+    const sun = document.getElementById('icon-theme-sun'), moon = document.getElementById('icon-theme-moon');
+    if (sun) sun.classList.toggle('hidden', !isDark);
+    if (moon) moon.classList.toggle('hidden', isDark);
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem('tucu_theme') || 'light';
+    const isDark = saved === 'dark';
+    document.documentElement.classList.toggle('dark', isDark);
+    updateThemeIcons(isDark);
   }
 
   function syncRubroData() {
-    const p = state.presets[state.rubro] || DEFAULT_PRESETS[state.rubro] || DEFAULT_PRESETS.barberia;
+    const p = state.presets[state.rubro] || DEFAULT_PRESETS.barberia;
     state.staff = getStorage(`tucu_l3_staff_${state.rubro}`, p.staff || []);
+    state.resources = getStorage(`tucu_l3_resources_${state.rubro}`, p.resources || []);
     state.services = getStorage(`tucu_l3_services_${state.rubro}`, p.services || []);
-    state.categories = getStorage(`tucu_l3_categories_${state.rubro}`, p.categories || []);
-    state.config = getStorage(`tucu_l3_config_${state.rubro}`, p.config || {});
-    state.bookings = getStorage('tucu_l3_bookings', []);
-    state.holidays = getStorage('tucu_l3_holidays', []);
-    state.blocks = getStorage(`tucu_l3_blocks_${state.rubro}`, []);
-
-    setStorage(`tucu_l3_staff_${state.rubro}`, state.staff);
-    setStorage(`tucu_l3_services_${state.rubro}`, state.services);
-    setStorage(`tucu_l3_categories_${state.rubro}`, state.categories);
-    setStorage(`tucu_l3_config_${state.rubro}`, state.config);
-
-    const ind = document.getElementById('rubro-indicator');
-    if (ind) ind.innerText = `${p.icon} ${p.name}`;
-    const sLbl = document.getElementById('tab-staff-label');
-    if (sLbl) sLbl.innerText = `${p.labels?.staffPlural || 'Personal'}`;
-    const svLbl = document.getElementById('tab-services-label');
-    if (svLbl) svLbl.innerText = `${p.labels?.servicePlural || 'Servicios'}`;
+    state.bookings = getStorage('tucu_l3_bookings', [
+      { id: 'TK-8492', rubroId: 'barberia', staffId: 'st-1', staffName: 'Mateo Silva', resourceId: 'res-1', resourceName: 'Sillón Principal #1', serviceId: 'srv-1', serviceName: 'Corte Clásico & Fade', duration: 30, price: 12000, date: todayStr, time: '10:00', client: 'Lucas Domínguez', phone: '3815551234', status: 'CONFIRMED' },
+      { id: 'TK-8493', rubroId: 'barberia', staffId: 'st-2', staffName: 'Lucas Gómez', resourceId: 'res-2', resourceName: 'Sillón Secundario #2', serviceId: 'srv-2', serviceName: 'Ritual de Barba', duration: 20, price: 9000, date: todayStr, time: '11:00', client: 'Esteban Morales', phone: '3815555678', status: 'CONFIRMED' },
+      { id: 'TK-8494', rubroId: 'barberia', staffId: 'st-1', staffName: 'Mateo Silva', resourceId: 'res-3', resourceName: 'Box VIP Lavado & Spa', serviceId: 'srv-3', serviceName: 'Spa Capilar VIP', duration: 45, price: 18000, date: todayStr, time: '12:00', client: 'Gastón Ibarra', phone: '3815559012', status: 'RELEASED' }
+    ]);
+    state.telemetry = getStorage('tucu_l3_telemetry', state.telemetry);
+    setStorage(`tucu_l3_staff_${state.rubro}`, state.staff); setStorage(`tucu_l3_resources_${state.rubro}`, state.resources);
+    setStorage(`tucu_l3_services_${state.rubro}`, state.services); setStorage('tucu_l3_bookings', state.bookings);
+    const ind = document.getElementById('rubro-indicator'); if (ind) ind.innerText = `${p.icon} ${p.name}`;
+    const sLbl = document.getElementById('tab-staff-label'); if (sLbl) sLbl.innerText = `${p.labels?.staffPlural || 'Personal Humano'}`;
+    const rLbl = document.getElementById('tab-resources-label'); if (rLbl) rLbl.innerText = `${p.labels?.resourcePlural || 'Recursos Físicos'}`;
+    const svLbl = document.getElementById('tab-services-label'); if (svLbl) svLbl.innerText = `${p.labels?.servicePlural || 'Servicios'}`;
   }
 
   function renderActiveView() {
     const root = document.getElementById('admin-view-root');
     if (!root) return;
-    if (state.activeTab === 'agenda') window.AdminL3Agenda?.render(root, state);
-    else if (state.activeTab === 'staff') window.AdminL3Staff?.render(root, state);
-    else if (state.activeTab === 'services') window.AdminL3Services?.render(root, state);
-    else if (state.activeTab === 'clients') window.AdminL3Clients?.render(root, state);
-    else if (state.activeTab === 'system') window.AdminL3System?.render(root, state);
+    const views = { agenda: window.AdminL3Agenda, staff: window.AdminL3Staff, resources: window.AdminL3Resources, services: window.AdminL3Services, clients: window.AdminL3Clients, telemetry: window.AdminL3Telemetry, system: window.AdminL3System };
+    views[state.activeTab]?.render(root, state);
   }
 
   function switchRubro(newRubro) {
@@ -96,8 +119,8 @@ window.AdminL3Core = (function () {
     document.querySelectorAll('.rubro-tab').forEach(b => {
       const isCur = b.dataset.rubro === newRubro;
       b.className = isCur
-        ? 'rubro-tab px-2.5 py-1.5 rounded-lg font-semibold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1'
-        : 'rubro-tab px-2.5 py-1.5 rounded-lg font-semibold transition-all text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 flex items-center gap-1';
+        ? 'rubro-tab px-3 py-1.5 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-xs flex items-center gap-1.5'
+        : 'rubro-tab px-3 py-1.5 rounded-xl font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5';
     });
     syncRubroData();
     renderActiveView();
@@ -108,44 +131,37 @@ window.AdminL3Core = (function () {
     document.querySelectorAll('.nav-tab').forEach(b => {
       const isCur = b.dataset.tab === newTab;
       b.className = isCur
-        ? 'nav-tab py-3 px-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-500 text-indigo-400 transition-all flex items-center gap-2 flex-shrink-0'
-        : 'nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all flex items-center gap-2 flex-shrink-0';
+        ? 'nav-tab py-3 px-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer'
+        : 'nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer';
     });
     renderActiveView();
   }
 
-  async function checkBaileysHealth() {
-    const badge = document.getElementById('wa-badge');
-    if (!badge) return;
-    try {
-      const res = await fetch('/health');
-      const data = await res.json();
-      const isOnline = data.status === 'online' && data.baileys?.active;
-      badge.innerHTML = isOnline
-        ? `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="font-mono text-[11px]">Baileys: ONLINE</span>`
-        : `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span class="font-mono text-[11px]">Baileys: STANDBY</span>`;
-    } catch (e) {
-      badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-zinc-500"></span><span class="font-mono text-[11px]">Baileys: LOCAL</span>`;
-    }
+  function executeCronSweep() {
+    playDingSound();
+    state.telemetry.lastSweep = 'Recién ejecutado';
+    state.telemetry.inspected += 3;
+    state.telemetry.confirmed += 2;
+    state.telemetry.released += 1;
+    state.telemetry.logs.unshift({ time: new Date().toLocaleTimeString(), inspected: 3, confirmed: 2, released: 1, hash: '#CRON-' + Math.random().toString(36).substring(2, 7).toUpperCase() });
+    setStorage('tucu_l3_telemetry', state.telemetry);
+    showToast('⚡ Barrido Cron T-2hs completado con éxito (Slots auditados e idempotentes)', 'telemetry');
+    renderActiveView();
   }
 
   async function init() {
-    await loadPresets();
+    initTheme();
     const datePicker = document.getElementById('admin-date-picker');
     if (datePicker) {
       datePicker.value = state.selectedDate;
-      datePicker.addEventListener('change', (e) => {
-        state.selectedDate = e.target.value;
-        renderActiveView();
-      });
+      datePicker.addEventListener('change', (e) => { state.selectedDate = e.target.value; renderActiveView(); });
     }
     document.querySelectorAll('.rubro-tab').forEach(b => b.addEventListener('click', (e) => switchRubro(e.currentTarget.dataset.rubro)));
     document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', (e) => switchTab(e.currentTarget.dataset.tab)));
     syncRubroData();
     renderActiveView();
-    checkBaileysHealth();
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { state, switchRubro, switchTab, syncRubroData, renderActiveView, getStorage, setStorage, playDingSound };
+  return { state, switchRubro, switchTab, syncRubroData, renderActiveView, toggleTheme, showToast, playDingSound, getStorage, setStorage, executeCronSweep };
 })();
