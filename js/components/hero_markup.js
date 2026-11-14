@@ -112,9 +112,9 @@ export function getHeroMarkup() {
 
                 <!-- Toque 3: Confirmación Web y Despacho WhatsApp -->
                 <div class="pt-1">
-                  <a href="#precios" id="hero-terminal-cta" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-headline font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-700/25 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-base">chat</span>
-                    <span>Confirmar Turno y Recibir en WhatsApp</span>
+                  <a href="#showroom" id="hero-terminal-cta" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-headline font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-700/25 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-base">play_circle</span>
+                    <span>Probar Turnero Completo</span>
                   </a>
                   <p class="text-[10px] text-center text-slate-400 font-medium mt-1.5">Reserva web en 3 toques • Confirmación inmediata</p>
                 </div>

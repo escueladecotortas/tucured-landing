@@ -1,133 +1,84 @@
 <!-- Archivo: public/admin_l3.html -->
 <!DOCTYPE html>
-<html lang="es" class="light h-full bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500/20">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus Admin L3 — Multi-Staff & Recursos Físicos</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title id="html-page-title">Nexus Admin L3 — Multi-Staff & Recursos (Warm Studio)</title>
+  <script>(function(){const t=localStorage.getItem('tucu_theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');const p=new URLSearchParams(window.location.search);if(p.get('embed')==='true'||window.self!==window.top)document.documentElement.classList.add('is-embedded');})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { fontFamily: { sans: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } }
-    }
-  </script>
-  <script>(function(){const p=new URLSearchParams(window.location.search);if(p.get('embed')==='true'||window.self!==window.top)document.documentElement.classList.add('is-embedded');})();</script>
-  <style>
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* Estilos Embebidos (Showcase Smartphone) */
-    html.is-embedded, html.is-embedded body { overflow-x: hidden !important; width: 100% !important; max-width: 100% !important; }
-    html.is-embedded body { padding-bottom: 2rem !important; min-height: 100% !important; }
-    html.is-embedded header { padding: 0.5rem 0.75rem !important; }
-    html.is-embedded header a[href*="tucu_widgets"], html.is-embedded header a[title*="Volver"] { display: none !important; }
-    html.is-embedded nav { padding-left: 0.5rem !important; padding-right: 0.5rem !important; gap: 0.5rem !important; }
-    html.is-embedded .nav-tab { padding: 0.5rem 0.5rem !important; font-size: 11px !important; }
-    html.is-embedded main { padding: 0.75rem !important; max-width: 100% !important; }
-  </style>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{accent:'var(--brand-accent, #800000)'}}}}};</script>
+  <link rel="stylesheet" href="/css/admin_unified.css">
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen pb-24 md:pb-12 antialiased selection:bg-indigo-500/20">
-  <!-- Topbar de Control Global Aura Light -->
-  <header style="padding-top: max(env(safe-area-inset-top), 1rem);" class="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl px-4 sm:px-8 py-3">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
-      <div class="flex items-center gap-3 min-w-0">
-        <a href="/" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 transition-all text-xs" title="Volver al Inicio">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </a>
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-          <h1 class="text-base font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
-            <span>Nexus Admin L3</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 font-bold">Aura Light</span>
-          </h1>
-          <span id="rubro-indicator" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-medium">💈 Barbería</span>
-        </div>
-      </div>
+<body class="admin-shell">
+  <header class="admin-mobile-header">
+    <button type="button" id="btn-open-sidebar" aria-label="Abrir menú" class="p-2 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span class="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">Admin L3 Multi-Equipo</span></div>
+    <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Online</span>
+  </header>
+  <div id="sidebar-backdrop" class="admin-backdrop hidden"></div>
 
-      <!-- Selector de Rubro Dinámico -->
-      <div class="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-2xl gap-1 text-xs">
-        <button data-rubro="barberia" class="rubro-tab px-3 py-1.5 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-xs flex items-center gap-1.5">
-          <span>💈</span><span class="hidden sm:inline">Barbería</span>
-        </button>
-        <button data-rubro="peluqueria_estetica" class="rubro-tab px-3 py-1.5 rounded-xl font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5">
-          <span>💇‍♀️</span><span class="hidden sm:inline">Estética</span>
-        </button>
-        <button data-rubro="salud_consultorio" class="rubro-tab px-3 py-1.5 rounded-xl font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5">
-          <span>🩺</span><span class="hidden sm:inline">Salud</span>
-        </button>
-        <button data-rubro="deportes_clubes" class="rubro-tab px-3 py-1.5 rounded-xl font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5">
-          <span>🎾</span><span class="hidden sm:inline">Clubes</span>
-        </button>
-      </div>
+  <aside id="admin-sidebar" class="admin-sidebar">
+    <div class="flex items-center justify-between pt-1 pb-4 border-b border-[#D5CEC2] dark:border-stone-800">
+      <a href="/" class="flex items-center gap-2.5 group">
+        <div class="w-8 h-8 rounded-xl bg-[#800000] text-white flex items-center justify-center font-black text-sm shadow-sm">T3</div>
+        <div><h2 class="text-sm font-bold text-stone-900 dark:text-stone-100 leading-none font-title">TucuRed</h2><span class="text-[10px] font-medium text-stone-500 dark:text-stone-400">Multi-Staff L3</span></div>
+      </a>
+      <button type="button" id="btn-close-sidebar" aria-label="Cerrar menú" class="lg:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
 
-      <!-- Telemetría Cron, WhatsApp, Fecha & Tema -->
-      <div class="flex items-center gap-2 shrink-0">
-        <div id="cron-telemetry-badge" onclick="AdminL3Core.switchTab('telemetry')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-xs text-indigo-700 dark:text-indigo-300 font-bold cursor-pointer hover:bg-indigo-100 transition-all shadow-xs" title="Ver telemetría del Daemon Cron T-2hs">
-          <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-          <span class="font-mono text-[11px]">Cron T-2hs: ACTIVO</span>
-        </div>
-        <div id="wa-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-xs">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="font-mono text-[11px]">Baileys: ONLINE</span>
-        </div>
-        <input type="date" id="admin-date-picker" class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500 cursor-pointer shadow-xs">
-        <button id="btnThemeToggle" type="button" onclick="AdminL3Core.toggleTheme()" title="Cambiar tema" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 cursor-pointer shadow-xs">
-          <svg id="icon-theme-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>
-          <svg id="icon-theme-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
-        </button>
+    <div class="space-y-1.5 py-3 border-b border-[#D5CEC2] dark:border-stone-800">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Rubro</span>
+        <span id="rubro-indicator" class="text-[10px] px-2 py-0.5 rounded-full bg-stone-200/70 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-semibold truncate max-w-[140px]">Barbería</span>
+      </div>
+      <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+        <button type="button" data-rubro="barberia" class="rubro-tab admin-glass-pill is-active px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg><span>Barbería</span></button>
+        <button type="button" data-rubro="peluqueria_estetica" class="rubro-tab admin-glass-pill px-2.5 py-1.5 rounded-xl font-semibold flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg><span>Estética</span></button>
+        <button type="button" data-rubro="salud_consultorio" class="rubro-tab admin-glass-pill px-2.5 py-1.5 rounded-xl font-semibold flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Salud</span></button>
+        <button type="button" data-rubro="deportes_clubes" class="rubro-tab admin-glass-pill px-2.5 py-1.5 rounded-xl font-semibold flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 000 18M3 12a9 9 0 0018 0"/></svg><span>Clubes</span></button>
       </div>
     </div>
-  </header>
 
-  <!-- Navegación por Pestañas SPA -->
-  <nav class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md px-4 sm:px-8 flex gap-1 sm:gap-3 overflow-x-auto hide-scrollbar">
-    <button data-tab="agenda" class="nav-tab py-3 px-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>📅</span><span>Agenda Multi-Staff</span>
-    </button>
-    <button data-tab="staff" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>👥</span><span id="tab-staff-label">Personal Humano</span>
-    </button>
-    <button data-tab="resources" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>🏟️</span><span id="tab-resources-label">Recursos Físicos</span>
-    </button>
-    <button data-tab="services" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>✂️</span><span id="tab-services-label">Servicios</span>
-    </button>
-    <button data-tab="clients" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>👤</span><span>Directorio CRM</span>
-    </button>
-    <button data-tab="telemetry" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>⚡</span><span>Telemetría Cron T-2hs</span>
-    </button>
-    <button data-tab="system" class="nav-tab py-3 px-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
-      <span>⚙️</span><span>Configuración</span>
-    </button>
-  </nav>
+    <nav class="space-y-1 py-2 flex-1 min-h-0 overflow-y-auto hide-scrollbar">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500 px-3 py-1">Vistas</p>
+      <button type="button" data-tab="agenda" class="nav-tab admin-nav-item active"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agenda Multi-Staff</span></button>
+      <button type="button" data-tab="staff" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span id="tab-staff-label">Personal Humano</span></button>
+      <button type="button" data-tab="resources" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span id="tab-resources-label">Recursos Físicos</span></button>
+      <button type="button" data-tab="services" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg><span id="tab-services-label">Servicios</span></button>
+      <button type="button" data-tab="clients" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg><span>Directorio CRM</span></button>
+      <button type="button" data-tab="telemetry" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span>Telemetría Cron</span></button>
+      <button type="button" data-tab="system" class="nav-tab admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span>Configuración</span></button>
+    </nav>
 
-  <!-- Contenedor Principal Dinámico -->
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+    <div class="mt-auto shrink-0 pt-2.5 border-t border-[#D5CEC2] dark:border-stone-800 space-y-1.5">
+      <div class="space-y-1.5 px-1">
+        <input type="date" id="admin-date-picker" class="w-full bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-2.5 py-1.5 text-xs text-stone-800 dark:text-stone-100 outline-none cursor-pointer">
+        <div id="cron-telemetry-badge" onclick="AdminL3Core.switchTab('telemetry')" class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-white/80 dark:bg-stone-800 border border-[#D5CEC2] dark:border-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-800 animate-pulse"></span><span>Cron T-2hs</span></span>
+          <span class="font-mono text-[10px] text-red-900 dark:text-red-400 font-bold">ACTIVO</span>
+        </div>
+        <div id="wa-badge" class="px-1"><span id="wa-status-pill" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border border-[#D5CEC2] bg-stone-100 text-stone-600">WhatsApp: Modo Demo</span></div>
+      </div>
+      <div class="flex items-center justify-between px-2 pt-1 border-t border-stone-200/70 dark:border-stone-800">
+        <span class="text-xs text-stone-500 dark:text-stone-400">Apariencia</span>
+        <button id="btnThemeToggle" type="button" title="Cambiar tema" class="p-1.5 rounded-lg admin-glass-btn text-stone-600 dark:text-stone-300"><svg id="icon-theme-sun" class="w-3.5 h-3.5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><svg id="icon-theme-moon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
+      </div>
+      <a href="/#showroom" target="_blank" class="flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800"><span class="flex items-center gap-2"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Turnero Cliente</span><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>
+      <a href="/" class="flex items-center gap-2 px-3 py-1 text-xs text-stone-500 hover:text-stone-800 dark:hover:text-stone-300 transition-colors"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg><span>Volver a Landing</span></a>
+    </div>
+  </aside>
+
+  <main class="admin-main-content px-6 lg:px-8">
     <div id="admin-view-root" class="w-full space-y-6"></div>
   </main>
 
-  <!-- Modal Container Global -->
-  <div id="admin-modal-root" class="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden"></div>
+  <div id="admin-modal-root" class="fixed inset-0 z-50 bg-stone-900/60 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden"></div>
+  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 text-xs font-medium text-stone-800 dark:text-stone-200 shadow-xl"><span id="toast-icon"></span><span id="toast-message">Notificación</span></div>
 
-  <!-- Toast Notificaciones -->
-  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-800 shadow-xl">
-    <span id="toast-icon">✓</span><span id="toast-message">Notificación</span>
-  </div>
-
-  <!-- Scripts Modulares L3 (Arquitectura Aura Light) -->
-  <script src="/js/admin_l3/view_agenda.js"></script>
-  <script src="/js/admin_l3/view_staff.js"></script>
-  <script src="/js/admin_l3/view_resources.js"></script>
-  <script src="/js/admin_l3/view_services.js"></script>
-  <script src="/js/admin_l3/view_clients.js"></script>
-  <script src="/js/admin_l3/view_telemetry.js"></script>
-  <script src="/js/admin_l3/view_system.js"></script>
-  <script src="/js/admin_l3/admin_core.js"></script>
+  <script src="/js/admin_shared/admin_holidays.js"></script><script src="/js/admin_shared/admin_shell.js"></script>
+  <script src="/js/admin_shared/admin_booking_engine.js"></script><script src="/js/admin_shared/admin_demo_seed.js"></script>
+  <script src="/js/admin_l3/view_agenda.js"></script><script src="/js/admin_l3/view_staff.js"></script><script src="/js/admin_l3/view_resources.js"></script><script src="/js/admin_l3/view_services.js"></script><script src="/js/admin_l3/view_clients.js"></script><script src="/js/admin_l3/view_telemetry.js"></script><script src="/js/admin_l3/view_system.js"></script><script src="/js/admin_l3/admin_core.js"></script>
 </body>
 </html>

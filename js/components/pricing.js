@@ -45,7 +45,7 @@ export const PRICING_PLANS = [
     features: [
       'Todo lo de Nivel 1 con velocidad de respuesta instantánea y soporte prioritario.',
       'Carga ágil de citas telefónicas y mostrador sin riesgo de doble turno.',
-      'Gobernanza Anti-No-Show: Lista Negra de ausencias y Lista VIP de clientes fieles.',
+      'Gestión Inteligente de Asistencias: control de ausencias reiteradas y atención prioritaria para tus clientes habituales.',
       'Tablero de métricas en vivo: porcentaje de ocupación diaria y facturación.',
       'Confirmaciones y recordatorios automáticos para asegurar la asistencia.'
     ]

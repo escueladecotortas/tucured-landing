@@ -16,7 +16,8 @@ export function getSystemCalendar(maxDays = 14) {
     if (diaNum !== 0) { // Salteo automático de domingos cerrados
       diasReales.push({
         diaNombre: diasSemana[diaNum], diaNumero: d.getDate(),
-        isToday: dayOffset === 0, isSunday: false, dateStr: d.toISOString().split('T')[0],
+        isToday: dayOffset === 0, isSunday: false,
+        dateStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
         fullLabel: `${diasSemana[diaNum]} ${d.getDate()} de ${mesActual}`,
         globalIndex: diasReales.length
       });
@@ -52,6 +53,25 @@ export function isTimePast(timeStr, state) {
 export function preloadShowcaseAssets() {
   if (typeof window === 'undefined') return;
   Object.values(ShowcaseState.rubros).forEach(r => { if (r.heroImage) { const img = new Image(); img.src = r.heroImage; } });
+}
+
+export function getActiveCatalogServices(state, rubro) {
+  const isOk = (s) => Boolean(s && !s.deletedAt && s.isActive !== false && s.activo !== false && s.active !== false);
+  const rMap = { barberia: 'barberia', estetica: 'peluqueria_estetica', salud: 'salud_consultorio', deportes: 'deportes_clubes' };
+  try {
+    if (typeof localStorage !== 'undefined' && state?.currentLevel === 'l3') {
+      const stored = JSON.parse(localStorage.getItem(`tucu_l3_services_${rMap[rubro?.id] || rubro?.id}`) || 'null');
+      if (Array.isArray(stored) && stored.length > 0) {
+        return stored.filter(isOk).map(s => ({ ...s, dur: `${s.duration || 30} min • $${Number(s.price || 0).toLocaleString('es-AR')}` }));
+      }
+    }
+    if (typeof localStorage !== 'undefined' && state?.currentLevel === 'l1') {
+      const storedL1 = JSON.parse(localStorage.getItem('tucu_l1_services') || 'null');
+      if (Array.isArray(storedL1) && storedL1.length > 0) return storedL1.filter(isOk);
+    }
+  } catch (_) {}
+  if (state?.currentLevel === 'l3' && Array.isArray(rubro?.catalogL3)) return rubro.catalogL3.filter(isOk);
+  return (rubro?.options || []).filter(o => typeof o === 'string' || isOk(o)).map(o => (typeof o === 'string' ? { name: o } : o));
 }
 
 const sysCalendar = getSystemCalendar();

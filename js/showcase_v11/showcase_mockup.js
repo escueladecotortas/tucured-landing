@@ -4,6 +4,7 @@
  * Flujo de 4 Pasos Canónicos, erradicación de redirecciones externas y Sandbox Local-First (< 160L).
  */
 
+import { getActiveCatalogServices } from './showcase_state.js';
 import { ShowcaseTemplatesL1 } from './showcase_templates_l1.js';
 import { ShowcaseTemplatesL2 } from './showcase_templates_l2.js';
 import { ShowcaseTemplatesL3 } from './showcase_templates_l3.js';
@@ -88,7 +89,8 @@ export const ShowcaseMockup = {
     }
 
     const isL3 = state.currentLevel === 'l3', isL1 = state.currentLevel === 'l1';
-    const serviceName = isL3 && rubro.catalogL3 ? rubro.catalogL3[state.selectedOption || 0].name : rubro.options[state.selectedOption || 0];
+    const activeSrvs = getActiveCatalogServices(state, rubro);
+    const serviceName = (activeSrvs[state.selectedOption || 0] || activeSrvs[0])?.name || rubro.options[state.selectedOption || 0] || 'Servicio';
     const clientName = `${state.clientFirstName || 'Martín'} ${state.clientLastName || 'Rodríguez'}`.trim();
     const dayLabel = state.getSelectedDayLabel();
     const phoneClean = (state.clientPhone || '3815554321').replace(/\D/g, '');

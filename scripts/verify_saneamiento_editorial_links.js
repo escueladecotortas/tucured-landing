@@ -50,7 +50,7 @@ const pricing = fs.readFileSync(path.join(rootDir, 'js/components/pricing.js'), 
 assert(!pricing.includes('despacho wa.me sin backend'), 'pricing.js erradicó jerga técnica de despacho');
 assert(pricing.includes('Reserva ágil en 4 pasos'), 'pricing.js describe flujo ágil de 4 pasos');
 assert(pricing.includes('Comprobante digital #TK'), 'pricing.js describe comprobante digital');
-assert(pricing.includes('Gobernanza Anti-No-Show'), 'pricing.js describe gobernanza anti-ausencias');
+assert(pricing.includes('Gestión Inteligente de Asistencias') || pricing.includes('Gobernanza Anti-No-Show'), 'pricing.js describe gestión inteligente de asistencias');
 
 const stageValue = fs.readFileSync(path.join(rootDir, 'js/components/stage_value_zone.js'), 'utf8');
 assert(!stageValue.includes("Base Multitenant 'tucured-clients'"), 'stage_value_zone.js erradicó mención de BBDD técnica');

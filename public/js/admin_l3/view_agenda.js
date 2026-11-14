@@ -1,174 +1,156 @@
 // Archivo: public/js/admin_l3/view_agenda.js
-/**
- * 📅 NEXUS ADMIN L3: VISTA DE AGENDA MULTI-STAFF & RECURSOS FÍSICOS (< 175 líneas)
- * - Grilla dual interactiva: Por Especialista vs. Por Recurso Físico
- * - Telemetría visual en vivo Daemon Cron T-2hs, métricas y modal de sobreturno
- */
+// Vista de Agenda Multi-Staff & Recursos L3 con 5 Estados, Señas y Deshacer (< 175 líneas)
 
 window.AdminL3Agenda = (function () {
   let viewTarget = 'staff', viewMode = 'grid', filterStatus = 'ALL', searchTerm = '';
-  const statusStyles = {
-    CONFIRMED: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-    ATTENDED: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800',
-    RELEASED: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-    CANCELLED: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800'
-  };
+  const eng = () => window.AdminBookingEngine;
+  const FILTERS = [['ALL', 'Todos'], ['PENDING_DEPOSIT', 'Pendiente Seña'], ['CONFIRMED', 'Confirmado'], ['COMPLETED', 'Finalizado'], ['CANCELLED', 'Cancelado'], ['NO_SHOW', 'Ausente']];
+
+  function inDateScope(b, state) {
+    if (state.dateRangeEnabled) return (!state.dateFrom || b.date >= state.dateFrom) && (!state.dateTo || b.date <= state.dateTo);
+    return b.date === state.selectedDate;
+  }
+
+  function persist(list, msg) {
+    window.AdminL3Core.setStorage('tucu_l3_bookings', list);
+    window.AdminL3Core.state.bookings = list;
+    if (msg) { window.AdminL3Core.playDingSound(); window.AdminL3Core.showToast(msg); }
+    window.AdminL3Core.renderActiveView();
+  }
+
+  function setStatus(id, nextCanon) {
+    const list = window.AdminL3Core.state.bookings || [], bk = list.find(x => x.id === id);
+    if (!bk) return;
+    eng().applyTransition(bk, nextCanon, 'l3');
+    persist(list, `Estado actualizado: ${eng().getMeta(bk.status).label}`);
+  }
+
+  function undoStatus(id) {
+    const list = window.AdminL3Core.state.bookings || [], bk = list.find(x => x.id === id);
+    if (!bk) return;
+    eng().undoTransition(bk, 'l3');
+    persist(list, `Revertido a ${eng().getMeta(bk.status).label}`);
+  }
+
+  function creditDeposit(id) {
+    const list = window.AdminL3Core.state.bookings || [], bk = list.find(x => x.id === id);
+    if (!bk) return;
+    const amt = bk.depositAmount || eng().calcDeposit(bk.price, 'l3');
+    eng().openPaymentPicker({
+      title: `Acreditar Seña #${id}`, amount: amt, level: 'l3',
+      onConfirm: (method) => { bk.depositAmount = amt; eng().applyTransition(bk, 'CONFIRMED', 'l3', method); persist(list, `Seña acreditada vía ${method}`); }
+    });
+  }
 
   function render(container, state) {
-    const activeStaff = (state.staff || []).filter(s => s.active !== false);
-    const activeResources = (state.resources || []).filter(r => r.active !== false);
-    const dayBookings = (state.bookings || []).filter(b => b.date === state.selectedDate && (b.rubroId === state.rubro || !b.rubroId));
-    const totalCount = dayBookings.length, confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED' || !b.status).length;
-    const releasedCount = dayBookings.filter(b => b.status === 'RELEASED').length;
-    const totalRevenue = dayBookings.filter(b => b.status !== 'CANCELLED' && b.status !== 'RELEASED').reduce((acc, b) => acc + (b.price || 0), 0);
-
-    const filteredBks = dayBookings.filter(b => {
-      const matchStatus = filterStatus === 'ALL' || b.status === filterStatus;
-      const matchSearch = !searchTerm || (b.client || '').toLowerCase().includes(searchTerm.toLowerCase()) || (b.id || '').toLowerCase().includes(searchTerm.toLowerCase());
-      return matchStatus && matchSearch;
-    });
-
+    const svg = window.AdminL3Core.svg, norm = window.AdminL3Core.normStr;
+    const activeStaff = (state.staff || []).filter(s => !s.deletedAt && s.active !== false), activeResources = (state.resources || []).filter(r => !r.deletedAt && r.active !== false);
+    const dayBks = (state.bookings || []).filter(b => !b.deletedAt && inDateScope(b, state) && (b.rubroId === state.rubro || !b.rubroId));
+    const kpis = eng().computeKpis(dayBks), q = norm(searchTerm);
+    const filtered = dayBks.filter(b => (filterStatus === 'ALL' || eng().normalizeKey(b.status) === filterStatus) && (!q || norm(b.client).includes(q) || norm(b.id).includes(q) || norm(b.phone).includes(q) || norm(b.serviceName).includes(q) || norm(b.staffName).includes(q)));
     const telem = state.telemetry || { daemonStatus: 'ACTIVE', lastSweep: 'Hace 4m', inspected: 18, confirmed: 16, released: 2 };
+    const confPct = dayBks.length ? Math.round((kpis.confirmedCount / dayBks.length) * 100) : 0;
+    const depPct = kpis.potentialDeposits > 0 ? Math.round((kpis.creditedDeposits / kpis.potentialDeposits) * 100) : 0;
+    const pills = FILTERS.map(([k, lbl]) => `<button onclick="AdminL3Agenda.setFilterStatus('${k}')" class="admin-glass-pill ${filterStatus === k ? 'is-active' : ''} px-2.5 py-1 rounded-xl text-[11px] font-semibold">${lbl}</button>`).join('');
+
     const headerHtml = `
-      <div class="space-y-4 pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-slate-50 dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-100 dark:border-indigo-900/40 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-ping"></span>
-            <div>
-              <p class="text-xs font-bold text-slate-900 dark:text-slate-100">⚡ Daemon Cron T-2hs: <span class="text-indigo-600 dark:text-indigo-400 font-mono">${telem.daemonStatus}</span> <span class="text-[11px] font-normal text-slate-500">· Última pasada: <strong>${telem.lastSweep}</strong></span></p>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">Inspeccionados: <strong>${telem.inspected}</strong> | Confirmados: <strong class="text-emerald-600">${telem.confirmed}</strong> | Liberados por inasistencia: <strong class="text-amber-600">${telem.released}</strong></p>
-            </div>
-          </div>
-          <button onclick="AdminL3Core.executeCronSweep()" class="py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"><span>⚡</span><span>Ejecutar Barrido Ahora</span></button>
+      <div class="space-y-4 pb-3 border-b border-[#D5CEC2] dark:border-stone-800">
+        <div class="admin-card flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full bg-red-800 animate-ping"></span><div><p class="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">${svg('bolt')}<span>Daemon Cron T-2hs: <span class="text-red-900 dark:text-red-400 font-mono">${telem.daemonStatus}</span></span><span class="text-[11px] font-normal text-stone-500">· Última pasada: <strong>${telem.lastSweep}</strong></span></p><p class="text-[11px] text-stone-500 dark:text-stone-400">Inspeccionados: <strong>${telem.inspected}</strong> | Confirmados: <strong class="text-emerald-700 dark:text-emerald-400">${telem.confirmed}</strong> | Liberados (Cron): <strong class="text-amber-700 dark:text-amber-400">${telem.released}</strong></p></div></div>
+          <button onclick="AdminL3Core.executeCronSweep()" class="py-1.5 px-3.5 rounded-xl admin-glass-primary font-bold text-xs flex items-center gap-1.5">${svg('bolt')}<span>Ejecutar Barrido Ahora</span></button>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs"><p class="text-[10px] uppercase font-bold text-slate-500">Total Turnos</p><p class="text-lg font-bold text-slate-900 dark:text-slate-100">${totalCount}</p></div>
-          <div class="p-3.5 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl shadow-xs"><p class="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">Confirmados</p><p class="text-lg font-bold text-emerald-700 dark:text-emerald-300">${confirmedCount}</p></div>
-          <div class="p-3.5 bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl shadow-xs"><p class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Liberados (Cron)</p><p class="text-lg font-bold text-amber-700 dark:text-amber-300">${releasedCount}</p></div>
-          <div class="p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 rounded-2xl shadow-xs"><p class="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-400">Recaudación Estimada</p><p class="text-lg font-bold text-indigo-700 dark:text-indigo-300">$${totalRevenue.toLocaleString('es-AR')}</p></div>
+          <div class="admin-card"><p class="text-[10px] uppercase font-bold text-stone-500">Turnos en Vista</p><p class="font-title text-xl font-extrabold text-stone-900 dark:text-stone-100">${dayBks.length}</p><div class="admin-kpi-track"><div class="admin-kpi-fill bg-[#800000]" style="width:${dayBks.length ? 100 : 0}%"></div></div></div>
+          <div class="admin-card"><p class="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">Confirmados</p><p class="font-title text-xl font-extrabold text-emerald-700 dark:text-emerald-300">${kpis.confirmedCount}</p><div class="admin-kpi-track"><div class="admin-kpi-fill bg-emerald-600" style="width:${confPct}%"></div></div></div>
+          <div class="admin-card"><p class="text-[10px] uppercase font-bold text-red-900 dark:text-red-400">Señas Acreditadas</p><p id="l3-kpi-deposit-total" class="font-title text-xl font-extrabold text-red-900 dark:text-red-300">$${kpis.creditedDeposits.toLocaleString('es-AR')}</p><p class="text-[10px] text-stone-500 mt-0.5">De $${kpis.potentialDeposits.toLocaleString('es-AR')} esperados</p><div class="admin-kpi-track"><div class="admin-kpi-fill bg-[#800000]" style="width:${depPct}%"></div></div></div>
+          <div class="admin-card"><p class="text-[10px] uppercase font-bold text-stone-500">Finalizados / Ausentes</p><p class="font-title text-xl font-extrabold text-stone-800 dark:text-stone-200">${kpis.doneCount} / ${kpis.noShowCount}</p><div class="admin-kpi-track"><div class="admin-kpi-fill bg-amber-600" style="width:${dayBks.length ? Math.round((kpis.doneCount / dayBks.length) * 100) : 0}%"></div></div></div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
           <div class="flex items-center gap-2 flex-wrap">
-            <div class="flex bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-bold">
-              <button onclick="AdminL3Agenda.setViewTarget('staff')" class="px-2.5 py-1 rounded-lg transition-all ${viewTarget==='staff'?'bg-indigo-600 text-white shadow-xs':'text-slate-600 dark:text-slate-400'}">👥 Por Especialista</button>
-              <button onclick="AdminL3Agenda.setViewTarget('resource')" class="px-2.5 py-1 rounded-lg transition-all ${viewTarget==='resource'?'bg-indigo-600 text-white shadow-xs':'text-slate-600 dark:text-slate-400'}">🏟️ Por Recurso Físico</button>
-            </div>
-            <div class="flex bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-bold">
-              <button onclick="AdminL3Agenda.setViewMode('grid')" class="px-2 py-1 rounded-lg ${viewMode==='grid'?'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs':'text-slate-600 dark:text-slate-400'}">⊞</button>
-              <button onclick="AdminL3Agenda.setViewMode('table')" class="px-2 py-1 rounded-lg ${viewMode==='table'?'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs':'text-slate-600 dark:text-slate-400'}">☰</button>
-            </div>
-            <select onchange="AdminL3Agenda.setFilterStatus(this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2.5 py-1.5 rounded-xl font-semibold outline-none shadow-xs">
-              <option value="ALL" ${filterStatus==='ALL'?'selected':''}>Todos los estados</option><option value="CONFIRMED" ${filterStatus==='CONFIRMED'?'selected':''}>Confirmados</option><option value="RELEASED" ${filterStatus==='RELEASED'?'selected':''}>Liberados (Cron T-2hs)</option><option value="ATTENDED" ${filterStatus==='ATTENDED'?'selected':''}>Atendidos</option><option value="CANCELLED" ${filterStatus==='CANCELLED'?'selected':''}>Cancelados</option>
-            </select>
+            <button onclick="AdminL3Agenda.setViewTarget('staff')" class="admin-glass-pill ${viewTarget === 'staff' ? 'is-active' : ''} px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">${svg('users')}<span>Por Especialista</span></button>
+            <button onclick="AdminL3Agenda.setViewTarget('resource')" class="admin-glass-pill ${viewTarget === 'resource' ? 'is-active' : ''} px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">${svg('space')}<span>Por Recurso Físico</span></button>
+            <button onclick="AdminL3Agenda.setViewMode('grid')" class="admin-glass-pill ${viewMode === 'grid' ? 'is-active' : ''} p-1.5 rounded-xl" title="Vista Grilla">${svg('grid')}</button>
+            <button onclick="AdminL3Agenda.setViewMode('table')" class="admin-glass-pill ${viewMode === 'table' ? 'is-active' : ''} p-1.5 rounded-xl" title="Vista Tabla">${svg('list')}</button>
+            <button onclick="AdminL3Agenda.toggleRangeMode()" class="admin-glass-pill ${state.dateRangeEnabled ? 'is-active' : ''} px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">${svg('cal')}<span>Rango</span></button>
           </div>
-          <div class="flex items-center gap-2">
-            <input type="text" placeholder="Buscar cliente o #TK..." value="${searchTerm}" oninput="AdminL3Agenda.setSearch(this.value)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-xl text-xs text-slate-800 dark:text-slate-100 outline-none w-44 sm:w-56 shadow-xs">
-            <button onclick="AdminL3Agenda.openSobreturnoModal()" class="py-1.5 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-all flex items-center gap-1 cursor-pointer"><span>➕</span><span>Sobreturno</span></button>
+          <div class="flex items-center gap-2 flex-wrap">
+            ${state.dateRangeEnabled ? `<input type="date" value="${state.dateFrom}" onchange="AdminL3Agenda.setDateRange('dateFrom', this.value)" class="bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 px-2 py-1 rounded-xl text-xs"><input type="date" value="${state.dateTo}" onchange="AdminL3Agenda.setDateRange('dateTo', this.value)" class="bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 px-2 py-1 rounded-xl text-xs">` : ''}
+            <input type="text" placeholder="Buscar cliente o #TK..." value="${searchTerm}" oninput="AdminL3Agenda.setSearch(this.value)" class="bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 px-3 py-1.5 rounded-xl text-xs text-stone-800 dark:text-stone-100 outline-none w-44 sm:w-56">
+            <button onclick="AdminL3Agenda.openSobreturnoModal()" class="py-1.5 px-3.5 rounded-xl admin-glass-primary font-bold text-xs flex items-center gap-1">${svg('plus')}<span>Sobreturno</span></button>
           </div>
         </div>
+        <div class="flex flex-wrap gap-1.5">${pills}</div>
       </div>`;
 
     const columns = viewTarget === 'staff' ? activeStaff : activeResources;
     let bodyHtml = '';
-
     if (viewMode === 'grid') {
-      const gridColumns = columns.map(item => {
-        const itemBks = filteredBks.filter(b => (viewTarget === 'staff' ? b.staffId === item.id : b.resourceId === item.id)).sort((a,b) => a.time.localeCompare(b.time));
-        const cardsHtml = itemBks.length === 0
-          ? `<div class="p-4 text-center text-slate-400 text-xs italic bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 my-2">Sin reservas</div>`
-          : itemBks.map(b => `
-            <div class="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
-              <div class="flex items-center justify-between"><span class="font-mono font-bold text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-800">⏰ ${b.time} hs</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusStyles[b.status] || statusStyles.CONFIRMED}">${b.status === 'RELEASED' ? '⚡ Liberado' : (b.status || 'Confirmado')}</span></div>
-              <div><p class="font-bold text-xs text-slate-900 dark:text-slate-100">${b.client || 'Cliente'}</p><p class="text-[11px] text-slate-500 dark:text-slate-400">${b.serviceName} (${b.duration || 30}m)</p><p class="text-[10px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5">${viewTarget === 'staff' ? `🏟️ ${b.resourceName || 'Recurso'}` : `👤 ${b.staffName || 'Staff'}`}</p></div>
-              <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-[11px]"><span class="font-mono text-slate-400 text-[10px]">#${b.id}</span><div class="flex items-center gap-1.5"><button onclick="AdminL3Agenda.openWhatsAppModal('${b.id}')" class="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold">💬 WA</button><button onclick="AdminL3Agenda.deleteBooking('${b.id}')" class="text-slate-400 hover:text-rose-500 text-xs">✕</button></div></div>
-            </div>`).join('');
-
-        return `
-          <div class="flex flex-col bg-slate-100/60 dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800 p-3.5 space-y-2.5 min-w-[270px] flex-1">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm shadow-xs">${item.photo || item.icon || '📌'}</div><div><h3 class="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">${item.name}</h3><p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${item.role || item.type}</p></div></div><button onclick="AdminL3Agenda.openSobreturnoModal('${viewTarget==='staff'?item.id:''}', '${viewTarget==='resource'?item.id:''}')" class="w-6 h-6 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-xs cursor-pointer">+</button></div>
-            <div class="space-y-2 max-h-[550px] overflow-y-auto pr-1 hide-scrollbar">${cardsHtml}</div>
+      bodyHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-x-auto pb-4">${columns.map(item => {
+        const itemBks = filtered.filter(b => (viewTarget === 'staff' ? b.staffId === item.id : b.resourceId === item.id)).sort((a, b) => a.time.localeCompare(b.time));
+        const cards = itemBks.length === 0 ? `<div class="p-4 text-center text-stone-400 text-xs italic bg-stone-50 dark:bg-stone-950/40 rounded-2xl border border-dashed border-[#D5CEC2] dark:border-stone-800 my-2">Sin reservas</div>` : itemBks.map(b => {
+          const meta = eng().getMeta(b.status);
+          return `<div class="admin-card !p-3 space-y-2">
+            <div class="flex items-center justify-between gap-1"><span class="font-mono font-bold text-xs text-red-900 dark:text-red-300 bg-red-50 dark:bg-red-950/50 px-2 py-0.5 rounded-lg border border-red-200 dark:border-red-900 inline-flex items-center gap-1">${svg('clock')} ${b.time} hs</span><div class="flex items-center gap-1.5 flex-wrap justify-end">${eng().renderUndoLabel(b.status, b.prevStatus)}<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${meta.badge}">${meta.label}</span></div></div>
+            <div><p class="font-bold text-xs text-stone-900 dark:text-stone-100">${b.client || 'Cliente'}</p><p class="text-[11px] text-stone-500 dark:text-stone-400">${b.serviceName} (${b.duration || 30}m)</p><p class="text-[10px] font-semibold text-stone-600 dark:text-stone-300 mt-0.5 flex items-center gap-1">${viewTarget === 'staff' ? `${svg('space')} ${b.resourceName || 'Recurso'}` : `${svg('users')} ${b.staffName || 'Staff'}`}</p></div>
+            ${eng().renderDepositHtml(b)}
+            <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-stone-100 dark:border-stone-800 text-[11px]"><div class="flex flex-wrap gap-1">${eng().renderActionButtons(b.id, b.status, 'AdminL3Agenda', b.prevStatus)}</div><button onclick="AdminL3Agenda.openWhatsAppModal('${b.id}')" class="px-2 py-1 rounded-lg admin-glass-btn text-emerald-700 dark:text-emerald-300 text-[10px] font-bold inline-flex items-center gap-1">${svg('msg')}<span>WA</span></button></div>
           </div>`;
-      }).join('');
-      bodyHtml = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-x-auto pb-4">${gridColumns}</div>`;
+        }).join('');
+        return `<div class="flex flex-col bg-stone-100/70 dark:bg-stone-900/40 rounded-3xl border border-[#D5CEC2] dark:border-stone-800 p-3.5 space-y-2.5 min-w-[270px] flex-1"><div class="flex items-center justify-between pb-2 border-b border-[#D5CEC2] dark:border-stone-800"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-white dark:bg-stone-800 border border-[#D5CEC2] dark:border-stone-700 flex items-center justify-center text-xs font-bold text-red-900 dark:text-red-300 shadow-xs">${(item.photo || item.icon || 'ST').slice(0, 2)}</div><div><h3 class="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">${item.name}</h3><p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">${item.role || item.type}</p></div></div><button onclick="AdminL3Agenda.openSobreturnoModal('${viewTarget === 'staff' ? item.id : ''}', '${viewTarget === 'resource' ? item.id : ''}')" class="w-6 h-6 rounded-lg admin-glass-btn flex items-center justify-center">${svg('plus')}</button></div><div class="space-y-2 max-h-[550px] overflow-y-auto pr-1 hide-scrollbar">${cards}</div></div>`;
+      }).join('')}</div>`;
     } else {
-      const rows = filteredBks.sort((a,b) => a.time.localeCompare(b.time)).map(b => `
-        <tr class="border-b border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-900/40 text-xs">
-          <td class="py-3 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">${b.time} hs</td>
-          <td class="py-3 px-4"><p class="font-bold text-slate-800 dark:text-slate-100">${b.client || 'Cliente'}</p><span class="text-[10px] text-slate-500">📞 ${b.phone}</span></td>
-          <td class="py-3 px-4"><p class="text-slate-800 dark:text-slate-200 font-semibold">${b.serviceName}</p><span class="text-[10px] text-slate-500">${b.staffName} · ${b.resourceName || 'Recurso'}</span></td>
-          <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-100">$${(b.price||0).toLocaleString('es-AR')}</td>
-          <td class="py-3 px-4"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusStyles[b.status]||statusStyles.CONFIRMED}">${b.status === 'RELEASED' ? '⚡ Liberado' : (b.status||'Confirmado')}</span></td>
-          <td class="py-3 px-4 text-right"><button onclick="AdminL3Agenda.openWhatsAppModal('${b.id}')" class="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold">💬 WA</button></td>
-        </tr>`).join('');
-      bodyHtml = `<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xs mt-2"><table class="w-full text-left"><thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 uppercase font-semibold"><tr><th class="py-3 px-4">Horario</th><th class="py-3 px-4">Cliente</th><th class="py-3 px-4">Servicio, Staff & Espacio</th><th class="py-3 px-4">Precio</th><th class="py-3 px-4">Estado</th><th class="py-3 px-4 text-right">Acción</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      const rows = filtered.sort((a, b) => a.time.localeCompare(b.time)).map(b => {
+        const meta = eng().getMeta(b.status);
+        return `<tr class="border-b border-stone-100 dark:border-stone-800/60 hover:bg-stone-50 dark:hover:bg-stone-900/40 text-xs"><td class="py-3 px-4 font-mono font-bold text-red-900 dark:text-red-400">${b.time} hs</td><td class="py-3 px-4"><p class="font-bold text-stone-800 dark:text-stone-100">${b.client || 'Cliente'}</p><span class="text-[10px] text-stone-500 inline-flex items-center gap-1">${svg('tel')} ${b.phone}</span></td><td class="py-3 px-4"><p class="text-stone-800 dark:text-stone-200 font-semibold">${b.serviceName}</p><span class="text-[10px] text-stone-500">${b.staffName} · ${b.resourceName || 'Recurso'}</span>${eng().renderDepositHtml(b)}</td><td class="py-3 px-4"><div class="flex flex-col items-start gap-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(b.status, b.prevStatus)}</div></td><td class="py-3 px-4 text-right"><div class="flex flex-wrap justify-end gap-1">${eng().renderActionButtons(b.id, b.status, 'AdminL3Agenda', b.prevStatus)}<button onclick="AdminL3Agenda.openWhatsAppModal('${b.id}')" class="px-2 py-1 rounded-lg admin-glass-btn text-emerald-700 dark:text-emerald-300 text-[10px] font-bold inline-flex items-center gap-1">${svg('msg')}<span>WA</span></button></div></td></tr>`;
+      }).join('');
+      bodyHtml = `<div class="admin-card !p-0 overflow-x-auto mt-2"><table class="w-full text-left"><thead class="bg-stone-50 dark:bg-stone-950/70 border-b border-[#D5CEC2] dark:border-stone-800 text-[11px] text-stone-500 uppercase font-semibold"><tr><th class="py-3 px-4">Horario</th><th class="py-3 px-4">Cliente</th><th class="py-3 px-4">Servicio & Seña</th><th class="py-3 px-4">Estado</th><th class="py-3 px-4 text-right">Acciones</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="p-6 text-center text-stone-400 italic">Sin reservas</td></tr>'}</tbody></table></div>`;
     }
     container.innerHTML = headerHtml + bodyHtml;
   }
 
-  function setViewTarget(t) { viewTarget = t; window.AdminL3Core.renderActiveView(); }
-  function setViewMode(m) { viewMode = m; window.AdminL3Core.renderActiveView(); }
-  function setFilterStatus(s) { filterStatus = s; window.AdminL3Core.renderActiveView(); }
-  function setSearch(v) { searchTerm = v; window.AdminL3Core.renderActiveView(); }
-
-  function deleteBooking(id) {
-    if (!confirm(`¿Eliminar la reserva #${id}?`)) return;
-    const bookings = window.AdminL3Core.getStorage('tucu_l3_bookings', []).filter(b => b.id !== id);
-    window.AdminL3Core.setStorage('tucu_l3_bookings', bookings);
-    window.AdminL3Core.state.bookings = bookings;
-    window.AdminL3Core.renderActiveView();
-  }
-
-  function openSobreturnoModal(preselectedStaffId = '', preselectedResId = '') {
+  function openSobreturnoModal(preStaff = '', preRes = '') {
     const modal = document.getElementById('admin-modal-root'); if (!modal) return;
-    const state = window.AdminL3Core.state;
-    const staffOpts = state.staff.filter(s => s.active !== false).map(s => `<option value="${s.id}" ${s.id===preselectedStaffId?'selected':''}>${s.name} (${s.role})</option>`).join('');
-    const resOpts = state.resources.filter(r => r.active !== false).map(r => `<option value="${r.id}" ${r.id===preselectedResId?'selected':''}>${r.name} (${r.type})</option>`).join('');
-    const srvOpts = state.services.map(s => `<option value="${s.id}">${s.name} - $${s.price || 0}</option>`).join('');
-
-    modal.innerHTML = `
-      <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3 shadow-2xl text-xs">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800"><h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">➕ Cargar Sobreturno Dual</h3><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="text-slate-400">✕</button></div>
-        <div class="space-y-2">
-          <div><label class="block text-slate-500 mb-1 font-semibold">1. Especialista:</label><select id="mbk-staff" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-slate-800 dark:text-slate-200 outline-none">${staffOpts}</select></div>
-          <div><label class="block text-slate-500 mb-1 font-semibold">2. Recurso Físico:</label><select id="mbk-resource" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-slate-800 dark:text-slate-200 outline-none">${resOpts}</select></div>
-          <div><label class="block text-slate-500 mb-1 font-semibold">3. Servicio:</label><select id="mbk-srv" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-slate-800 dark:text-slate-200 outline-none">${srvOpts}</select></div>
-          <div class="grid grid-cols-2 gap-2"><div><label class="block text-slate-500 mb-1 font-semibold">Hora:</label><input type="text" id="mbk-time" value="11:30" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-mono outline-none"></div><div><label class="block text-slate-500 mb-1 font-semibold">WhatsApp:</label><input type="tel" id="mbk-phone" value="3815554321" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 outline-none"></div></div>
-          <div><label class="block text-slate-500 mb-1 font-semibold">Cliente:</label><input type="text" id="mbk-client" value="Martín Rodríguez" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 outline-none"></div>
-        </div>
-        <div class="flex gap-2 pt-2"><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="w-1/3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold">Cancelar</button><button onclick="AdminL3Agenda.saveSobreturno()" class="w-2/3 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">Confirmar Turno</button></div>
-      </div>`;
+    const state = window.AdminL3Core.state, svg = window.AdminL3Core.svg, methods = eng().getEnabledMethods('l3');
+    const staffOpts = state.staff.filter(s => !s.deletedAt && s.active !== false).map(s => `<option value="${s.id}" ${s.id === preStaff ? 'selected' : ''}>${s.name} (${s.role})</option>`).join('');
+    const resOpts = state.resources.filter(r => !r.deletedAt && r.active !== false).map(r => `<option value="${r.id}" ${r.id === preRes ? 'selected' : ''}>${r.name} (${r.type})</option>`).join('');
+    const availSrvs = state.services.filter(s => (window.AdminShell ? window.AdminShell.isServiceAvailable(s) : (s.active !== false && s.isActive !== false && !s.deletedAt)));
+    const srvOpts = availSrvs.map(s => `<option value="${s.id}">${s.name} - $${s.price || 0}</option>`).join('') || '<option value="">Sin servicios activos</option>';
+    const pmOpts = methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('');
+    modal.innerHTML = `<div class="w-full max-w-md bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-3xl p-6 space-y-3 shadow-2xl text-xs"><div class="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800"><h3 class="font-bold text-stone-900 dark:text-stone-100 text-sm font-title">Cargar Sobreturno Dual</h3><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="text-stone-400 cursor-pointer">${svg('close')}</button></div><div class="space-y-2"><div><label class="block text-stone-500 mb-1 font-semibold">Especialista:</label><select id="mbk-staff" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none">${staffOpts}</select></div><div><label class="block text-stone-500 mb-1 font-semibold">Recurso Físico:</label><select id="mbk-resource" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none">${resOpts}</select></div><div><label class="block text-stone-500 mb-1 font-semibold">Servicio:</label><select id="mbk-srv" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none">${srvOpts}</select></div><div class="grid grid-cols-2 gap-2"><div><label class="block text-stone-500 mb-1 font-semibold">Fecha:</label><input type="date" id="mbk-date" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none"></div><div><label class="block text-stone-500 mb-1 font-semibold">Hora:</label><select id="mbk-time" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 font-mono outline-none"></select></div></div><div class="grid grid-cols-2 gap-2"><div><label class="block text-stone-500 mb-1 font-semibold">Cliente:</label><input type="text" id="mbk-client" value="Martín Rodríguez" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none"></div><div><label class="block text-stone-500 mb-1 font-semibold">WhatsApp:</label><input type="tel" id="mbk-phone" value="3815554321" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none"></div></div><div class="grid grid-cols-2 gap-2 items-center pt-1"><label class="flex items-center gap-2 font-semibold text-stone-700 dark:text-stone-200 cursor-pointer"><input type="checkbox" id="mbk-paid" checked class="w-4 h-4 accent-[#800000]"><span>¿Seña cobrada?</span></label><select id="mbk-method" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none">${pmOpts}</select></div></div><div class="flex gap-2 pt-2"><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="w-1/3 py-2.5 rounded-xl admin-glass-btn font-bold">Cancelar</button><button onclick="AdminL3Agenda.saveSobreturno()" class="w-2/3 py-2.5 rounded-xl admin-glass-primary font-bold">Confirmar Turno</button></div></div>`;
     modal.classList.remove('hidden');
+    window.AdminShell?.bindDateTimeGuards({ dateId: 'mbk-date', timeId: 'mbk-time', initialDate: state.selectedDate });
   }
 
   function saveSobreturno() {
     const staffId = document.getElementById('mbk-staff')?.value, resId = document.getElementById('mbk-resource')?.value, srvId = document.getElementById('mbk-srv')?.value;
-    const time = document.getElementById('mbk-time')?.value || '11:30', phone = (document.getElementById('mbk-phone')?.value || '3815554321').replace(/\D/g, '');
-    const client = document.getElementById('mbk-client')?.value || 'Cliente Sobreturno';
+    const today = window.AdminShell ? window.AdminShell.localTodayStr() : new Date().toISOString().split('T')[0];
+    const date = document.getElementById('mbk-date')?.value || today, time = document.getElementById('mbk-time')?.value || '';
+    if (!srvId) return window.AdminL3Core.showToast('Activa al menos un servicio', 'error');
+    if (date < today || !time || (date === today && window.AdminShell && time <= window.AdminShell.currentHHMM())) return window.AdminL3Core.showToast('Selecciona fecha y horario futuros', 'error');
+    const phone = (document.getElementById('mbk-phone')?.value || '3815554321').replace(/\D/g, ''), client = document.getElementById('mbk-client')?.value || 'Cliente Sobreturno';
+    const paid = !!document.getElementById('mbk-paid')?.checked, method = paid ? (document.getElementById('mbk-method')?.value || 'Efectivo') : null;
     const state = window.AdminL3Core.state, staffObj = state.staff.find(s => s.id === staffId), resObj = state.resources.find(r => r.id === resId), srvObj = state.services.find(s => s.id === srvId);
-    const newBooking = { id: 'TK-' + Math.random().toString(36).substring(2, 6).toUpperCase(), rubroId: state.rubro, staffId, staffName: staffObj ? staffObj.name : 'Staff', resourceId: resId, resourceName: resObj ? resObj.name : 'Recurso', serviceId: srvId, serviceName: srvObj ? srvObj.name : 'Servicio', duration: srvObj ? srvObj.duration : 30, price: srvObj ? srvObj.price : 0, date: state.selectedDate, time, client, phone, status: 'CONFIRMED' };
-    const bookings = window.AdminL3Core.getStorage('tucu_l3_bookings', []);
-    bookings.push(newBooking);
-    window.AdminL3Core.setStorage('tucu_l3_bookings', bookings);
-    window.AdminL3Core.state.bookings = bookings;
-    window.AdminL3Core.playDingSound();
-    window.AdminL3Core.showToast(`Turno agendado en ${resObj?.name || 'Recurso'}`);
+    const price = srvObj?.price || 12000, depAmt = eng().calcDeposit(price, 'l3'), list = window.AdminL3Core.getStorage('tucu_l3_bookings', []);
+    list.push({ id: 'TK-' + Math.random().toString(36).substring(2, 6).toUpperCase(), rubroId: state.rubro, staffId, staffName: staffObj?.name || 'Staff', resourceId: resId, resourceName: resObj?.name || 'Recurso', serviceId: srvId, serviceName: srvObj?.name || 'Servicio', duration: srvObj?.duration || 30, price, depositAmount: depAmt, depositPaid: paid, paymentMethod: method, paidAt: paid ? new Date().toISOString() : null, date, time, client, phone, status: paid ? 'CONFIRMED' : 'PENDING_DEPOSIT', prevStatus: null });
     document.getElementById('admin-modal-root')?.classList.add('hidden');
-    window.AdminL3Core.renderActiveView();
+    persist(list, `Turno agendado en ${resObj?.name || 'Recurso'}`);
   }
 
   function openWhatsAppModal(bookingId) {
-    const b = window.AdminL3Core.getStorage('tucu_l3_bookings', []).find(x => x.id === bookingId); if (!b) return;
-    const modal = document.getElementById('admin-modal-root'); if (!modal) return;
-    const msg = `¡Hola ${b.client}! Te confirmamos tu turno en Nexus L3 el día ${b.date} a las ${b.time} hs con ${b.staffName} en ${b.resourceName || 'nuestro espacio'} para ${b.serviceName} (Comprobante: #${b.id}).`;
-    modal.innerHTML = `
-      <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3.5 shadow-2xl text-xs">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800"><h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">💬 Notificación WhatsApp</h3><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="text-slate-400">✕</button></div>
-        <div><label class="block text-slate-500 mb-1">Destinatario:</label><input readonly value="${b.client} (${b.phone})" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 font-bold text-slate-800 dark:text-slate-200"></div>
-        <div><label class="block text-slate-500 mb-1">Mensaje:</label><textarea id="wa-modal-msg" rows="3" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2 text-slate-800 dark:text-slate-200 outline-none">${msg}</textarea></div>
-        <div class="flex gap-2 pt-2"><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="w-1/3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold">Cerrar</button><button onclick="window.AdminL3Core.showToast('Mensaje despachado'); document.getElementById('admin-modal-root').classList.add('hidden');" class="w-2/3 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700">🚀 Despachar</button></div>
-      </div>`;
+    const b = window.AdminL3Core.getStorage('tucu_l3_bookings', []).find(x => x.id === bookingId), modal = document.getElementById('admin-modal-root'), svg = window.AdminL3Core.svg;
+    if (!b || !modal) return;
+    const msg = `Hola ${b.client}, te confirmamos tu turno el ${b.date} a las ${b.time} hs con ${b.staffName} en ${b.resourceName || 'nuestro espacio'} para ${b.serviceName} (#${b.id}).`;
+    modal.innerHTML = `<div class="w-full max-w-md bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-3xl p-6 space-y-3.5 shadow-2xl text-xs"><div class="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800"><h3 class="font-bold text-stone-900 dark:text-stone-100 text-sm flex items-center gap-1.5">${svg('msg')}<span>Notificación WhatsApp</span></h3><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="text-stone-400 cursor-pointer">${svg('close')}</button></div><div><label class="block text-stone-500 mb-1">Destinatario:</label><input readonly value="${b.client} (${b.phone})" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 font-bold"></div><div><label class="block text-stone-500 mb-1">Mensaje:</label><textarea id="wa-modal-msg" rows="3" class="w-full bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2 outline-none">${msg}</textarea></div><div class="flex gap-2 pt-2"><button onclick="document.getElementById('admin-modal-root').classList.add('hidden')" class="w-1/3 py-2.5 rounded-xl admin-glass-btn font-bold">Cerrar</button><button onclick="window.AdminL3Core.showToast('Mensaje despachado'); document.getElementById('admin-modal-root').classList.add('hidden');" class="w-2/3 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer">Despachar Mensaje</button></div></div>`;
     modal.classList.remove('hidden');
   }
 
-  return { render, setViewTarget, setViewMode, setFilterStatus, setSearch, deleteBooking, openSobreturnoModal, saveSobreturno, openWhatsAppModal };
+  return {
+    render, setStatus, undoStatus, creditDeposit, openSobreturnoModal, saveSobreturno, openWhatsAppModal,
+    setViewTarget: (t) => { viewTarget = t; window.AdminL3Core.renderActiveView(); },
+    setViewMode: (m) => { viewMode = m; window.AdminL3Core.renderActiveView(); },
+    setFilterStatus: (s) => { filterStatus = s; window.AdminL3Core.renderActiveView(); },
+    setSearch: (v) => { searchTerm = v; window.AdminL3Core.renderActiveView(); },
+    toggleRangeMode: () => { const s = window.AdminL3Core.state; s.dateRangeEnabled = !s.dateRangeEnabled; window.AdminL3Core.renderActiveView(); },
+    setDateRange: (k, v) => { window.AdminL3Core.state[k] = v; window.AdminL3Core.renderActiveView(); }
+  };
 })();

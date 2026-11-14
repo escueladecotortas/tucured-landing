@@ -55,12 +55,12 @@
       const sub = assets.subtitle || assets.subcategory || assets.category || DEFAULT_CONFIG.subtitle;
       const rawLogo = assets.logoUrl || assets.logo_url || assets.semantic_photos?.logo || '';
       const logo = rawLogo.startsWith('./') ? `/nexus_archives/tucu-red/clients/${slug}/${rawLogo.slice(2)}` : (rawLogo || '');
-      const accent = assets.accentColor || assets.brand_accent || assets.accent || '#4F46E5';
+      const accent = assets.accentColor || assets.brand_accent || assets.accent || '#800000';
       document.documentElement.style.setProperty('--brand-accent', accent);
       localStorage.setItem('tucu_l1_biz_name', name); localStorage.setItem('tucu_l1_subtitle', sub); localStorage.setItem('tucu_l1_logo', logo);
       if (Array.isArray(assets.services) && assets.services.length > 0 && global.adminL1Pricing?.syncFromBrand) global.adminL1Pricing.syncFromBrand(assets.services);
     } else {
-      document.documentElement.style.setProperty('--brand-accent', '#4F46E5');
+      document.documentElement.style.setProperty('--brand-accent', '#800000');
       localStorage.setItem('tucu_l1_biz_name', DEFAULT_CONFIG.bizName);
       localStorage.setItem('tucu_l1_subtitle', DEFAULT_CONFIG.subtitle);
       localStorage.setItem('tucu_l1_logo', '');
@@ -102,10 +102,10 @@
     const btn = document.getElementById('btnTurneroSwitch'), knob = document.getElementById('reception-knob');
     const badge = document.getElementById('turneroStatusBadge'), dot = document.getElementById('turneroStatusDot'), txt = document.getElementById('turneroStatusText');
     if (!btn || !txt) return;
-    btn.style.backgroundColor = isActive ? 'var(--brand-accent)' : '#7A766E';
-    if (knob) knob.className = `w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200 ${isActive ? 'translate-x-5' : 'translate-x-0'}`;
-    if (dot) dot.className = `w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`;
-    if (badge) badge.className = `flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${isActive ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20'}`;
+    btn.style.backgroundColor = isActive ? 'var(--color-primary, #800000)' : '#8C8478';
+    if (knob) knob.className = `w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`;
+    if (dot) dot.className = `w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-stone-500'}`;
+    if (badge) badge.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'}`;
     txt.textContent = isActive ? 'Recepción Abierta' : 'En Pausa';
   }
 
@@ -114,11 +114,8 @@
       document.getElementById(`view-section-${v}`)?.classList.toggle('hidden', v !== target);
       const bDesk = document.getElementById(`main-view-btn-${v}`), bMob = document.getElementById(`mob-nav-${v}`);
       const act = v === target;
-      if (bDesk) {
-        bDesk.style.backgroundColor = act ? 'var(--brand-accent)' : 'transparent';
-        bDesk.className = `px-5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${act ? 'text-white shadow-xs' : 'text-[#7A766E] dark:text-[#9E9A93] hover:text-[#1C1A17] dark:hover:text-[#F5F3EF]'}`;
-      }
-      if (bMob) bMob.style.color = act ? 'var(--brand-accent)' : '#7A766E';
+      if (bDesk) bDesk.className = act ? 'admin-nav-item active' : 'admin-nav-item';
+      if (bMob) bMob.style.color = act ? 'var(--color-primary, #800000)' : '#8C8478';
     });
   }
 

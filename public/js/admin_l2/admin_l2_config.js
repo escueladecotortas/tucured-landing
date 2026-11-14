@@ -10,8 +10,8 @@
       const btn = document.getElementById('tab-btn-' + t), sec = document.getElementById('config-content-' + t);
       const isAct = t === target;
       if (btn) btn.className = isAct
-        ? 'config-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-xs flex items-center gap-1.5 cursor-pointer'
-        : 'config-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 flex items-center gap-1.5 cursor-pointer';
+        ? 'config-tab-btn admin-glass-pill is-active px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5'
+        : 'config-tab-btn admin-glass-pill px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5';
       if (sec) sec.classList.toggle('hidden', !isAct);
     });
   }
@@ -42,8 +42,8 @@
     const c = document.getElementById('occupied-chips-container');
     if (!c) return;
     c.innerHTML = occupiedSlots.map((t, idx) => `
-      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-800 dark:text-slate-200">
-        <span>⏰ ${t}</span><button type="button" onclick="adminL2Config.removeOccupiedSlot(${idx})" class="text-slate-400 hover:text-rose-600 cursor-pointer text-xs font-bold">✕</button>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 border border-[#D5CEC2] dark:border-stone-700 text-xs font-mono text-stone-800 dark:text-stone-200">
+        <span>${t}</span><button type="button" onclick="adminL2Config.removeOccupiedSlot(${idx})" class="text-stone-400 hover:text-rose-600 cursor-pointer text-xs font-bold">x</button>
       </span>
     `).join('');
   }
@@ -106,7 +106,10 @@
     const wa = global.adminL2Core?.sanitizeCleanPhone(g('cfg-wa-number')?.value);
     localStorage.setItem('tucu_l2_biz_name', biz); localStorage.setItem('tucu_biz_name', biz);
     localStorage.setItem('tucu_l2_wa_number', wa); localStorage.setItem('tucu_wa_number', wa);
-    localStorage.setItem('tucu_l2_interval', g('cfg-interval')?.value || '30');
+    const ivSel = g('cfg-interval')?.value || '30';
+    const ivCustom = parseInt(g('cfg-interval-custom')?.value, 10);
+    const interval = ivSel === 'custom' ? Math.min(480, Math.max(5, isNaN(ivCustom) ? 30 : ivCustom)) : ivSel;
+    localStorage.setItem('tucu_l2_interval', String(interval));
     localStorage.setItem('tucu_l2_days', g('cfg-max-days')?.value || '14');
     localStorage.setItem('tucu_l2_template', g('cfg-msg-template')?.value || '');
     localStorage.setItem('tucu_l2_block_holidays', String(g('cfg-block-holidays')?.checked));
@@ -123,7 +126,7 @@
     document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
       closeQrWizard();
       const b = document.getElementById('wa-node-status-badge');
-      if (b) { b.textContent = '🟢 OPEN'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'; }
+      if (b) { b.textContent = 'ONLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'; }
       global.adminL2Core?.showToast('Sesión de Baileys vinculada correctamente');
     });
 
@@ -133,7 +136,7 @@
     document.getElementById('btn-confirm-logout')?.addEventListener('click', () => {
       mLogout?.classList.add('hidden'); mLogout?.classList.remove('flex');
       const b = document.getElementById('wa-node-status-badge');
-      if (b) { b.textContent = '🔴 CLOSE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300'; }
+      if (b) { b.textContent = 'OFFLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300'; }
       global.adminL2Core?.showToast('Sesión desvinculada');
     });
 
@@ -143,12 +146,26 @@
 
     const drop = document.getElementById('drop-zone-l2'), inpF = document.getElementById('file-input-l2');
     drop?.addEventListener('click', () => inpF?.click());
-    drop?.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('border-indigo-500', 'bg-indigo-50/50'); });
-    drop?.addEventListener('dragleave', () => drop.classList.remove('border-indigo-500', 'bg-indigo-50/50'));
-    drop?.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('border-indigo-500', 'bg-indigo-50/50'); if (e.dataTransfer.files.length) handleImportFile(e.dataTransfer.files[0]); });
+    drop?.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('border-red-900', 'bg-red-50/40'); });
+    drop?.addEventListener('dragleave', () => drop.classList.remove('border-red-900', 'bg-red-50/40'));
+    drop?.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('border-red-900', 'bg-red-50/40'); if (e.dataTransfer.files.length) handleImportFile(e.dataTransfer.files[0]); });
     inpF?.addEventListener('change', (e) => { if (e.target.files.length) handleImportFile(e.target.files[0]); });
     document.getElementById('btn-save-global-config')?.addEventListener('click', saveGlobalConfig);
+    if (global.AdminBookingEngine?.mountPaymentConfigPanel) {
+      global.AdminBookingEngine.mountPaymentConfigPanel({
+        mountId: 'l2-payment-config-mount', level: 'l2', includeDepositRule: true,
+        onChange: () => { global.adminL2Calendar?.renderCalendar(); },
+        onResetDemo: () => { global.adminL2Calendar?.resetDemoBookings(); }
+      });
+    }
 
+    const ivEl = document.getElementById('cfg-interval'), ivCust = document.getElementById('cfg-interval-custom');
+    if (ivEl) {
+      const savedIv = localStorage.getItem('tucu_l2_interval') || '30';
+      if (['15', '30', '45', '60'].includes(savedIv)) { ivEl.value = savedIv; ivCust?.classList.add('hidden'); }
+      else { ivEl.value = 'custom'; if (ivCust) { ivCust.value = savedIv; ivCust.classList.remove('hidden'); } }
+      ivEl.addEventListener('change', () => ivCust?.classList.toggle('hidden', ivEl.value !== 'custom'));
+    }
     const savedName = localStorage.getItem('tucu_l2_biz_name') || localStorage.getItem('tucu_biz_name');
     if (savedName && document.getElementById('cfg-biz-name')) document.getElementById('cfg-biz-name').value = savedName;
     const defaultTpl = "¡Hola! Quiero confirmar mi reserva en {{comercio}}:\n- 🎟️ ID: #{{id}}\n- 👤 Nombre: {{cliente}}\n- 📅 Día: {{fecha}}\n- ⏰ Hora: {{hora}}\n- 👥 Personas: {{personas}}\n- 📞 Tel: {{telefono}}\n- 🔗 Autogestión: {{link}}\n¿Me confirman disponibilidad?";

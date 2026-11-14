@@ -86,9 +86,17 @@ export function renderHero(containerId = 'app-hero') {
     }
   };
 
-  // Botones CTAs hacia Precios y Activación de Nivel 2
+  const navigateToShowroom = (e) => {
+    e.preventDefault();
+    const target = document.getElementById('showroom') || document.getElementById('app-stage');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Botones CTAs: Primario a Precios (Nivel 2) y Terminal a Showroom
   ctaPrimary?.addEventListener('click', navigateToPrecios);
-  terminalCta?.addEventListener('click', navigateToPrecios);
+  terminalCta?.addEventListener('click', navigateToShowroom);
 
   return anamorphic;
 }

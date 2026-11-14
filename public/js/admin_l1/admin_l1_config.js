@@ -27,7 +27,7 @@
       return `<div class="p-3.5 rounded-2xl border border-[#E8E6DF] dark:border-[#2D2A28] ${cardBg} shadow-xs space-y-2 transition-all">
         <div class="flex items-center justify-between">
           <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" onchange="adminL1Config.toggleDay(${d}, this.checked)" ${s.enabled ? 'checked' : ''} class="w-4 h-4 rounded text-indigo-600 focus:ring-0">
+            <input type="checkbox" onchange="adminL1Config.toggleDay(${d}, this.checked)" ${s.enabled ? 'checked' : ''} class="w-4 h-4 rounded accent-[#800000] focus:ring-0">
             <span class="text-xs font-bold text-[#1C1A17] dark:text-[#F5F3EF]">${dayNames[d]}</span>
           </label>
           <span class="text-[10px] font-semibold text-[#7A766E] dark:text-[#9E9A93]">${s.enabled ? (s.isSplit ? '2 Turnos' : '1 Turno') : 'Cerrado'}</span>
@@ -42,7 +42,7 @@
             </div>
           </div>
           <div class="bg-[#FBFBF9] dark:bg-[#121110] p-2 rounded-xl border border-[#E8E6DF]/70 dark:border-[#2D2A28]/70 ${s.isSplit ? '' : 'opacity-40'}">
-            <div class="flex items-center justify-between mb-1"><span class="text-[9px] text-[#7A766E] dark:text-[#9E9A93] uppercase font-bold">Tarde</span><button type="button" onclick="adminL1Config.toggleSplit(${d})" class="text-[9px] text-indigo-500 font-bold cursor-pointer hover:underline">${s.isSplit ? 'Activo' : '+ Activar'}</button></div>
+            <div class="flex items-center justify-between mb-1"><span class="text-[9px] text-[#7A766E] dark:text-[#9E9A93] uppercase font-bold">Tarde</span><button type="button" onclick="adminL1Config.toggleSplit(${d})" class="text-[9px] text-red-900 dark:text-red-400 font-bold cursor-pointer hover:underline">${s.isSplit ? 'Activo' : 'Activar'}</button></div>
             <div class="flex items-center gap-1">
               <input type="time" value="${s.open2 || '17:00'}" ${s.isSplit ? '' : 'disabled'} onchange="adminL1Config.updateHour(${d}, 'open2', this.value)" class="w-full min-w-[85px] bg-white dark:bg-[#1C1A19] border border-[#E8E6DF] dark:border-[#2D2A28] rounded-lg px-2 py-1 text-xs text-center font-mono outline-none disabled:opacity-40">
               <span class="text-[#7A766E]">-</span>
@@ -71,10 +71,12 @@
 
   function saveConfig() {
     const v = (id) => document.getElementById(id);
+    const prevExt = global.AdminBookingEngine ? global.AdminBookingEngine.getConfig('l1') : {};
     configData = {
+      ...prevExt,
       requireDeposit: v('cfg-deposit-toggle')?.checked ?? true,
       depositType: v('cfg-deposit-type')?.value || 'percentage',
-      depositValue: parseInt(v('cfg-deposit-value')?.value, 10) || 50,
+      depositValue: Math.max(0, parseInt(v('cfg-deposit-value')?.value, 10) || 0),
       alias: v('inputAlias')?.value.trim() || configData.alias,
       cbu: v('inputCbu')?.value.trim().replace(/\D/g, '') || configData.cbu,
       waNumber: v('cfg-wa-number')?.value.trim().replace(/\D/g, '') || configData.waNumber,
@@ -84,14 +86,18 @@
       schedule
     };
     localStorage.setItem('tucu_schedule', JSON.stringify(schedule));
-    localStorage.setItem('tucu_l1_cfg_ext', JSON.stringify(configData));
+    if (global.AdminBookingEngine) global.AdminBookingEngine.saveConfig('l1', configData);
+    else localStorage.setItem('tucu_l1_cfg_ext', JSON.stringify(configData));
+    if (global.adminL1Pricing?.renderPricing) global.adminL1Pricing.renderPricing();
     localStorage.setItem('tucu_l1_alias', configData.alias);
     localStorage.setItem('tucu_l1_cbu', configData.cbu);
     localStorage.setItem('tucu_l1_wa_number', configData.waNumber);
     localStorage.setItem('tucu_l1_template', configData.template);
     localStorage.setItem('tucu_l1_feriados', configData.blockHolidays ? 'true' : 'false');
     const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
-    fetch(`/api/portal/${slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) }).catch(() => {});
+    if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
+      fetch(`/api/portal/${slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(configData) }).catch(() => {});
+    }
     updatePreview();
     const toast = document.getElementById('saveToast');
     if (toast) { toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 2200); }
@@ -124,7 +130,7 @@
       <div class="w-full max-w-sm rounded-2xl border border-[#E8E6DF] dark:border-[#2D2A28] bg-white dark:bg-[#1C1A19] p-6 shadow-2xl text-center space-y-4">
         <div class="flex items-center justify-between pb-2 border-b border-[#E8E6DF] dark:border-[#2D2A28]">
           <h3 class="text-sm font-bold text-[#1C1A17] dark:text-[#F5F3EF] flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Gateway WhatsApp (Baileys)</span></h3>
-          <button type="button" onclick="adminL1Config.closeBaileysModal()" class="text-xs text-[#7A766E] hover:text-[#1C1A17] dark:hover:text-white cursor-pointer font-bold">✕</button>
+          <button type="button" onclick="adminL1Config.closeBaileysModal()" aria-label="Cerrar" class="p-1 text-[#7A766E] hover:text-[#1C1A17] dark:hover:text-white cursor-pointer"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
         <div class="p-3 bg-white rounded-xl border border-slate-200 inline-block shadow-inner mx-auto">
           <svg class="w-36 h-36 mx-auto" viewBox="0 0 120 120" fill="currentColor"><rect width="120" height="120" fill="white" /><path d="M10,10 h35 v35 h-35 z M15,15 v25 h25 v-25 z M20,20 h15 v15 h-15 z M75,10 h35 v35 h-35 z M80,15 v25 h25 v-25 z M85,20 h15 v15 h-15 z M10,75 h35 v35 h-35 z M15,80 v25 h25 v-25 z M20,85 h15 v15 h-15 z M50,15 h5 v10 h-5 z M60,10 h5 v5 h-5 z M50,30 h10 v5 h-10 z M65,25 h5 v15 h-5 z M10,50 h10 v5 h-10 z M25,50 h15 v5 h-15 z M50,50 h20 v5 h-20 z M80,50 h10 v5 h-10 z M100,50 h10 v10 h-10 z M50,60 h5 v15 h-5 z M60,65 h15 v5 h-15 z M80,60 h5 v10 h-5 z M95,65 h15 v5 h-15 z M50,80 h10 v10 h-10 z M65,80 h10 v5 h-10 z M80,75 h20 v5 h-20 z M105,80 h5 v25 h-5 z M50,95 h5 v15 h-5 z M60,100 h15 v5 h-15 z M80,95 h15 v15 h-15 z" fill="#0f172a" /></svg>
@@ -133,18 +139,23 @@
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>WhatsApp Conectado · ${wa}</span></span>
           <p class="text-[11px] text-[#7A766E] dark:text-[#9E9A93] pt-1 leading-relaxed">Dispositivos vinculados > Escanear QR para sincronizar el bot despachador.</p>
         </div>
-        <button type="button" onclick="adminL1Config.closeBaileysModal()" class="w-full py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-xs">Listo / Cerrar</button>
+        <button type="button" onclick="adminL1Config.closeBaileysModal()" class="w-full py-2 rounded-xl text-xs font-bold admin-glass-primary">Listo / Cerrar</button>
       </div>
     </div>`;
   }
 
-  function closeBaileysModal() {
-    const root = document.getElementById('dynamicModalRoot');
-    if (root) root.innerHTML = '';
-  }
+  function closeBaileysModal() { const root = document.getElementById('dynamicModalRoot'); if (root) root.innerHTML = ''; }
 
   function init() {
     loadLocal(); renderSchedule(); populateInputs();
+    if (global.AdminHolidays) { global.AdminHolidays.renderLabel('l1-holidays-label'); global.AdminHolidays.loadHolidays(); }
+    if (global.AdminBookingEngine?.mountPaymentConfigPanel) {
+      global.AdminBookingEngine.mountPaymentConfigPanel({
+        mountId: 'l1-payment-methods-mount', level: 'l1', includeDepositRule: false,
+        onChange: () => { configData = { ...configData, ...global.AdminBookingEngine.getConfig('l1') }; },
+        onResetDemo: () => { const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria'; global.adminL1Agenda?.resetDemoBookings(slug); }
+      });
+    }
     ['cfg-deposit-toggle', 'cfg-deposit-type', 'cfg-deposit-value', 'inputAlias', 'inputCbu', 'cfg-wa-number', 'chk-remind-24h', 'chk-remind-2h', 'cfg-feriados-toggle', 'cfg-msg-template'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.addEventListener('input', saveConfig); el.addEventListener('change', saveConfig); }

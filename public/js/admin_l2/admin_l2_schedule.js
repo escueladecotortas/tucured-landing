@@ -14,17 +14,6 @@
 
   const dayNames = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado', 0: 'Domingo' };
 
-  const HOLIDAYS_CATALOG = [
-    { date: "2026-01-01", name: "Año Nuevo" }, { date: "2026-02-16", name: "Carnaval (Lunes)" },
-    { date: "2026-02-17", name: "Carnaval (Martes)" }, { date: "2026-03-24", name: "Día de la Memoria" },
-    { date: "2026-04-02", name: "Día del Veterano" }, { date: "2026-04-03", name: "Viernes Santo" },
-    { date: "2026-05-01", name: "Día del Trabajador" }, { date: "2026-05-25", name: "Revolución de Mayo" },
-    { date: "2026-06-17", name: "Paso a la Inmortalidad de Güemes" }, { date: "2026-06-20", name: "Día de la Bandera" },
-    { date: "2026-07-09", name: "Día de la Independencia" }, { date: "2026-08-17", name: "San Martín" },
-    { date: "2026-10-12", name: "Diversidad Cultural" }, { date: "2026-11-20", name: "Soberanía Nacional" },
-    { date: "2026-12-08", name: "Inmaculada Concepción" }, { date: "2026-12-25", name: "Navidad" }
-  ];
-
   let weeklySchedule = JSON.parse(localStorage.getItem('tucu_schedule') || JSON.stringify(defaultSchedule));
   let vacations = JSON.parse(localStorage.getItem('tucu_l2_vacations') || '[]');
 
@@ -38,20 +27,20 @@
         <div class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <input type="checkbox" onchange="adminL2Schedule.toggleDay(${day}, this.checked)" ${d.enabled ? 'checked' : ''} class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-              <span class="text-xs font-bold ${d.enabled ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}">${dayNames[day]}</span>
+              <input type="checkbox" onchange="adminL2Schedule.toggleDay(${day}, this.checked)" ${d.enabled ? 'checked' : ''} class="w-4 h-4 rounded accent-[#800000] cursor-pointer">
+              <span class="text-xs font-bold ${d.enabled ? 'text-stone-900 dark:text-stone-100' : 'text-stone-400'}">${dayNames[day]}</span>
             </div>
-            <button type="button" onclick="adminL2Schedule.toggleSplit(${day})" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer ${d.isSplit ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}">
-              ${d.isSplit ? '☀️ Horario Partido' : '🔄 Horario Corrido'}
+            <button type="button" onclick="adminL2Schedule.toggleSplit(${day})" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer ${d.isSplit ? 'bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-300 border border-red-200 dark:border-red-900' : 'admin-glass-pill'}">
+              ${d.isSplit ? 'Horario Partido' : 'Horario Corrido'}
             </button>
           </div>
           ${d.enabled ? `
             <div class="grid grid-cols-2 ${d.isSplit ? 'sm:grid-cols-4' : 'sm:grid-cols-2'} gap-2 pt-1">
-              <div><label class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Apertura</label><input type="time" value="${d.open}" onchange="adminL2Schedule.updateHour(${day}, 'open', this.value)" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500"></div>
-              <div><label class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Cierre</label><input type="time" value="${d.close}" onchange="adminL2Schedule.updateHour(${day}, 'close', this.value)" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500"></div>
+              <div><label class="block text-[10px] text-stone-500 dark:text-stone-400 mb-0.5">Apertura</label><input type="time" value="${d.open}" onchange="adminL2Schedule.updateHour(${day}, 'open', this.value)" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-lg px-2.5 py-1.5 text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-red-900"></div>
+              <div><label class="block text-[10px] text-stone-500 dark:text-stone-400 mb-0.5">Cierre</label><input type="time" value="${d.close}" onchange="adminL2Schedule.updateHour(${day}, 'close', this.value)" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-lg px-2.5 py-1.5 text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-red-900"></div>
               ${d.isSplit ? `
-                <div><label class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Reapertura</label><input type="time" value="${d.open2 || '17:00'}" onchange="adminL2Schedule.updateHour(${day}, 'open2', this.value)" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500"></div>
-                <div><label class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">Cierre Tarde</label><input type="time" value="${d.close2 || '21:00'}" onchange="adminL2Schedule.updateHour(${day}, 'close2', this.value)" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500"></div>
+                <div><label class="block text-[10px] text-stone-500 dark:text-stone-400 mb-0.5">Reapertura</label><input type="time" value="${d.open2 || '17:00'}" onchange="adminL2Schedule.updateHour(${day}, 'open2', this.value)" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-lg px-2.5 py-1.5 text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-red-900"></div>
+                <div><label class="block text-[10px] text-stone-500 dark:text-stone-400 mb-0.5">Cierre Tarde</label><input type="time" value="${d.close2 || '21:00'}" onchange="adminL2Schedule.updateHour(${day}, 'close2', this.value)" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-lg px-2.5 py-1.5 text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-red-900"></div>
               ` : ''}
             </div>
           ` : ''}
@@ -85,16 +74,17 @@
     global.adminL2Core?.showToast('Horarios de Lunes copiados a días hábiles');
   }
 
-  function renderHolidays() {
+  function renderHolidays(list) {
     const container = document.getElementById('holidays-container');
     if (!container) return;
-    container.innerHTML = HOLIDAYS_CATALOG.map(h => `
+    const holidays = Array.isArray(list) && list.length ? list : (global.AdminHolidays ? global.AdminHolidays.getCachedHolidays() : []);
+    container.innerHTML = holidays.map(h => `
       <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shadow-xs">
         <div class="min-w-0">
-          <span class="font-bold text-slate-800 dark:text-slate-200 block truncate text-xs">${h.name}</span>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${h.date}</span>
+          <span class="font-bold text-slate-800 dark:text-slate-200 block truncate text-xs">${h.nombre || h.name}</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${h.fecha || h.date}</span>
         </div>
-        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0">Feriado</span>
+        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-300 border border-red-200 dark:border-red-900 shrink-0">Feriado</span>
       </div>
     `).join('');
   }
@@ -102,22 +92,25 @@
   function renderVacations() {
     const c = document.getElementById('vacations-list-container');
     if (!c) return;
-    c.innerHTML = vacations.length === 0 ? '<p class="text-xs text-slate-400 italic py-2">No hay vacaciones ni cierres programados.</p>' : vacations.map((v, i) => `
+    const active = vacations.map((v, idx) => ({ v, idx })).filter(({ v }) => !v.deletedAt);
+    c.innerHTML = active.length === 0 ? '<p class="text-xs text-slate-400 italic py-2">No hay vacaciones ni cierres programados.</p>' : active.map(({ v, idx }) => `
       <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shadow-xs">
         <div>
           <span class="font-bold text-amber-700 dark:text-amber-400">${v.reason || 'Cierre Temporal'}</span>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">📅 ${v.from} al ${v.to}</p>
+          <p class="text-[11px] text-stone-500 dark:text-stone-400 font-mono">${v.from} al ${v.to}</p>
         </div>
-        <button type="button" onclick="adminL2Schedule.removeVacation(${i})" class="text-xs text-rose-600 hover:text-rose-700 font-semibold cursor-pointer px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40">Eliminar</button>
+        <button type="button" onclick="adminL2Schedule.removeVacation(${idx})" class="text-xs text-rose-600 hover:text-rose-700 font-semibold cursor-pointer px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40">Eliminar</button>
       </div>
     `).join('');
   }
 
   function removeVacation(i) {
-    vacations.splice(i, 1);
-    localStorage.setItem('tucu_l2_vacations', JSON.stringify(vacations));
-    renderVacations();
-    global.adminL2Core?.showToast('Cierre eliminado');
+    if (vacations[i]) {
+      vacations[i].deletedAt = new Date().toISOString();
+      localStorage.setItem('tucu_l2_vacations', JSON.stringify(vacations));
+      renderVacations();
+      global.adminL2Core?.showToast('Cierre archivado en histórico');
+    }
   }
 
   function addVacation() {
@@ -141,8 +134,14 @@
 
   function init() {
     renderScheduleMatrix();
+    global.AdminHolidays?.renderLabel('l2-holidays-label');
     renderHolidays();
+    global.AdminHolidays?.loadHolidays().then(renderHolidays);
     renderVacations();
+    const today = global.AdminShell?.localTodayStr?.() || '';
+    const vStart = document.getElementById('vacation-start-date'), vEnd = document.getElementById('vacation-end-date');
+    if (today && vStart) vStart.min = today;
+    if (today && vEnd) vEnd.min = today;
 
     document.getElementById('btn-copy-mon-to-all')?.addEventListener('click', copyMonToAll);
     document.getElementById('btn-add-vacation')?.addEventListener('click', addVacation);

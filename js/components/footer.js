@@ -38,10 +38,13 @@ export function renderFooter(containerId = 'app-footer') {
           </a>
         </div>
 
-        <!-- Créditos -->
-        <p class="text-xs text-slate-400 text-center md:text-right">
-          © ${year} Tucu Red — Herramientas Digitales para Negocios. Tucumán, Argentina.
-        </p>
+        <!-- Créditos y Cumplimiento Legal -->
+        <div class="text-xs text-slate-400 text-center md:text-right space-y-1">
+          <p>© ${year} Tucu Red — Herramientas Digitales para Negocios. Tucumán, Argentina.</p>
+          <p class="text-[11px] text-slate-400/90 font-medium">
+            Conforme a la Ley 25.326 de Protección de Datos Personales (Rep. Argentina).
+          </p>
+        </div>
 
       </div>
     </footer>

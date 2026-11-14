@@ -34,7 +34,7 @@ const LEVEL_MATRIX_V16 = {
     adminFeatures: [
       { icon: 'dashboard', title: 'SPA Administrativa avanzada de 3 vistas', desc: 'Control en tiempo real de agenda diaria, catálogo de precios y configuración.' },
       { icon: 'point_of_sale', title: 'Gestión ágil de turnos telefónicos y mostrador', desc: 'Carga inmediata de citas presenciales con bloqueo instantáneo.' },
-      { icon: 'shield', title: 'Gobernanza CRM Anti-No-Show y Lista VIP', desc: 'Lista Negra para clientes ausentes y fidelización de clientes VIP.' }
+      { icon: 'shield', title: 'Gestión Inteligente de Asistencias y Clientes VIP', desc: 'Control de ausencias reiteradas y atención prioritaria para tus clientes habituales.' }
     ]
   },
   l3: {
@@ -49,7 +49,7 @@ const LEVEL_MATRIX_V16 = {
     adminFeatures: [
       { icon: 'groups', title: 'Múltiples profesionales con agendas individuales', desc: 'Horarios semanales diferenciados para staff, terapeutas o colaboradores.' },
       { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Sillones, gabinetes, consultorios médicos o canchas deportivas.' },
-      { icon: 'alarm_on', title: 'Barredora Cron automática T-2hs por WhatsApp', desc: 'Recordatorio desatendido con confirmación 2 horas antes de cada cita.' }
+      { icon: 'alarm_on', title: 'Reconfirmación automática inteligente T-2hs por WhatsApp', desc: 'Aviso automático con confirmación 2 horas antes; si cancelan, el turno se libera al instante.' }
     ]
   }
 };

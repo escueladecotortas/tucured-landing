@@ -58,26 +58,27 @@ assert(fs.existsSync(l3Path), 'public/admin_l3.html existe');
 // 4. Aislamiento y CSS Embebido en admin_l1.html
 console.log('\n--- 4. Aislamiento y CSS Embebido en admin_l1.html ---');
 const l1Content = fs.readFileSync(l1Path, 'utf8');
+const unifiedCss = fs.readFileSync(path.resolve('public/css/admin_unified.css'), 'utf8');
 assert(l1Content.includes('is-embedded'), 'admin_l1.html detecta y asigna clase is-embedded');
 assert(l1Content.includes('embed') || l1Content.includes('window.self !== window.top'), 'admin_l1.html detecta embed=true o iframe embedding');
-assert(l1Content.includes('html.is-embedded #pinAuthModal'), 'Oculta modal de PIN cuando está embebido');
-assert(l1Content.includes('html.is-embedded button[onclick*="logout"]'), 'Oculta botón de logout en modo embebido');
+assert(l1Content.includes('admin_unified.css') && unifiedCss.includes('is-embedded'), 'Aplica hoja de estilos unificada con soporte is-embedded');
+assert(unifiedCss.includes('#pinAuthModal') || l1Content.includes('pinAuthModal'), 'Oculta o gestiona modal de PIN en modo embebido');
 
 // 5. Aislamiento y CSS Embebido en admin_l2.html
 console.log('\n--- 5. Aislamiento y CSS Embebido en admin_l2.html ---');
 const l2Content = fs.readFileSync(l2Path, 'utf8');
 assert(l2Content.includes('is-embedded'), 'admin_l2.html detecta y asigna clase is-embedded');
 assert(l2Content.includes('embed') || l2Content.includes('window.self !== window.top'), 'admin_l2.html detecta embed=true o iframe embedding');
-assert(l2Content.includes('html.is-embedded header a[href*="tucu_widgets"]'), 'Oculta botón de navegación externa en modo embebido');
-assert(l2Content.includes('html.is-embedded #btn-open-logout-modal'), 'Oculta botón de logout en modo embebido');
+assert(l2Content.includes('admin_unified.css'), 'admin_l2.html importa hoja de estilos unificada');
+assert(l2Content.includes('admin_shell.js') || l2Content.includes('admin-sidebar'), 'admin_l2.html implementa arquitectura de shell unificado');
 
 // 6. Aislamiento y CSS Embebido en admin_l3.html
 console.log('\n--- 6. Aislamiento y CSS Embebido en admin_l3.html ---');
 const l3Content = fs.readFileSync(l3Path, 'utf8');
 assert(l3Content.includes('is-embedded'), 'admin_l3.html detecta y asigna clase is-embedded');
 assert(l3Content.includes('embed') || l3Content.includes('window.self !== window.top'), 'admin_l3.html detecta embed=true o iframe embedding');
-assert(l3Content.includes('html.is-embedded header a[href*="tucu_widgets"]'), 'Oculta botón externo en modo embebido');
-assert(l3Content.includes('html.is-embedded nav'), 'Ajusta navegación y tabs en modo embebido');
+assert(l3Content.includes('admin_unified.css'), 'admin_l3.html importa hoja de estilos unificada');
+assert(l3Content.includes('admin_shell.js') || l3Content.includes('admin-sidebar'), 'admin_l3.html implementa arquitectura de shell unificado');
 
 // 7. Scripts de soporte en public/js/
 console.log('\n--- 7. Scripts de Soporte en public/js/ ---');

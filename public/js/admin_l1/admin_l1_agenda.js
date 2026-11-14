@@ -1,170 +1,166 @@
 // Archivo: public/js/admin_l1/admin_l1_agenda.js
-// Agenda L1: Filtros Avanzados, Modal +Nueva Cita & Semilla Demo (Nexus OS v11.1 - < 170 líneas)
+// Agenda L1: Reversión Explícita, Curado Temporal, Filtro de Servicios Activos (< 180 líneas)
 
 (function (global) {
-  let bookings = [];
-  let filterTime = 'hoy', filterStatus = 'todos', searchQuery = '';
-  const fmt = (n) => '$' + Number(n || 0).toLocaleString('es-AR');
+  let bookings = [], filterTime = 'hoy', filterStatus = 'todos', searchQuery = '';
+  const SLOTS = ['08:00', '09:00', '10:00', '11:30', '13:00', '15:00', '16:30', '18:00', '19:30', '21:00'];
+  const eng = () => global.AdminBookingEngine;
+  const fmt = (n) => (eng() ? eng().fmt(n) : '$' + Number(n || 0).toLocaleString('es-AR'));
+  const norm = (s) => (global.AdminShell ? global.AdminShell.normStr(s) : String(s || '').toLowerCase());
+  const isoDay = (offset = 0) => (global.AdminShell ? global.AdminShell.localTodayStr(offset) : new Date(Date.now() + offset * 86400000).toISOString().split('T')[0]);
+  const currentSlug = () => localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
 
-  const DEMO_SEED = [
-    { id: 'b_1', token: '#TK-8421', clientName: 'Martín Gómez', clientPhone: '3815112233', service: 'Corte Degradé / Fade', deposit: '$5.000', price: '$10.000', day: 'Hoy', time: '15:00', status: 'confirmado', dateStr: new Date().toISOString().split('T')[0] },
-    { id: 'b_2', token: '#TK-3319', clientName: 'Lucas Peralta', clientPhone: '3814998877', service: 'Corte Clásico / Tradicional', deposit: '$4.000', price: '$8.000', day: 'Hoy', time: '16:30', status: 'pendiente', dateStr: new Date().toISOString().split('T')[0] },
-    { id: 'b_3', token: '#TK-9012', clientName: 'Facundo Ruiz', clientPhone: '3816223344', service: 'Corte + Perfilado de Barba', deposit: '$7.000', price: '$14.000', day: 'Hoy', time: '17:30', status: 'en_atencion', dateStr: new Date().toISOString().split('T')[0] },
-    { id: 'b_4', token: '#TK-5520', clientName: 'Javier Soto', clientPhone: '3813445566', service: 'Cuidado de Barba', deposit: '$3.000', price: '$6.000', day: 'Hoy', time: '19:00', status: 'cancelado', dateStr: new Date().toISOString().split('T')[0] }
-  ];
-
-  function getLocalBookings(slug) {
-    try {
-      const stored = localStorage.getItem(`tucu_bookings_${slug}`);
-      if (stored) { const parsed = JSON.parse(stored); if (Array.isArray(parsed) && parsed.length > 0) return parsed; }
-    } catch (_) {}
-    return DEMO_SEED;
+  function toast(msg) {
+    const t = document.getElementById('saveToast');
+    if (t) { const sp = t.querySelector('span'); if (sp) sp.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2200); }
   }
 
   function saveLocalBookings(slug, list) {
     bookings = list;
-    try { localStorage.setItem(`tucu_bookings_${slug}`, JSON.stringify(list)); } catch (_) {}
+    try { localStorage.setItem(`tucu_l1_bookings_${slug}`, JSON.stringify(list)); } catch (_) {}
     renderAgenda();
+  }
+
+  function resetDemoBookings(slug = currentSlug()) {
+    const seed = global.AdminDemoSeed ? global.AdminDemoSeed.resetLevel('l1', slug) : [];
+    saveLocalBookings(slug, seed);
+    toast('Base de práctica L1 restaurada');
   }
 
   async function loadBookings(slug) {
+    let raw = [];
     try {
-      const res = await fetch(`/api/portal/${slug}/bookings`);
-      if (res.ok) {
-        const d = await res.json();
-        if (Array.isArray(d.bookings) && d.bookings.length > 0) { bookings = d.bookings; renderAgenda(); return; }
-      }
+      const parsed = JSON.parse(localStorage.getItem(`tucu_l1_bookings_${slug}`) || '[]');
+      if (Array.isArray(parsed) && parsed.length > 0 && !parsed.some(b => b.service?.includes('Lash'))) raw = parsed;
     } catch (_) {}
-    bookings = getLocalBookings(slug);
-    renderAgenda();
+    if (raw.length === 0) raw = global.AdminDemoSeed ? global.AdminDemoSeed.getL1Seed(eng()?.getConfig('l1')) : [];
+    bookings = eng() ? raw.map(b => eng().hydrateBooking(b, 'l1', 8000)) : raw;
+    saveLocalBookings(slug, bookings);
+    if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
+      try {
+        const res = await fetch(`/api/portal/${slug}/bookings`);
+        if (res.ok) { const d = await res.json(); if (Array.isArray(d.bookings) && d.bookings.length > 0) saveLocalBookings(slug, d.bookings.map(b => (eng() ? eng().hydrateBooking(b, 'l1', 8000) : b))); }
+      } catch (_) {}
+    }
+  }
+
+  function matchTimeWindow(b) {
+    const today = isoDay(0), bDate = b.dateStr || today;
+    if (filterTime === 'hoy') return bDate === today;
+    if (filterTime === 'semana') return bDate >= isoDay(-3) && bDate <= isoDay(7);
+    if (filterTime === 'mes') return bDate.slice(0, 7) === today.slice(0, 7);
+    if (filterTime === 'rango') {
+      const from = document.getElementById('filter-date-from')?.value || '', to = document.getElementById('filter-date-to')?.value || '';
+      return (!from || bDate >= from) && (!to || bDate <= to);
+    }
+    return true;
   }
 
   function getFilteredBookings() {
-    return bookings.filter(b => {
-      if (filterStatus !== 'todos') {
-        if (filterStatus === 'confirmado' && b.status !== 'confirmado') return false;
-        if (filterStatus === 'pendiente' && b.status !== 'pendiente') return false;
-        if (filterStatus === 'en_atencion' && b.status !== 'en_atencion') return false;
-        if (filterStatus === 'cancelado' && b.status !== 'cancelado') return false;
-      }
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const matchName = (b.clientName || '').toLowerCase().includes(q);
-        const matchPhone = (b.clientPhone || '').includes(q);
-        const matchService = (b.service || '').toLowerCase().includes(q);
-        if (!matchName && !matchPhone && !matchService) return false;
-      }
-      return true;
+    const q = norm(searchQuery), stFilter = filterStatus === 'todos' ? 'ALL' : eng()?.normalizeKey(filterStatus);
+    return bookings.filter(b => !b.deletedAt).filter(b => {
+      if (!matchTimeWindow(b)) return false;
+      if (stFilter !== 'ALL' && eng()?.normalizeKey(b.status) !== stFilter) return false;
+      return !q || norm(b.clientName).includes(q) || norm(b.clientPhone).includes(q) || norm(b.service).includes(q) || norm(b.token).includes(q);
     });
   }
 
-  function renderAgenda() {
-    const box = document.getElementById('bookingsListContainer');
-    if (!box) return;
-    const active = bookings.filter(b => b.status !== 'completado' && b.status !== 'cancelado');
-    const sumDeposits = bookings.reduce((acc, b) => (b.status === 'confirmado' || b.status === 'en_atencion' || b.status === 'completado') ? acc + (parseInt(String(b.deposit || '0').replace(/\D/g, ''), 10) || 0) : acc, 3000);
-    const kpiDate = document.getElementById('kpi-date-badge'), kpiTurnos = document.getElementById('kpi-turnos-count'), kpiTotal = document.getElementById('kpi-deposit-total');
-    if (kpiDate) kpiDate.textContent = filterTime === 'hoy' ? 'Hoy' : (filterTime === 'semana' ? 'Esta Semana' : 'Este Mes');
-    if (kpiTurnos) kpiTurnos.textContent = `${active.length} citas activas`;
-    if (kpiTotal) kpiTotal.textContent = fmt(Math.max(sumDeposits, 15000));
+  function updateKpis(periodList) {
+    const k = eng() ? eng().computeKpis(periodList) : { activeCount: 0, creditedDeposits: 0, potentialDeposits: 0, doneCount: 0, noShowCount: 0 };
+    const total = periodList.length, evalTotal = Math.max(1, k.doneCount + k.noShowCount + k.confirmedCount);
+    const rate = total > 0 ? Math.round(((k.doneCount + k.confirmedCount) / evalTotal) * 100) : 0;
+    const labels = { hoy: 'Hoy', semana: 'Semana', mes: 'Este Mes', rango: 'Rango' };
+    const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const setW = (id, w) => { const el = document.getElementById(id); if (el) el.style.width = `${w}%`; };
+    setT('kpi-date-badge', labels[filterTime] || 'Hoy');
+    setT('kpi-turnos-count', `${k.activeCount} ${k.activeCount === 1 ? 'activo' : 'activos'}`);
+    setT('kpi-deposit-total', fmt(k.creditedDeposits));
+    setT('kpi-attendance-rate', `${rate}%`);
+    setW('kpi-turnos-bar', total > 0 ? Math.min(100, Math.round((k.activeCount / total) * 100)) : 0);
+    setW('kpi-deposit-bar', k.potentialDeposits > 0 ? Math.min(100, Math.round((k.creditedDeposits / k.potentialDeposits) * 100)) : 0);
+    setW('kpi-attendance-bar', rate);
+  }
 
+  function renderAgenda() {
+    document.getElementById('filter-range-panel')?.classList.toggle('hidden', filterTime !== 'rango');
+    updateKpis(bookings.filter(b => !b.deletedAt && matchTimeWindow(b)));
+    const box = document.getElementById('bookingsListContainer'); if (!box) return;
     const list = getFilteredBookings();
-    if (list.length === 0) {
-      box.innerHTML = '<div class="p-8 text-center text-slate-500 dark:text-slate-400 text-xs rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">No se encontraron turnos con el filtro seleccionado.</div>';
-      return;
-    }
+    if (!list.length) { box.innerHTML = `<div class="admin-card p-8 text-center text-xs text-stone-500">No hay turnos para este filtro en la agenda.</div>`; return; }
     box.innerHTML = list.map(bk => {
-      const st = bk.status || 'pendiente', isDone = st === 'completado', isCancel = st === 'cancelado';
-      const stBadge = isDone ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' : (st === 'confirmado' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : (st === 'en_atencion' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : (isCancel ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800')));
-      const stLabel = isDone ? 'Finalizado' : (st === 'confirmado' ? 'Confirmado' : (st === 'en_atencion' ? 'En Atención' : (isCancel ? 'Cancelado' : 'Pendiente Seña')));
-      const actBtn = isDone || isCancel ? '' : (st === 'pendiente'
-        ? `<button onclick="adminL1Agenda.updateStatus('${bk.id}','en_atencion')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 cursor-pointer shadow-xs">Acreditar Seña</button>`
-        : `<button onclick="adminL1Agenda.updateStatus('${bk.id}','completado')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer shadow-xs">Marcar Atendido</button>`);
-      return `<article class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isDone || isCancel ? 'opacity-40 grayscale' : ''}">
-        <div class="flex items-center gap-3.5">
-          <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center shrink-0">
-            <span class="text-sm font-bold text-slate-800 dark:text-slate-100 font-mono">${bk.time}</span><span class="text-[9px] text-slate-400 uppercase">${bk.day}</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2"><h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${bk.token}</span></div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${bk.service} · <span class="font-mono">${bk.clientPhone}</span></p>
+      const meta = eng().getMeta(bk.status), muted = meta.key === 'COMPLETED' || meta.key === 'CANCELLED' || meta.key === 'NO_SHOW';
+      return `<article class="admin-card flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${muted ? 'opacity-80' : ''}">
+        <div class="flex items-center gap-3.5 min-w-0">
+          <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex flex-col items-center justify-center shrink-0"><span class="text-sm font-bold text-stone-800 dark:text-stone-100 font-mono">${bk.time}</span><span class="text-[9px] text-stone-400 uppercase">${bk.dateStr || bk.day}</span></div>
+          <div class="min-w-0 space-y-1">
+            <div class="flex items-center gap-2 flex-wrap"><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${bk.token}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(bk.status, bk.prevStatus)}</div>
+            <p class="text-xs text-stone-500 dark:text-stone-400">${bk.service} (${fmt(bk.price)}) · <span class="font-mono">${bk.clientPhone}</span></p>
+            ${eng().renderDepositHtml(bk)}
           </div>
         </div>
-        <div class="flex items-center gap-3 self-end sm:self-center">
-          <div class="text-right"><span class="text-xs font-bold block text-indigo-600 dark:text-indigo-400">Seña: ${bk.deposit}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${stBadge}">${stLabel}</span></div>
-          ${actBtn}
-        </div>
+        <div class="flex items-center flex-wrap gap-2 self-end lg:self-center shrink-0">${eng().renderActionButtons(bk.id, bk.status, 'adminL1Agenda', bk.prevStatus)}</div>
       </article>`;
     }).join('');
   }
 
-  function updateStatus(id, next) {
-    const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
-    const bk = bookings.find(b => b.id === id);
-    if (bk) { bk.status = next; saveLocalBookings(slug, [...bookings]); }
-    fetch(`/api/portal/${slug}/bookings/${id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) }).catch(() => {});
+  function persistStatus(bk, msg) {
+    const slug = currentSlug();
+    saveLocalBookings(slug, [...bookings]);
+    if (msg) toast(msg);
+    if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
+      fetch(`/api/portal/${slug}/bookings/${bk.id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: bk.status }) }).catch(() => {});
+    }
+  }
+  function setStatus(id, nextCanon) { const bk = bookings.find(b => b.id === id); if (bk) { eng().applyTransition(bk, nextCanon, 'l1'); persistStatus(bk, `Estado: ${eng().getMeta(bk.status).label}`); } }
+  function undoStatus(id) { const bk = bookings.find(b => b.id === id); if (bk) { eng().undoTransition(bk, 'l1'); persistStatus(bk, `Revertido a ${eng().getMeta(bk.status).label}`); } }
+  function creditDeposit(id) {
+    const bk = bookings.find(b => b.id === id); if (!bk) return;
+    eng().openPaymentPicker({ title: `Acreditar Seña · ${bk.clientName}`, amount: bk.depositAmount, level: 'l1', onConfirm: (method) => { eng().applyTransition(bk, 'CONFIRMED', 'l1', method); persistStatus(bk, `Seña acreditada (${method})`); } });
   }
 
   function openNewBookingModal() {
-    const srvs = global.adminL1Pricing ? global.adminL1Pricing.getServices() : [];
-    const root = document.getElementById('dynamicModalRoot');
-    if (!root) return;
-    root.innerHTML = `
-      <div id="newBookingModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-4 shadow-2xl">
-          <div class="flex items-center justify-between"><h3 class="text-base font-bold text-slate-900 dark:text-slate-100">+ Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">&times;</button></div>
-          <form id="formNewBooking" onsubmit="adminL1Agenda.saveManualBooking(event)" class="space-y-3 text-xs">
-            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100">${srvs.map(s => `<option value="${s.name}" data-dep="${s.depositAmount}">${s.name} (${fmt(s.priceNumeric)})</option>`).join('')}</select></div>
-            <div class="grid grid-cols-2 gap-2">
-              <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Fecha</label><input type="date" id="nb-date" required value="${new Date().toISOString().split('T')[0]}" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
-              <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"><option>10:00</option><option>11:30</option><option>15:00</option><option>16:30</option><option>18:00</option><option>19:30</option></select></div>
-            </div>
-            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
-            <div><label class="block text-[10px] uppercase text-slate-400 mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 outline-none text-slate-900 dark:text-slate-100"></div>
-            <div class="flex gap-2 pt-2"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 font-bold text-slate-500 cursor-pointer">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer shadow-xs">Guardar Turno</button></div>
-          </form>
-        </div>
-      </div>`;
+    const rawSrvs = global.adminL1Pricing ? global.adminL1Pricing.getServices(false) : [];
+    const srvs = rawSrvs.filter(s => (global.AdminShell ? global.AdminShell.isServiceAvailable(s) : s.isActive !== false && !s.deletedAt));
+    const root = document.getElementById('dynamicModalRoot'); if (!root) return;
+    const methods = eng().getEnabledMethods('l1'), today = isoDay(0);
+    root.innerHTML = `<div id="newBookingModal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4"><div class="w-full max-w-md rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#181B22] p-5 space-y-4 shadow-2xl"><div class="flex items-center justify-between"><h3 class="text-base font-bold text-stone-900 dark:text-stone-100 font-title">Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-stone-400 hover:text-stone-600 cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><form id="formNewBooking" onsubmit="adminL1Agenda.saveManualBooking(event)" class="space-y-3 text-xs"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${srvs.map(s => `<option value="${s.name}" data-price="${s.priceNumeric}" data-req="${s.requireDeposit !== false}">${s.name} (${fmt(s.priceNumeric)} · Seña ${fmt(s.depositAmount)})</option>`).join('') || '<option value="">Sin servicios activos</option>'}</select></div><div class="grid grid-cols-2 gap-2"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Fecha</label><input type="date" id="nb-date" required min="${today}" value="${today}" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></select></div></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div class="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 space-y-2"><label class="flex items-center gap-2 font-semibold cursor-pointer"><input type="checkbox" id="nb-dep-paid" checked class="w-4 h-4 accent-[#800000]"><span>¿Seña cobrada al agendar?</span></label><select id="nb-method" class="w-full p-2 rounded-lg bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('')}</select></div><div class="flex gap-2 pt-1"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full admin-glass-btn font-bold">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full admin-glass-primary font-bold">Guardar Turno</button></div></form></div></div>`;
+    global.AdminShell?.bindDateTimeGuards({ dateId: 'nb-date', timeId: 'nb-time', slots: SLOTS });
+    document.getElementById('nb-dep-paid')?.addEventListener('change', (ev) => { document.getElementById('nb-method')?.classList.toggle('hidden', !ev.target.checked); });
   }
 
-  function closeModal() {
-    const root = document.getElementById('dynamicModalRoot');
-    if (root) root.innerHTML = '';
-  }
+  function closeModal() { const root = document.getElementById('dynamicModalRoot'); if (root) root.innerHTML = ''; }
 
   function saveManualBooking(e) {
     e.preventDefault();
-    const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
-    const srv = document.getElementById('nb-srv')?.value || 'Corte Clásico';
-    const name = document.getElementById('nb-name')?.value.trim() || 'Cliente Mostrador';
-    const phone = document.getElementById('nb-phone')?.value.replace(/\D/g, '') || '3810000000';
-    const time = document.getElementById('nb-time')?.value || '16:00';
-    const date = document.getElementById('nb-date')?.value || new Date().toISOString().split('T')[0];
-    const newBk = {
-      id: 'mbk_' + Date.now(), token: '#TK-MANUAL', clientName: name, clientPhone: phone,
-      service: srv, deposit: '$4.000', price: '$8.000', day: 'Hoy', time: time, status: 'confirmado', dateStr: date
-    };
-    saveLocalBookings(slug, [newBk, ...bookings]);
-    closeModal();
+    const sel = document.getElementById('nb-srv'), opt = sel?.selectedOptions?.[0], date = document.getElementById('nb-date')?.value || isoDay(0);
+    const time = document.getElementById('nb-time')?.value || '', today = isoDay(0);
+    if (!sel?.value) return toast('Activa al menos un servicio antes de agendar');
+    if (date < today || !time || (date === today && global.AdminShell && time <= global.AdminShell.currentHHMM())) return toast('Selecciona fecha y horario futuros');
+    const price = Number(opt?.dataset?.price || 8000), req = opt?.dataset?.req !== 'false';
+    const depositAmount = eng().calcDeposit(price, 'l1', req), paid = depositAmount === 0 ? true : (document.getElementById('nb-dep-paid')?.checked ?? true);
+    const method = paid ? (depositAmount === 0 ? null : document.getElementById('nb-method')?.value || 'Efectivo') : null;
+    const name = document.getElementById('nb-name')?.value.trim() || 'Cliente Mostrador', phone = document.getElementById('nb-phone')?.value.replace(/\D/g, '') || '3810000000';
+    saveLocalBookings(currentSlug(), [{ id: 'mbk_' + Date.now(), token: '#TK-' + Math.random().toString(36).substring(2, 6).toUpperCase(), clientName: name, clientPhone: phone, service: sel.value, price, depositAmount, depositPaid: paid, paymentMethod: method, paidAt: paid ? new Date().toISOString() : null, day: date === today ? 'Hoy' : date, time, status: paid ? 'confirmado' : 'pendiente', dateStr: date, prevStatus: null }, ...bookings]);
+    closeModal(); toast('Turno agendado correctamente');
   }
 
   function init() {
-    const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
-    loadBookings(slug);
+    const fFrom = document.getElementById('filter-date-from'), fTo = document.getElementById('filter-date-to');
+    if (fFrom && !fFrom.value) fFrom.value = isoDay(-7); if (fTo && !fTo.value) fTo.value = isoDay(7);
+    fFrom?.addEventListener('change', renderAgenda); fTo?.addEventListener('change', renderAgenda);
+    loadBookings(currentSlug());
     document.querySelectorAll('[data-tfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-tfilter]').forEach(x => { x.className = 'px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'; });
-      b.className = 'px-3 py-1.5 rounded-lg font-bold bg-indigo-600 text-white shadow-xs';
+      document.querySelectorAll('[data-tfilter]').forEach(x => { x.className = 'admin-glass-pill px-3 py-1.5 rounded-lg font-semibold'; });
+      b.className = 'admin-glass-pill is-active px-3 py-1.5 rounded-lg font-bold';
       filterTime = b.getAttribute('data-tfilter'); renderAgenda();
     }));
     document.querySelectorAll('[data-sfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-sfilter]').forEach(x => { x.className = 'px-2.5 py-1 rounded-full text-slate-500'; });
-      b.className = 'px-2.5 py-1 rounded-full font-bold bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white';
+      document.querySelectorAll('[data-sfilter]').forEach(x => { x.className = 'admin-glass-pill px-2.5 py-1 rounded-full font-semibold'; });
+      b.className = 'admin-glass-pill is-active px-2.5 py-1 rounded-full font-bold';
       filterStatus = b.getAttribute('data-sfilter'); renderAgenda();
     }));
-    document.getElementById('inputSearchBooking')?.addEventListener('input', (e) => {
-      searchQuery = e.target.value.trim(); renderAgenda();
-    });
+    document.getElementById('inputSearchBooking')?.addEventListener('input', (e) => { searchQuery = e.target.value.trim(); renderAgenda(); });
   }
 
-  global.adminL1Agenda = { init, loadBookings, renderAgenda, updateStatus, openNewBookingModal, closeModal, saveManualBooking };
+  global.adminL1Agenda = { init, loadBookings, renderAgenda, setStatus, undoStatus, creditDeposit, resetDemoBookings, openNewBookingModal, closeModal, saveManualBooking };
 })(typeof window !== 'undefined' ? window : global);

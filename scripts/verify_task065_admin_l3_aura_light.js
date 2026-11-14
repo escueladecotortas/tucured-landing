@@ -46,10 +46,10 @@ monitoredFiles.forEach(file => {
 // 2. COMPUERTA ESTÁNDAR AURA LIGHT & PALETA LUMINOSA
 console.log('\n2. COMPUERTA ESTÁNDAR AURA LIGHT & PALETA LUMINOSA:');
 const l3Html = fs.readFileSync(path.join(rootDir, 'public/admin_l3.html'), 'utf8');
-assert(l3Html.includes('bg-slate-50') && l3Html.includes('border-slate-200'), 'admin_l3.html utiliza fondos bg-slate-50 y bordes border-slate-200');
+assert(l3Html.includes('admin_unified.css') && l3Html.includes('admin-shell'), 'admin_l3.html utiliza arquitectura unificada Warm Studio');
 assert(l3Html.includes('class="light') || l3Html.includes("'light'"), 'admin_l3.html establece light mode como estándar por defecto');
 assert(!l3Html.includes('<body class="min-h-full flex flex-col font-sans bg-zinc-950'), 'admin_l3.html erradicó monocromo dark rígido en body');
-assert(l3Html.includes('Aura Light'), 'admin_l3.html renderiza badge canónico Aura Light');
+assert(l3Html.includes('Admin L3'), 'admin_l3.html renderiza encabezado canónico de Nivel 3');
 assert(l3Html.includes('btnThemeToggle'), 'admin_l3.html provee conmutador de tema claro/oscuro');
 
 // 3. COMPUERTA MODELADO DE RECURSOS FÍSICOS VS. PERSONAL HUMANO
@@ -69,7 +69,7 @@ assert(resJs.includes('toggleActive') && resJs.includes('openEditModal'), 'view_
 
 // 4. COMPUERTA TELEMETRÍA VISUAL CRON T-2HS
 console.log('\n4. COMPUERTA TELEMETRÍA VISUAL CRON T-2HS:');
-assert(l3Html.includes('cron-telemetry-badge') && l3Html.includes('Cron T-2hs: ACTIVO'), 'admin_l3.html incorpora badge visual de telemetría en topbar');
+assert(l3Html.includes('cron-telemetry-badge') && l3Html.includes('Cron T-2hs') && l3Html.includes('ACTIVO'), 'admin_l3.html incorpora badge visual de telemetría en topbar o sidebar');
 assert(agendaJs.includes('Daemon Cron T-2hs') && agendaJs.includes('executeCronSweep'), 'view_agenda.js despliega tarjeta de telemetría activa con botón de barrido');
 assert(agendaJs.includes('Liberados (Cron)'), 'view_agenda.js cuantifica turnos liberados por el cron');
 
@@ -86,7 +86,7 @@ const checkHttp = () => new Promise((resolve) => {
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
       assert(body.includes('admin_core.js'), 'Respuesta HTTP admin_l3 incluye scripts modulares');
-      assert(body.includes('Aura Light'), 'Respuesta HTTP admin_l3 renderiza badge Aura Light');
+      assert(body.includes('Admin L3'), 'Respuesta HTTP admin_l3 renderiza consola Nivel 3');
       assert(body.includes('view_resources.js'), 'Respuesta HTTP admin_l3 incluye módulo view_resources.js');
       assert(body.includes('view_telemetry.js'), 'Respuesta HTTP admin_l3 incluye módulo view_telemetry.js');
       resolve();

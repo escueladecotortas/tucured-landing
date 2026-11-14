@@ -5,7 +5,7 @@
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
-import { getSystemCalendar, getVisibleDays, isSelectedDaySunday, isTimePast } from './showcase_state.js';
+import { getSystemCalendar, getVisibleDays, isSelectedDaySunday, isTimePast, getActiveCatalogServices } from './showcase_state.js';
 
 export const ShowcaseTemplatesL3 = {
   render(rubroId, state, rubro) {
@@ -63,11 +63,15 @@ export const ShowcaseTemplatesL3 = {
   },
 
   renderCatalog(r, state, activeColor) {
+    const items = getActiveCatalogServices(state, r);
+    const listHtml = items.length === 0
+      ? '<div class="col-span-2 p-3 text-center text-xs text-slate-500 bg-slate-100 rounded-xl border border-slate-200">Sin servicios disponibles actualmente</div>'
+      : items.map((cat, idx) => `
+        <button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="p-2 rounded-xl text-left border cursor-pointer transition-all ${(state.selectedOption || 0) === idx ? `${activeColor} bg-slate-100 font-bold shadow-xs` : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">
+          <span class="block text-xs text-slate-900">${cat.name}</span><span class="block text-[10px] text-slate-500 font-mono mt-0.5">${cat.dur || ''}</span>
+        </button>`).join('');
     return `<div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Catálogo con Duración</h4>
-      <div class="grid grid-cols-2 gap-1.5">${r.catalogL3.map((cat, idx) => `
-        <button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="p-2 rounded-xl text-left border cursor-pointer transition-all ${state.selectedOption === idx ? `${activeColor} bg-slate-100 font-bold shadow-xs` : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">
-          <span class="block text-xs text-slate-900">${cat.name}</span><span class="block text-[10px] text-slate-500 font-mono mt-0.5">${cat.dur}</span>
-        </button>`).join('')}</div></div>`;
+      <div class="grid grid-cols-2 gap-1.5">${listHtml}</div></div>`;
   },
 
   renderSubmitBtn(r) {

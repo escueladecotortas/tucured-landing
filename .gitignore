@@ -12,3 +12,4 @@ temp/
 
 # Local Netlify folder
 .netlify
+.tmp-cdp-*/
