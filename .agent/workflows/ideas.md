@@ -35,3 +35,8 @@
 
 - **[IDEA-010] Auditoría Exploratoria Mobile Viewport Angosto (< 380px):** Verificar ergonomía de uso en viewports angostos (ej. iPhone SE 375px) sobre las 3 consolas de administración Aura Light (L1, L2, L3) y en iframe embebido.
 - **[IDEA-011] Compuerta Automática de Enlaces Locales en Argus:** Integrar en las suites de pruebas la detección estricta de rutas de archivos inexistentes (ej. 404s en enlaces backoffice) antes de autorizar el cierre de tareas.
+
+### 7. WhatsApp Self-Hosted, Límites Operativos y Patrones Arquitectónicos (Sesión 2026-11-14)
+
+- **[IDEA-012] Migración / Soporte `whatsmeow` (`Evolution GO`) en Nodo Mini HP (`192.168.100.27`):** Evaluar puente WhatsApp en Go con *jitter* anti-ráfaga (5–15s entre mensajes) e incorporar en el contrato comercial de Tucu Red la tabla de límites operativos recomendados (1–25 msg/día en líneas nuevas; 1–80 msg/día en líneas maduras) bajo cláusula de uso transaccional responsable.
+- **[IDEA-013] Compuerta Fija de Paridad Dual & Normalización Temporal ART (`localTodayStr`):** Mantener como regla obligatoria en el enjambre que toda mutación sobre consolas o portal cliente en `tucured-landing` replique byte-a-byte en `C:\Users\leola\Downloads\tucured-engine\public\`, y evitar `toISOString().slice(0, 10)` para fechas operativas en Argentina (GMT-3) tras las 21:00 ART.
