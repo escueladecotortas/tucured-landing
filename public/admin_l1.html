@@ -12,29 +12,11 @@
   <link rel="stylesheet" href="/css/admin_unified.css">
 </head>
 <body class="admin-shell">
-  <!-- Modal PIN Táctil 3x4 & Biometría WebAuthn -->
-  <div id="pinAuthModal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-xl flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-xs rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#181B22] p-6 shadow-2xl text-center space-y-3.5">
-      <div class="relative w-14 h-14 rounded-2xl mx-auto overflow-hidden border border-stone-200 dark:border-stone-800 flex items-center justify-center shadow-lg bg-[#800000] text-white">
-        <span id="pin-brand-initials" class="font-black text-lg">PB</span>
-        <img id="pin-brand-logo" src="" alt="Logo" class="absolute inset-0 w-full h-full object-cover hidden" onload="this.classList.remove('hidden')">
-      </div>
-      <div><h2 id="pin-brand-title" class="text-base font-bold text-stone-900 dark:text-stone-100 font-title">Panel de Gestión</h2><p class="text-xs text-stone-500 dark:text-stone-400">Comercio: <strong id="pin-brand-name" class="text-stone-900 dark:text-stone-100">Peluquería Central</strong></p></div>
-      <button id="btnWebAuthn" type="button" onclick="adminL1Auth.authenticateBiometrics()" class="w-full py-2.5 px-3 rounded-xl admin-glass-btn text-xs font-semibold flex items-center justify-center gap-2"><svg class="w-4 h-4 text-red-900 dark:text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.026.99-4.183.99-6.417A9.97 9.97 0 0012 3a9.97 9.97 0 00-7.99 3.99"/></svg><span>Acceder con Huella o Face ID</span></button>
-      <div class="flex items-center gap-2 py-0.5"><div class="h-px bg-stone-200 dark:bg-stone-800 flex-1"></div><span class="text-[10px] text-stone-400 uppercase tracking-widest">o con PIN</span><div class="h-px bg-stone-200 dark:bg-stone-800 flex-1"></div></div>
-      <div id="pinDotsContainer" class="flex justify-center gap-3"><div class="pin-dot w-3.5 h-3.5 rounded-full border border-stone-400 transition-all"></div><div class="pin-dot w-3.5 h-3.5 rounded-full border border-stone-400 transition-all"></div><div class="pin-dot w-3.5 h-3.5 rounded-full border border-stone-400 transition-all"></div><div class="pin-dot w-3.5 h-3.5 rounded-full border border-stone-400 transition-all"></div></div>
-      <p id="pinErrorMsg" class="text-xs text-rose-500 font-semibold min-h-[1rem] opacity-0 transition-opacity">PIN incorrecto</p>
-      <div id="pinKeypad" class="grid grid-cols-3 gap-2">
-        <button data-key="1" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">1</button><button data-key="2" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">2</button><button data-key="3" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">3</button><button data-key="4" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">4</button><button data-key="5" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">5</button><button data-key="6" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">6</button><button data-key="7" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">7</button><button data-key="8" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">8</button><button data-key="9" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">9</button><button data-key="CLR" class="h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold text-xs cursor-pointer">Borrar</button><button data-key="0" class="h-10 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-white font-bold text-base cursor-pointer">0</button><button data-key="DEL" class="h-10 rounded-xl bg-stone-100/60 dark:bg-stone-800/60 text-stone-500 font-semibold text-xs cursor-pointer"><svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l7-7h11a2 2 0 012 2v10a2 2 0 01-2 2H10l-7-7z"/></svg></button>
-      </div>
-    </div>
-  </div>
-
   <!-- Topbar Móvil (< 1024px) -->
   <header class="admin-mobile-header">
     <button id="btn-open-sidebar" type="button" aria-label="Abrir Menú" class="p-2 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-800 animate-pulse"></span><span class="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100">Admin L1 Autónomo</span></div>
-    <span class="text-[10px] px-2 py-0.5 rounded-full font-mono bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">Online</span>
+    <button type="button" id="mobile-turnero-pill" onclick="adminL1Core.toggleTurneroActive()" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 cursor-pointer">Turnero Abierto</button>
   </header>
   <div id="sidebar-backdrop" class="admin-backdrop hidden"></div>
 
@@ -70,32 +52,32 @@
     </nav>
 
     <!-- Footer Sidebar -->
-    <div class="mt-auto shrink-0 pt-3 border-t border-[#D5CEC2] dark:border-stone-800 space-y-2">
-      <div class="flex items-center justify-between px-3 py-1.5">
+    <div class="admin-sidebar-footer mt-auto shrink-0 pt-3 border-t border-[#D5CEC2] dark:border-stone-800 space-y-2">
+      <div class="flex items-center justify-between px-3 py-1">
         <span class="text-xs text-stone-500 dark:text-stone-400">Apariencia</span>
         <button id="btnThemeToggle" type="button" title="Cambiar tema Día/Noche" class="p-1.5 rounded-lg admin-glass-btn text-stone-600 dark:text-stone-300"><svg id="icon-theme-sun" class="w-3.5 h-3.5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg><svg id="icon-theme-moon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
       </div>
-      <button onclick="adminL1Auth.logout()" class="admin-hide-embed w-full py-2 px-3 rounded-xl admin-glass-btn text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-rose-600 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Cerrar Sesión</span></button>
+      <button id="btn-logout-session" type="button" onclick="window.AdminPinGate?.logout()" class="w-full py-2 px-3 rounded-xl admin-glass-btn text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-rose-600 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg><span>Cerrar Sesión</span></button>
     </div>
   </aside>
 
   <!-- Área Operativa Fluida -->
   <main class="admin-main-content px-6 lg:px-8">
     <section id="view-section-citas" class="space-y-4">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div class="admin-kpi-grid grid grid-cols-3 gap-2 md:gap-3.5">
         <div class="admin-card">
-          <div class="flex items-center justify-between"><span class="text-xs font-semibold text-stone-500 dark:text-stone-400">Turnos Programados</span><span id="kpi-date-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Hoy</span></div>
-          <div class="mt-1.5 flex items-baseline justify-between"><span id="kpi-turnos-count" class="font-title text-xl font-extrabold text-stone-900 dark:text-stone-100">3 activas</span><span id="kpi-turnos-sub" class="text-[11px] text-stone-500">En agenda</span></div>
+          <div class="flex items-center justify-between gap-1"><span class="text-[10px] md:text-xs font-semibold text-stone-500 dark:text-stone-400 truncate"><span class="hidden md:inline">Turnos Programados</span><span class="md:hidden">Turnos</span></span><span id="kpi-date-badge" class="hidden sm:inline text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Hoy</span></div>
+          <div class="mt-1 md:mt-1.5 flex items-baseline justify-between"><span id="kpi-turnos-count" class="font-title text-sm md:text-xl font-extrabold text-stone-900 dark:text-stone-100 truncate">3 activas</span><span id="kpi-turnos-sub" class="hidden md:inline text-[11px] text-stone-500">En agenda</span></div>
           <div class="admin-kpi-track"><div id="kpi-turnos-bar" class="admin-kpi-fill bg-[#800000]" style="width:75%"></div></div>
         </div>
         <div class="admin-card">
-          <div class="flex items-center justify-between"><span class="text-xs font-semibold text-stone-500 dark:text-stone-400">Señas Acreditadas</span><span class="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">Ingresos</span></div>
-          <div class="mt-1.5 flex items-baseline justify-between"><span id="kpi-deposit-total" class="font-title text-xl font-extrabold text-emerald-700 dark:text-emerald-400">$12.000</span><span id="kpi-deposit-sub" class="text-[11px] text-stone-500">Confirmadas</span></div>
+          <div class="flex items-center justify-between gap-1"><span class="text-[10px] md:text-xs font-semibold text-stone-500 dark:text-stone-400 truncate"><span class="hidden md:inline">Señas Acreditadas</span><span class="md:hidden">Señas</span></span><span class="hidden sm:inline text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">Ingresos</span></div>
+          <div class="mt-1 md:mt-1.5 flex items-baseline justify-between"><span id="kpi-deposit-total" class="font-title text-sm md:text-xl font-extrabold text-emerald-700 dark:text-emerald-400 truncate">$12.000</span><span id="kpi-deposit-sub" class="hidden md:inline text-[11px] text-stone-500">Confirmadas</span></div>
           <div class="admin-kpi-track"><div id="kpi-deposit-bar" class="admin-kpi-fill bg-emerald-600" style="width:65%"></div></div>
         </div>
         <div class="admin-card">
-          <div class="flex items-center justify-between"><span class="text-xs font-semibold text-stone-500 dark:text-stone-400">Tasa de Asistencia</span><span class="text-[10px] font-semibold text-amber-700 dark:text-amber-400">Efectividad</span></div>
-          <div class="mt-1.5 flex items-baseline justify-between"><span id="kpi-attendance-rate" class="font-title text-xl font-extrabold text-stone-900 dark:text-stone-100">75%</span><span id="kpi-attendance-sub" class="text-[11px] text-stone-500">Sobre el período</span></div>
+          <div class="flex items-center justify-between gap-1"><span class="text-[10px] md:text-xs font-semibold text-stone-500 dark:text-stone-400 truncate"><span class="hidden md:inline">Tasa de Asistencia</span><span class="md:hidden">Asist.</span></span><span class="hidden sm:inline text-[10px] font-semibold text-amber-700 dark:text-amber-400">Efectividad</span></div>
+          <div class="mt-1 md:mt-1.5 flex items-baseline justify-between"><span id="kpi-attendance-rate" class="font-title text-sm md:text-xl font-extrabold text-stone-900 dark:text-stone-100 truncate">75%</span><span id="kpi-attendance-sub" class="hidden md:inline text-[11px] text-stone-500">Sobre el período</span></div>
           <div class="admin-kpi-track"><div id="kpi-attendance-bar" class="admin-kpi-fill bg-amber-600" style="width:75%"></div></div>
         </div>
       </div>
@@ -147,11 +129,8 @@
       </div>
       <div class="admin-card space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div><h3 class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">WhatsApp & Avisos Automáticos</h3><p class="text-xs text-stone-500">Canal oficial de confirmación</p></div><button type="button" onclick="adminL1Config.openBaileysModal()" class="px-3.5 py-1.5 rounded-xl admin-glass-btn text-emerald-700 dark:text-emerald-400 text-xs font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Vincular Sesión QR</span></button></div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><label class="block text-[10px] text-stone-400 uppercase mb-1">WhatsApp del Comercio</label><input id="cfg-wa-number" type="text" placeholder="Ej. 5493815551234" class="w-full bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-900 dark:text-stone-100 font-mono outline-none"></div>
-          <div class="space-y-1.5"><span class="block text-[10px] text-stone-400 uppercase">Frecuencia de Recordatorios</span><div class="flex gap-4 pt-1"><label class="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer"><input id="chk-remind-24h" type="checkbox" class="w-4 h-4 rounded accent-[#800000]"> 24 hs antes</label><label class="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer"><input id="chk-remind-2h" type="checkbox" class="w-4 h-4 rounded accent-[#800000]"> 2 hs antes</label></div></div>
-        </div>
-        <div><label class="block text-[10px] text-stone-400 uppercase mb-1">Plantilla de Confirmación</label><textarea id="cfg-msg-template" rows="3" class="w-full bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-3 text-xs text-stone-900 dark:text-stone-100 outline-none"></textarea><div id="wa-bubble-preview" class="mt-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-100"></div></div>
+        <div class="space-y-1.5"><span class="block text-[10px] text-stone-400 uppercase">Frecuencia de Recordatorios</span><div class="flex gap-4 pt-0.5"><label class="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer"><input id="chk-remind-24h" type="checkbox" class="w-4 h-4 rounded accent-[#800000]"> 24 hs antes</label><label class="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400 cursor-pointer"><input id="chk-remind-2h" type="checkbox" class="w-4 h-4 rounded accent-[#800000]"> 2 hs antes</label></div></div>
+        <div id="l1-wa-config-mount"></div>
       </div>
     </section>
   </main>
@@ -170,6 +149,6 @@
   </div>
   <div id="dynamicModalRoot"></div>
   <div id="saveToast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#181B22] text-xs font-semibold text-red-900 dark:text-red-400 shadow-2xl flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Cambios guardados</span></div>
-  <script src="/js/admin_shared/admin_holidays.js"></script><script src="/js/admin_shared/admin_shell.js"></script><script src="/js/admin_shared/admin_booking_engine.js"></script><script src="/js/admin_shared/admin_demo_seed.js"></script><script src="/js/admin_l1/admin_l1_auth.js"></script><script src="/js/admin_l1/admin_l1_pricing.js"></script><script src="/js/admin_l1/admin_l1_config.js"></script><script src="/js/admin_l1/admin_l1_agenda.js"></script><script src="/js/admin_l1/admin_l1_core.js"></script>
+  <script src="/js/admin_shared/admin_holidays.js"></script><script src="/js/admin_shared/admin_shell.js"></script><script src="/js/admin_shared/admin_pin_gate.js"></script><script src="/js/admin_shared/admin_wa_templates.js"></script><script src="/js/admin_shared/admin_booking_engine.js"></script><script src="/js/admin_shared/admin_demo_seed.js"></script><script src="/js/admin_l1/admin_l1_auth.js"></script><script src="/js/admin_l1/admin_l1_pricing.js"></script><script src="/js/admin_l1/admin_l1_config.js"></script><script src="/js/admin_l1/admin_l1_agenda.js"></script><script src="/js/admin_l1/admin_l1_core.js"></script>
 </body>
 </html>

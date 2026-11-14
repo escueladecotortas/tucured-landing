@@ -20,7 +20,7 @@ function getAudioContext() {
 
 export function triggerHaptic(duration = 12) {
   try {
-    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function' && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) {
       navigator.vibrate(duration);
     }
   } catch (_) {}

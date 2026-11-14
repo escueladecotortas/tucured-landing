@@ -61,17 +61,16 @@
     if (v('cfg-deposit-value')) v('cfg-deposit-value').value = configData.depositValue || 50;
     if (v('inputAlias')) v('inputAlias').value = localStorage.getItem('tucu_l1_alias') || configData.alias;
     if (v('inputCbu')) v('inputCbu').value = localStorage.getItem('tucu_l1_cbu') || configData.cbu;
-    if (v('cfg-wa-number')) v('cfg-wa-number').value = localStorage.getItem('tucu_l1_wa_number') || configData.waNumber;
     if (v('chk-remind-24h')) v('chk-remind-24h').checked = configData.reminders?.h24 !== false;
     if (v('chk-remind-2h')) v('chk-remind-2h').checked = configData.reminders?.h2 !== false;
     if (v('cfg-feriados-toggle')) v('cfg-feriados-toggle').checked = localStorage.getItem('tucu_l1_feriados') !== 'false';
-    if (v('cfg-msg-template')) v('cfg-msg-template').value = localStorage.getItem('tucu_l1_template') || configData.template;
     updatePreview();
   }
 
   function saveConfig() {
     const v = (id) => document.getElementById(id);
     const prevExt = global.AdminBookingEngine ? global.AdminBookingEngine.getConfig('l1') : {};
+    const waTpls = global.AdminWaTemplates?.saveTemplates?.('l1') || {};
     configData = {
       ...prevExt,
       requireDeposit: v('cfg-deposit-toggle')?.checked ?? true,
@@ -79,10 +78,10 @@
       depositValue: Math.max(0, parseInt(v('cfg-deposit-value')?.value, 10) || 0),
       alias: v('inputAlias')?.value.trim() || configData.alias,
       cbu: v('inputCbu')?.value.trim().replace(/\D/g, '') || configData.cbu,
-      waNumber: v('cfg-wa-number')?.value.trim().replace(/\D/g, '') || configData.waNumber,
+      waNumber: global.AdminWaTemplates?.DEMO_WA_NUMBER || '5493815551234',
       reminders: { h24: v('chk-remind-24h')?.checked ?? true, h2: v('chk-remind-2h')?.checked ?? true },
       blockHolidays: v('cfg-feriados-toggle')?.checked ?? true,
-      template: v('cfg-msg-template')?.value || configData.template,
+      template: waTpls.confirm || configData.template,
       schedule
     };
     localStorage.setItem('tucu_schedule', JSON.stringify(schedule));
@@ -91,8 +90,6 @@
     if (global.adminL1Pricing?.renderPricing) global.adminL1Pricing.renderPricing();
     localStorage.setItem('tucu_l1_alias', configData.alias);
     localStorage.setItem('tucu_l1_cbu', configData.cbu);
-    localStorage.setItem('tucu_l1_wa_number', configData.waNumber);
-    localStorage.setItem('tucu_l1_template', configData.template);
     localStorage.setItem('tucu_l1_feriados', configData.blockHolidays ? 'true' : 'false');
     const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
     if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
@@ -104,16 +101,7 @@
   }
 
   function updatePreview() {
-    const tplEl = document.getElementById('cfg-msg-template'), prevEl = document.getElementById('wa-bubble-preview');
-    if (!tplEl || !prevEl) return;
-    const biz = localStorage.getItem('tucu_l1_biz_name') || 'Peluquería & Barbería Central';
-    const alias = document.getElementById('inputAlias')?.value || configData.alias;
-    const cbu = document.getElementById('inputCbu')?.value || configData.cbu;
-    prevEl.innerText = tplEl.value
-      .replace(/\{\{cliente\}\}/g, 'Martín').replace(/\{\{comercio\}\}/g, biz)
-      .replace(/\{\{fecha\}\}/g, 'Hoy').replace(/\{\{hora\}\}/g, '17:30')
-      .replace(/\{\{monto_seña\}\}/g, configData.depositType === 'percentage' ? '$4.000 (50%)' : `$${configData.depositValue}`)
-      .replace(/\{\{alias\}\}/g, alias).replace(/\{\{cbu\}\}/g, cbu);
+    global.AdminWaTemplates?.renderPreview?.({ mountId: 'l1-wa-config-mount', level: 'l1', aliasInputId: 'inputAlias' });
   }
 
   function copyAlias() {
@@ -147,16 +135,18 @@
   function closeBaileysModal() { const root = document.getElementById('dynamicModalRoot'); if (root) root.innerHTML = ''; }
 
   function init() {
-    loadLocal(); renderSchedule(); populateInputs();
+    loadLocal(); renderSchedule();
+    global.AdminWaTemplates?.mount?.({ mountId: 'l1-wa-config-mount', level: 'l1', aliasInputId: 'inputAlias', onChange: saveConfig });
+    populateInputs();
     if (global.AdminHolidays) { global.AdminHolidays.renderLabel('l1-holidays-label'); global.AdminHolidays.loadHolidays(); }
     if (global.AdminBookingEngine?.mountPaymentConfigPanel) {
       global.AdminBookingEngine.mountPaymentConfigPanel({
         mountId: 'l1-payment-methods-mount', level: 'l1', includeDepositRule: false,
-        onChange: () => { configData = { ...configData, ...global.AdminBookingEngine.getConfig('l1') }; },
+        onChange: () => { configData = { ...configData, ...global.AdminBookingEngine.getConfig('l1') }; updatePreview(); },
         onResetDemo: () => { const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria'; global.adminL1Agenda?.resetDemoBookings(slug); }
       });
     }
-    ['cfg-deposit-toggle', 'cfg-deposit-type', 'cfg-deposit-value', 'inputAlias', 'inputCbu', 'cfg-wa-number', 'chk-remind-24h', 'chk-remind-2h', 'cfg-feriados-toggle', 'cfg-msg-template'].forEach(id => {
+    ['cfg-deposit-toggle', 'cfg-deposit-type', 'cfg-deposit-value', 'inputAlias', 'inputCbu', 'chk-remind-24h', 'chk-remind-2h', 'cfg-feriados-toggle'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.addEventListener('input', saveConfig); el.addEventListener('change', saveConfig); }
     });

@@ -88,20 +88,13 @@ window.AdminShell = (function () {
       }
     };
     if (dEl) {
-      dEl.min = today;
-      const base = initialDate || dEl.value || today;
+      dEl.min = today; const base = initialDate || dEl.value || today;
       dEl.value = base < today ? today : base;
-      dEl.onchange = () => {
-        if (dEl.value < localTodayStr()) dEl.value = localTodayStr();
-        refreshTimes();
-      };
+      dEl.onchange = () => { if (dEl.value < localTodayStr()) dEl.value = localTodayStr(); refreshTimes(); };
     }
     refreshTimes();
   }
-
-  function isServiceAvailable(srv) {
-    return Boolean(srv && !srv.deletedAt && srv.isActive !== false && srv.activo !== false && srv.active !== false);
-  }
+  const isServiceAvailable = (srv) => Boolean(srv && !srv.deletedAt && srv.isActive !== false && srv.activo !== false && srv.active !== false);
 
   function applyWaPill(el, state, text) {
     if (!el) return;
@@ -143,32 +136,40 @@ window.AdminShell = (function () {
     }
   }
 
+  function syncReceptionPill(isOpen) {
+    const el = document.getElementById('mobile-turnero-pill'); if (!el) return;
+    el.className = isOpen ? 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 cursor-pointer transition-colors' : 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 cursor-pointer transition-colors';
+    el.textContent = isOpen ? 'Turnero Abierto' : 'Turnero Pausado';
+  }
+
+  function toggleReception(storageKey = 'tucu_turnero_open') {
+    const nxt = localStorage.getItem(storageKey) === 'false';
+    localStorage.setItem(storageKey, String(nxt));
+    syncReceptionPill(nxt);
+    return nxt;
+  }
+
   function init() {
     initTheme();
     const { sidebar, backdrop, btnOpen, btnClose, btnTheme } = getElements();
-    btnOpen?.addEventListener('click', openSidebar);
-    btnClose?.addEventListener('click', closeSidebar);
-    backdrop?.addEventListener('click', closeSidebar);
-    btnTheme?.addEventListener('click', toggleTheme);
+    btnOpen?.addEventListener('click', openSidebar); btnClose?.addEventListener('click', closeSidebar);
+    backdrop?.addEventListener('click', closeSidebar); btnTheme?.addEventListener('click', toggleTheme);
     bindNavigationClose(sidebar);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
     window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeSidebar(); });
+    syncReceptionPill(localStorage.getItem('tucu_turnero_open') !== 'false');
     probeWhatsAppStatus();
-    if (window.AdminHolidays) {
-      window.AdminHolidays.renderLabel('l1-holidays-label');
-      window.AdminHolidays.renderLabel('l2-holidays-label');
-    }
+    if (window.AdminHolidays) { window.AdminHolidays.renderLabel('l1-holidays-label'); window.AdminHolidays.renderLabel('l2-holidays-label'); }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  function normStr(s) {
-    return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  }
+  const normStr = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
   return {
     openSidebar, closeSidebar, toggleSidebar, initTheme, toggleTheme, normStr,
-    localTodayStr, currentHHMM, filterFutureSlots, bindDateTimeGuards, isServiceAvailable, probeWhatsAppStatus
+    localTodayStr, currentHHMM, filterFutureSlots, bindDateTimeGuards, isServiceAvailable,
+    probeWhatsAppStatus, syncReceptionPill, toggleReception
   };
 })();

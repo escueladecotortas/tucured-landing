@@ -44,25 +44,18 @@
     if (filtered.length === 0) {
       container.innerHTML = '<div class="p-8 text-center text-xs text-stone-500 dark:text-stone-400">No hay turnos registrados para este filtro.</div>';
     } else {
-      const bizName = document.getElementById('cfg-biz-name')?.value || 'TucuRed Central';
       container.innerHTML = filtered.map(b => {
         const meta = eng().getMeta(b.status), muted = meta.key === 'CANCELLED' || meta.key === 'COMPLETED' || meta.key === 'NO_SHOW';
-        const cleanPhone = (b.phone || '').replace(/\D/g, '');
-        const waMsg = encodeURIComponent(`Hola ${b.client || b.name}, te contactamos desde ${bizName} respecto a tu turno #${b.id}.`);
         return `<div class="p-4 flex items-center justify-between flex-wrap gap-3 hover:bg-stone-50/80 dark:hover:bg-stone-900/60 transition-colors ${muted ? 'opacity-75' : ''}">
           <div class="flex items-center gap-3.5 min-w-0">
             <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-300 border border-red-200/80 dark:border-red-900 flex items-center justify-center font-mono font-bold text-xs shrink-0 shadow-xs">${b.time || '--:--'}</div>
             <div class="min-w-0 space-y-1">
-              <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</span><span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold">#${b.id}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(b.status, b.prevStatus)}</div>
+              <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</span><span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold">#${b.id}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(b.status, b.prevStatus, b)}</div>
               <p class="text-xs text-stone-500 dark:text-stone-400 flex items-center flex-wrap gap-2.5"><span class="inline-flex items-center gap-1">${SVG_CAL} ${b.date || 'Hoy'}</span><span class="inline-flex items-center gap-1">${SVG_TEL} ${b.phone}</span><span class="inline-flex items-center gap-1">${SVG_USR} ${b.pax || '1'} pax</span></p>
               ${eng().renderDepositHtml(b)}
             </div>
           </div>
-          <div class="flex items-center flex-wrap gap-2">
-            <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold admin-glass-btn text-emerald-700 dark:text-emerald-300 flex items-center gap-1">${SVG_MSG}<span>WA</span></a>
-            <a href="/gestion_turno.html?token=${b.id}" target="_blank" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold admin-glass-btn text-red-900 dark:text-red-300 flex items-center gap-1" title="Portal de autogestión">${SVG_LNK}<span>Portal</span></a>
-            ${eng().renderActionButtons(b.id, b.status, 'adminL2Calendar', b.prevStatus)}
-          </div>
+          <div class="flex items-center flex-wrap gap-2">${eng().renderTicketAndWaLinks(b, 'l2')}${eng().renderActionButtons(b.id, b.status, 'adminL2Calendar', b.prevStatus)}</div>
         </div>`;
       }).join('');
     }
@@ -87,7 +80,7 @@
     const list = getBookings(), bk = list.find(b => b.id === id);
     if (!bk) return;
     eng().undoTransition(bk, 'l2'); saveBookings(list); renderCalendar();
-    global.adminL2Core?.showToast(`Revertido a ${eng().getMeta(bk.status).label}`);
+    global.adminL2Core?.showToast(`Turno reabierto · Volvió a ${eng().getMeta(bk.status).label}`);
   }
   function cancelBooking(id) { setStatus(id, 'CANCELLED'); }
   function creditDeposit(id) {

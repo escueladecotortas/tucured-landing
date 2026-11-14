@@ -17,19 +17,12 @@
   }
 
   function insertToken(tok) {
-    const t = document.getElementById('cfg-msg-template');
+    const t = document.getElementById('cfg-msg-confirm');
     if (t) { t.value += tok; updatePreview(); }
   }
 
   function updatePreview() {
-    const t = document.getElementById('cfg-msg-template'), p = document.getElementById('wa-bubble-preview');
-    if (!t || !p) return;
-    const biz = document.getElementById('cfg-biz-name')?.value || 'TucuRed Central';
-    p.textContent = (t.value || '')
-      .replace(/\{\{id\}\}/g, 'TK-8492').replace(/\{\{cliente\}\}/g, 'Juan Pérez')
-      .replace(/\{\{fecha\}\}/g, 'Lunes 24 de Agosto').replace(/\{\{hora\}\}/g, '10:30')
-      .replace(/\{\{personas\}\}/g, '2').replace(/\{\{comercio\}\}/g, biz)
-      .replace(/\{\{telefono\}\}/g, '3811234567').replace(/\{\{link\}\}/g, `${window.location.origin}/gestion_turno.html?token=TK-8492`);
+    global.AdminWaTemplates?.renderPreview?.({ mountId: 'l2-wa-config-mount', level: 'l2', bizInputId: 'cfg-biz-name' });
   }
 
   function showQrStep(step) {
@@ -103,7 +96,8 @@
   function saveGlobalConfig() {
     const g = (id) => document.getElementById(id);
     const biz = g('cfg-biz-name')?.value.trim() || 'TucuRed Central';
-    const wa = global.adminL2Core?.sanitizeCleanPhone(g('cfg-wa-number')?.value);
+    const waTpls = global.AdminWaTemplates?.saveTemplates?.('l2') || {};
+    const wa = global.AdminWaTemplates?.DEMO_WA_NUMBER || '5493815551234';
     localStorage.setItem('tucu_l2_biz_name', biz); localStorage.setItem('tucu_biz_name', biz);
     localStorage.setItem('tucu_l2_wa_number', wa); localStorage.setItem('tucu_wa_number', wa);
     const ivSel = g('cfg-interval')?.value || '30';
@@ -111,14 +105,15 @@
     const interval = ivSel === 'custom' ? Math.min(480, Math.max(5, isNaN(ivCustom) ? 30 : ivCustom)) : ivSel;
     localStorage.setItem('tucu_l2_interval', String(interval));
     localStorage.setItem('tucu_l2_days', g('cfg-max-days')?.value || '14');
-    localStorage.setItem('tucu_l2_template', g('cfg-msg-template')?.value || '');
+    if (waTpls.confirm) localStorage.setItem('tucu_l2_template', waTpls.confirm);
     localStorage.setItem('tucu_l2_block_holidays', String(g('cfg-block-holidays')?.checked));
+    updatePreview();
     global.adminL2Core?.showToast('Configuración sincronizada con éxito');
   }
 
   function init() {
     configTabs.forEach(t => document.getElementById('tab-btn-' + t)?.addEventListener('click', () => switchConfigTab(t)));
-    document.getElementById('cfg-msg-template')?.addEventListener('input', updatePreview);
+    document.getElementById('cfg-biz-name')?.addEventListener('input', updatePreview);
     document.getElementById('btn-open-qr-modal')?.addEventListener('click', openQrWizard);
     document.getElementById('btn-close-qr-wizard')?.addEventListener('click', closeQrWizard);
     document.getElementById('btn-wizard-go-qr')?.addEventListener('click', () => showQrStep(2));
@@ -168,9 +163,7 @@
     }
     const savedName = localStorage.getItem('tucu_l2_biz_name') || localStorage.getItem('tucu_biz_name');
     if (savedName && document.getElementById('cfg-biz-name')) document.getElementById('cfg-biz-name').value = savedName;
-    const defaultTpl = "¡Hola! Quiero confirmar mi reserva en {{comercio}}:\n- 🎟️ ID: #{{id}}\n- 👤 Nombre: {{cliente}}\n- 📅 Día: {{fecha}}\n- ⏰ Hora: {{hora}}\n- 👥 Personas: {{personas}}\n- 📞 Tel: {{telefono}}\n- 🔗 Autogestión: {{link}}\n¿Me confirman disponibilidad?";
-    const savedTpl = localStorage.getItem('tucu_l2_template') || defaultTpl;
-    if (document.getElementById('cfg-msg-template')) { document.getElementById('cfg-msg-template').value = savedTpl; updatePreview(); }
+    global.AdminWaTemplates?.mount?.({ mountId: 'l2-wa-config-mount', level: 'l2', bizInputId: 'cfg-biz-name', onChange: () => updatePreview() });
   }
 
   global.adminL2Config = { init, switchConfigTab, insertToken, updatePreview, openQrWizard, closeQrWizard, showQrStep, renderOccupiedSlots, addOccupiedSlot, removeOccupiedSlot, resetOccupiedSlots, handleImportFile, saveGlobalConfig };

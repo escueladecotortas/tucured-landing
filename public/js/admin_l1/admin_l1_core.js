@@ -93,14 +93,19 @@
   function toggleTurneroActive() {
     const next = !(localStorage.getItem('tucu_l1_is_active') !== 'false');
     localStorage.setItem('tucu_l1_is_active', next ? 'true' : 'false');
+    localStorage.setItem('tucu_turnero_open', next ? 'true' : 'false');
     renderTurneroSwitch();
-    fetch(`/api/portal/${getConfig().slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: next }) }).catch(() => {});
+    const slug = getConfig().slug;
+    if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
+      fetch(`/api/portal/${slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: next }) }).catch(() => {});
+    }
   }
 
   function renderTurneroSwitch() {
     const isActive = localStorage.getItem('tucu_l1_is_active') !== 'false';
     const btn = document.getElementById('btnTurneroSwitch'), knob = document.getElementById('reception-knob');
     const badge = document.getElementById('turneroStatusBadge'), dot = document.getElementById('turneroStatusDot'), txt = document.getElementById('turneroStatusText');
+    global.AdminShell?.syncReceptionPill?.(isActive);
     if (!btn || !txt) return;
     btn.style.backgroundColor = isActive ? 'var(--color-primary, #800000)' : '#8C8478';
     if (knob) knob.className = `w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`;

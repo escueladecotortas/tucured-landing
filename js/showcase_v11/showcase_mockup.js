@@ -10,6 +10,7 @@ import { ShowcaseTemplatesL2 } from './showcase_templates_l2.js';
 import { ShowcaseTemplatesL3 } from './showcase_templates_l3.js';
 import { ShowcaseSelfServiceL2 } from './showcase_self_service_l2.js';
 import { renderAdminPreview } from './showcase_admin_preview.js';
+import { buildStep4WaUrl } from './showcase_booking_sync.js';
 
 export const ShowcaseMockup = {
   render(containerId, state) {
@@ -31,7 +32,7 @@ export const ShowcaseMockup = {
           </button>
         </div>
 
-        <div class="relative w-full rounded-[2.5rem] border-[7px] border-slate-800 bg-slate-50 overflow-hidden shadow-2xl flex flex-col ring-1 ring-slate-900/10 min-h-[510px] transition-all duration-300">
+        <div class="relative w-full rounded-[2.5rem] border-[7px] border-slate-800 bg-slate-50 overflow-hidden shadow-2xl flex flex-col ring-1 ring-slate-900/10 min-h-[700px] transition-all duration-300">
           <div class="w-full h-full flex flex-col flex-1 animate-[fadeIn_0.25s_ease-out]">
             ${isAdmin ? renderAdminPreview(state, curRubro, curLvl) : this.renderClientView(state, curRubro, curLvl)}
           </div>
@@ -129,27 +130,37 @@ export const ShowcaseMockup = {
     }
 
     // PASO 4: Ticket Digital Confirmado (#TK-XXXX)
-    const token = isL3 ? '#TK-92C1' : (isL1 ? '#TK-71A0' : '#TK-84B2');
+    const rec = state.lastBookingRecord || {};
+    const code = state.lastBookingCode || (isL3 ? 'TK-92C1' : (isL1 ? 'TK-71A0' : 'TK-84B2'));
+    const needsDep = (Number(rec.depositAmount) || 0) > 0 && !rec.depositPaid;
+    const statusBadge = needsDep
+      ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">Pendiente Seña $${Number(rec.depositAmount).toLocaleString('es-AR')}</span>`
+      : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Turno Confirmado</span>`;
+    const waHref = buildStep4WaUrl({ ...rec, id: code, client: clientName, service: serviceName, time: state.selectedTime }, state.currentLevel, rubro);
 
     return `
-      <div class="space-y-2.5 text-center my-auto animate-[fadeIn_0.3s_ease-out]">
-        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
-          <span class="material-symbols-outlined text-xl">check_circle</span>
+      <div class="space-y-2 text-center my-auto animate-[fadeIn_0.3s_ease-out]">
+        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
+          <span class="material-symbols-outlined text-lg">check_circle</span>
         </div>
-        <h4 class="text-xs sm:text-sm font-bold text-slate-900 font-display tracking-tight">✓ TURNO CONFIRMADO EN AGENDA</h4>
-        <div class="p-3 rounded-2xl bg-white border border-slate-200 text-left text-xs space-y-2 shadow-xs">
+        <h4 class="text-xs sm:text-sm font-bold text-slate-900 font-display tracking-tight">TURNO REGISTRADO EN AGENDA</h4>
+        <div class="p-3 rounded-2xl bg-white border border-slate-200 text-left text-xs space-y-1.5 shadow-xs">
           <div class="text-center"><p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">${rubro.bizName}</p><h5 class="text-xs font-bold text-slate-900">${serviceName}</h5></div>
-          <div class="flex justify-center my-1"><span class="font-mono text-xs tracking-wider font-bold bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 text-slate-800">${token}</span></div>
-          <div class="border-t border-dashed border-slate-200 pt-2 space-y-1 text-[11px]">
+          <div class="flex items-center justify-center gap-1.5 flex-wrap my-1"><span class="font-mono text-xs tracking-wider font-bold bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200 text-slate-800">#${code}</span>${statusBadge}</div>
+          <div class="border-t border-dashed border-slate-200 pt-1.5 space-y-1 text-[11px]">
             <div class="flex justify-between text-slate-600"><span>Fecha y Hora:</span><span class="text-slate-900 font-semibold">${dayLabel} · ${state.selectedTime} hs</span></div>
             ${isL3 ? `<div class="flex justify-between text-slate-600"><span>Especialista / Recurso:</span><span class="font-semibold text-slate-900">${rubro.staff[state.selectedStaff || 0]}</span></div>` : ''}
             ${rubro.requireInsurance ? `<div class="flex justify-between text-slate-600"><span>Cobertura:</span><span class="text-teal-700 font-medium">${state.clientInsurance || 'OSDE'}</span></div>` : ''}
             <div class="flex justify-between text-slate-600"><span>Cliente:</span><span class="text-slate-900 font-medium">${clientName}</span></div>
           </div>
         </div>
-        <button type="button" onclick="window.ShowcaseCore.addToCalendar()" class="w-full py-2.5 rounded-xl text-xs font-bold ${rubro.btnClass} shadow-md flex items-center justify-center gap-1.5 cursor-pointer"><span class="material-symbols-outlined text-sm">calendar_add_on</span><span>Agendar en mi Calendario</span></button>
-        <button type="button" onclick="window.ShowcaseCore.toggleSelfService(true)" class="w-full py-1.5 rounded-xl text-[11px] font-medium bg-white border border-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-xs">settings</span><span>✕ Cancelar o Reprogramar Turno</span></button>
-        <button type="button" onclick="window.ShowcaseCore.selectStep(1)" class="w-full mt-1 py-1 rounded-xl text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 cursor-pointer">Reiniciar Simulación ↻</button>
+        <div class="grid grid-cols-2 gap-1.5">
+          <a href="/gestion_turno.html?token=${encodeURIComponent(code)}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl text-[11px] font-bold bg-[#800000] hover:bg-[#660000] text-white shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">open_in_new</span><span>Ver Ticket Online</span></a>
+          <a href="${waHref}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl text-[11px] font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">chat</span><span>Copia WhatsApp</span></a>
+        </div>
+        <button type="button" onclick="window.ShowcaseCore.addToCalendar()" class="w-full py-2 rounded-xl text-xs font-bold ${rubro.btnClass} shadow-md flex items-center justify-center gap-1.5 cursor-pointer"><span class="material-symbols-outlined text-sm">calendar_add_on</span><span>Agendar en mi Calendario</span></button>
+        <button type="button" onclick="window.ShowcaseCore.toggleSelfService(true)" class="w-full py-1.5 rounded-xl text-[11px] font-medium bg-white border border-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-xs">settings</span><span>Cancelar o Reprogramar Turno</span></button>
+        <button type="button" onclick="window.ShowcaseCore.selectStep(1)" class="w-full py-1 rounded-xl text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 cursor-pointer flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">refresh</span><span>Reiniciar Simulación</span></button>
       </div>
     `;
   }

@@ -5,10 +5,14 @@
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
-export function getAdminUrlForLevel(level) {
+import { mapShowroomRubroToL3 } from './showcase_booking_sync.js';
+
+export function getAdminUrlForLevel(level, state = null) {
   const lvl = String(level || 'l1').toLowerCase();
   if (lvl === 'l3' || lvl === 'multi_equipo' || lvl === 'multi-equipo') {
-    return '/admin_l3.html?slug=demo-staff&embed=true';
+    const r = mapShowroomRubroToL3(state?.currentRubro);
+    const d = state?.lastBookingRecord?.date || state?.systemCalendar?.diasReales?.[state?.selectedDay || 0]?.dateStr || '';
+    return `/admin_l3.html?slug=demo-staff&embed=true&rubro=${encodeURIComponent(r)}${d ? `&date=${encodeURIComponent(d)}` : ''}`;
   }
   if (lvl === 'l2' || lvl === 'central_pro' || lvl === 'central-pro') {
     return '/admin_l2.html?slug=demo-central&embed=true';
@@ -18,10 +22,10 @@ export function getAdminUrlForLevel(level) {
 
 export function renderAdminPreview(state, curRubro, curLvl) {
   const lvlId = state?.currentLevel || 'l1';
-  const adminUrl = getAdminUrlForLevel(lvlId);
+  const adminUrl = getAdminUrlForLevel(lvlId, state);
 
   return `
-    <div class="relative w-full h-[540px] sm:h-[580px] overflow-hidden rounded-b-[2rem] bg-slate-50">
+    <div class="relative w-full h-[710px] sm:h-[730px] overflow-hidden rounded-b-[2rem] bg-slate-50">
       <!-- Spinner sutil mientras carga el iframe -->
       <div id="admin-iframe-loader" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-10 transition-opacity duration-300">
         <div class="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>

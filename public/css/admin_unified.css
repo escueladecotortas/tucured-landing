@@ -132,8 +132,17 @@ h1, h2, h3, h4, h5, h6, .font-title { font-family: var(--font-title); letter-spa
 }
 .dark .admin-glass-pill.is-active { background: rgba(168, 34, 34, 0.92) !important; }
 
-/* Modo Embebido (?embed=true) */
+/* Modo Embebido (?embed=true) + KPI Compacto Móvil */
+@media (max-width: 767px) {
+  .admin-kpi-grid .admin-card { padding: 0.55rem 0.65rem; border-radius: 0.9rem; }
+  .admin-kpi-grid .admin-kpi-track { margin-top: 0.3rem; height: 4px; }
+}
 html.is-embedded, html.is-embedded body { overflow-x: hidden !important; width: 100% !important; max-width: 100% !important; }
 html.is-embedded body { padding-bottom: 0 !important; min-height: 100% !important; }
-html.is-embedded #pinAuthModal, html.is-embedded .admin-hide-embed { display: none !important; }
+html.is-embedded .admin-hide-embed { display: none !important; }
+html.is-embedded #pinAuthModal { z-index: 60 !important; padding: 0.75rem !important; }
+html.is-embedded .admin-sidebar { height: 100%; overflow-y: auto; }
+html.is-embedded .admin-sidebar nav { padding: 0.45rem 0.65rem !important; gap: 0.125rem !important; }
+html.is-embedded .admin-sidebar .admin-nav-item { padding: 0.42rem 0.7rem !important; font-size: 0.75rem !important; }
+html.is-embedded .admin-sidebar-footer { padding: 0.55rem 0.65rem !important; gap: 0.3rem !important; }
 html.is-embedded .admin-main-content { padding: 0.75rem !important; }

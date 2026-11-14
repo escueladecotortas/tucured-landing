@@ -1,0 +1,3 @@
+# Archivo: public/_redirects
+/t/*  /gestion_turno.html?token=:splat  200
+

@@ -1,0 +1,51 @@
+<!-- Archivo: public/gestion_turno.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Ticket de Turno — TucuRed Autogestión</title>
+  <script>(function(){if((localStorage.getItem('tucu_theme')||'light')==='dark')document.documentElement.classList.add('dark');})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{accent:'#800000'}}}}};</script>
+  <link rel="stylesheet" href="/css/admin_unified.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-[#EAE4DA] dark:bg-[#121110] text-stone-900 dark:text-stone-100">
+  <header class="w-full border-b border-[#D5CEC2] dark:border-stone-800 bg-[#FBFBF9]/90 dark:bg-[#1C1A19]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between">
+    <a href="/#showroom" class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-xl bg-[#800000] text-white flex items-center justify-center shadow-xs">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+      </span>
+      <div><h1 class="font-title text-sm font-extrabold leading-tight">TucuRed</h1><p class="text-[10px] text-stone-500">Ticket Digital & Autogestión</p></div>
+    </a>
+    <a href="/#showroom" class="px-3 py-1.5 rounded-xl admin-glass-btn text-xs font-semibold flex items-center gap-1.5">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      <span>Volver al Turnero</span>
+    </a>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6">
+    <section id="portal-card-root" class="admin-card w-full max-w-md shadow-xl">
+      <div class="py-10 text-center text-xs text-stone-500">Cargando información de la reserva...</div>
+    </section>
+  </main>
+
+  <footer class="text-center py-3 px-4 text-[11px] text-stone-500 dark:text-stone-400">
+    TucuRed · Autogestión instantánea · Cumplimiento Ley 25.326 de Protección de Datos Personales
+  </footer>
+
+  <div id="portal-toast" class="fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#1C1A19] text-xs font-semibold text-stone-900 dark:text-stone-100 shadow-xl opacity-0 translate-y-4 pointer-events-none transition-all duration-200 flex items-center gap-2">
+    <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    <span>Actualizado</span>
+  </div>
+
+  <script src="/js/admin_shared/admin_holidays.js"></script>
+  <script src="/js/admin_shared/admin_shell.js"></script>
+  <script src="/js/admin_shared/admin_booking_engine.js"></script>
+  <script src="/js/admin_shared/admin_demo_seed.js"></script>
+  <script src="/js/admin_shared/admin_wa_templates.js"></script>
+  <script src="/js/admin_shared/ticket_portal.js"></script>
+</body>
+</html>
+

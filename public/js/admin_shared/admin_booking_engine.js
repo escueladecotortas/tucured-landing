@@ -20,6 +20,8 @@ window.AdminBookingEngine = (function () {
   const SVG_OK = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
   const SVG_X = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
   const SVG_RST = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+  const SVG_LNK = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>';
+  const SVG_MSG = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>';
   const fmt = (n) => '$' + Math.max(0, Math.round(Number(n) || 0)).toLocaleString('es-AR');
   const parseMoney = (v) => (typeof v === 'number' ? v : parseInt(String(v || '0').replace(/\D/g, ''), 10) || 0);
 
@@ -108,10 +110,11 @@ window.AdminBookingEngine = (function () {
     return `<div class="text-[11px] flex flex-wrap items-center gap-x-2.5 gap-y-0.5">${depBadge}<span class="text-stone-500 dark:text-stone-400">Saldo en local: <strong class="text-stone-800 dark:text-stone-100">${fmt(balance)}</strong></span></div>`;
   }
 
-  function renderUndoLabel(rawStatus, prevStatus = null) {
+  function renderUndoLabel(rawStatus, prevStatus = null, booking = null) {
     const k = normalizeKey(rawStatus);
-    if (k !== 'COMPLETED' && k !== 'CANCELLED' && k !== 'NO_SHOW') return '';
-    return `<span class="text-[10px] font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Anterior: ${getMeta(prevStatus || 'CONFIRMED').label}</span>`;
+    const clientBadge = booking?.clientConfirmed ? `<span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full whitespace-nowrap">${SVG_OK}<span>Asistencia confirmada por cliente</span></span>` : '';
+    if (k !== 'COMPLETED' && k !== 'CANCELLED' && k !== 'NO_SHOW') return clientBadge;
+    return `${clientBadge}<span class="text-[10px] font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Anterior: ${getMeta(prevStatus || 'CONFIRMED').label}</span>`;
   }
 
   function renderActionButtons(id, rawStatus, ns, prevStatus = null) {
@@ -119,7 +122,14 @@ window.AdminBookingEngine = (function () {
     if (k === 'PENDING_DEPOSIT') return `<button type="button" onclick="${ns}.creditDeposit('${id}')" class="rounded-xl px-3 py-1.5 text-xs font-bold admin-glass-primary inline-flex items-center gap-1">${SVG_OK}<span>Acreditar Seña</span></button><button type="button" onclick="${ns}.setStatus('${id}','CANCELLED')" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold admin-glass-btn hover:text-rose-600 inline-flex items-center gap-1">${SVG_X}<span>Cancelar</span></button>`;
     if (k === 'CONFIRMED') return `<button type="button" onclick="${ns}.setStatus('${id}','COMPLETED')" class="rounded-xl px-3 py-1.5 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer inline-flex items-center gap-1">${SVG_OK}<span>Marcar Finalizado</span></button><button type="button" onclick="${ns}.setStatus('${id}','NO_SHOW')" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold admin-glass-btn text-amber-800 dark:text-amber-300">Ausente</button><button type="button" onclick="${ns}.setStatus('${id}','CANCELLED')" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold admin-glass-btn hover:text-rose-600">Cancelar</button>`;
     const prevLabel = getMeta(prevStatus || 'CONFIRMED').label;
-    return `<button type="button" onclick="${ns}.undoStatus('${id}')" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold admin-glass-btn text-red-900 dark:text-red-300 inline-flex items-center gap-1 whitespace-nowrap">${SVG_UNDO}<span>\u21A9 A ${prevLabel}</span></button>`;
+    return `<button type="button" onclick="${ns}.undoStatus('${id}')" title="Volver a ${prevLabel}" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold admin-glass-btn text-red-900 dark:text-red-300 inline-flex items-center gap-1 whitespace-nowrap">${SVG_UNDO}<span>Reabrir turno</span></button>`;
+  }
+
+  function renderTicketAndWaLinks(booking, level, compact = false) {
+    const code = String(booking?.token || booking?.id || '').replace(/^#/, '');
+    const cls = compact ? 'px-2 py-1 rounded-lg text-[10px] font-bold' : 'px-2.5 py-1.5 rounded-xl text-xs font-semibold';
+    const waUrl = window.AdminWaTemplates?.buildWaUrl ? window.AdminWaTemplates.buildWaUrl(booking, level) : '#';
+    return `<a href="/gestion_turno.html?token=${encodeURIComponent(code)}" target="_blank" rel="noopener" title="Abrir portal del ticket" class="${cls} admin-glass-btn text-red-900 dark:text-red-300 inline-flex items-center gap-1 whitespace-nowrap">${SVG_LNK}<span>Ver Ticket Online</span></a><a href="${waUrl}" target="_blank" rel="noopener" title="Enviar mensaje por WhatsApp" class="${cls} admin-glass-btn text-emerald-700 dark:text-emerald-300 inline-flex items-center gap-1 whitespace-nowrap">${SVG_MSG}<span>Enviar WhatsApp</span></a>`;
   }
 
   function openPaymentPicker({ title = 'Acreditar Seña', amount = 0, level = 'l1', onConfirm }) {
@@ -162,5 +172,5 @@ window.AdminBookingEngine = (function () {
     document.getElementById(`btn-reset-demo-${level}`)?.addEventListener('click', () => { if (onResetDemo) onResetDemo(); });
   }
 
-  return { DEFAULT_METHODS, STATES, fmt, parseMoney, getConfig, saveConfig, getEnabledMethods, calcDeposit, normalizeKey, levelCode, getMeta, hydrateBooking, applyTransition, undoTransition, computeKpis, renderDepositHtml, renderUndoLabel, renderActionButtons, openPaymentPicker, mountPaymentConfigPanel };
+  return { DEFAULT_METHODS, STATES, fmt, parseMoney, getConfig, saveConfig, getEnabledMethods, calcDeposit, normalizeKey, levelCode, getMeta, hydrateBooking, applyTransition, undoTransition, computeKpis, renderDepositHtml, renderUndoLabel, renderActionButtons, renderTicketAndWaLinks, openPaymentPicker, mountPaymentConfigPanel };
 })();

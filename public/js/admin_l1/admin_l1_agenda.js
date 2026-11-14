@@ -31,7 +31,7 @@
     let raw = [];
     try {
       const parsed = JSON.parse(localStorage.getItem(`tucu_l1_bookings_${slug}`) || '[]');
-      if (Array.isArray(parsed) && parsed.length > 0 && !parsed.some(b => b.service?.includes('Lash'))) raw = parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) raw = parsed;
     } catch (_) {}
     if (raw.length === 0) raw = global.AdminDemoSeed ? global.AdminDemoSeed.getL1Seed(eng()?.getConfig('l1')) : [];
     bookings = eng() ? raw.map(b => eng().hydrateBooking(b, 'l1', 8000)) : raw;
@@ -93,12 +93,12 @@
         <div class="flex items-center gap-3.5 min-w-0">
           <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex flex-col items-center justify-center shrink-0"><span class="text-sm font-bold text-stone-800 dark:text-stone-100 font-mono">${bk.time}</span><span class="text-[9px] text-stone-400 uppercase">${bk.dateStr || bk.day}</span></div>
           <div class="min-w-0 space-y-1">
-            <div class="flex items-center gap-2 flex-wrap"><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${bk.token}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(bk.status, bk.prevStatus)}</div>
+            <div class="flex items-center gap-2 flex-wrap"><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${bk.token}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(bk.status, bk.prevStatus, bk)}</div>
             <p class="text-xs text-stone-500 dark:text-stone-400">${bk.service} (${fmt(bk.price)}) · <span class="font-mono">${bk.clientPhone}</span></p>
             ${eng().renderDepositHtml(bk)}
           </div>
         </div>
-        <div class="flex items-center flex-wrap gap-2 self-end lg:self-center shrink-0">${eng().renderActionButtons(bk.id, bk.status, 'adminL1Agenda', bk.prevStatus)}</div>
+        <div class="flex items-center flex-wrap gap-2 self-end lg:self-center shrink-0">${eng().renderTicketAndWaLinks(bk, 'l1')}${eng().renderActionButtons(bk.id, bk.status, 'adminL1Agenda', bk.prevStatus)}</div>
       </article>`;
     }).join('');
   }
@@ -112,7 +112,7 @@
     }
   }
   function setStatus(id, nextCanon) { const bk = bookings.find(b => b.id === id); if (bk) { eng().applyTransition(bk, nextCanon, 'l1'); persistStatus(bk, `Estado: ${eng().getMeta(bk.status).label}`); } }
-  function undoStatus(id) { const bk = bookings.find(b => b.id === id); if (bk) { eng().undoTransition(bk, 'l1'); persistStatus(bk, `Revertido a ${eng().getMeta(bk.status).label}`); } }
+  function undoStatus(id) { const bk = bookings.find(b => b.id === id); if (bk) { eng().undoTransition(bk, 'l1'); persistStatus(bk, `Turno reabierto · Volvió a ${eng().getMeta(bk.status).label}`); } }
   function creditDeposit(id) {
     const bk = bookings.find(b => b.id === id); if (!bk) return;
     eng().openPaymentPicker({ title: `Acreditar Seña · ${bk.clientName}`, amount: bk.depositAmount, level: 'l1', onConfirm: (method) => { eng().applyTransition(bk, 'CONFIRMED', 'l1', method); persistStatus(bk, `Seña acreditada (${method})`); } });

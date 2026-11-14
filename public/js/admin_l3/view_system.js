@@ -47,8 +47,10 @@ window.AdminL3System = (function () {
         <button onclick="AdminL3System.saveConfig()" class="w-full py-3 rounded-2xl admin-glass-primary font-bold text-xs">Guardar Parámetros de Operación</button>
       </div>
       <div class="admin-card space-y-4"><div class="pb-3 border-b border-stone-200 dark:border-stone-800"><h3 class="font-bold text-sm text-stone-900 dark:text-stone-100 font-title">Señas & Medios de Pago Activos</h3><p class="text-xs text-stone-500">Define el porcentaje o monto fijo de seña, medios habilitados y base de práctica.</p></div><div id="l3-payment-config-mount"></div></div>
+      <div class="admin-card space-y-4"><div class="pb-3 border-b border-stone-200 dark:border-stone-800"><h3 class="font-bold text-sm text-stone-900 dark:text-stone-100 font-title">WhatsApp & Plantillas de Notificación</h3><p class="text-xs text-stone-500">Canal oficial demo y mensajería automática por reserva y recordatorio.</p></div><div id="l3-wa-config-mount"></div></div>
     </div>`;
-    window.AdminBookingEngine?.mountPaymentConfigPanel({ mountId: 'l3-payment-config-mount', level: 'l3', includeDepositRule: true, onChange: () => window.AdminL3Core.showToast('Reglas de seña actualizadas'), onResetDemo: () => window.AdminL3Core.resetDemoBookings() });
+    window.AdminBookingEngine?.mountPaymentConfigPanel({ mountId: 'l3-payment-config-mount', level: 'l3', includeDepositRule: true, onChange: () => { window.AdminL3Core.showToast('Reglas de seña actualizadas'); window.AdminWaTemplates?.renderPreview?.({ mountId: 'l3-wa-config-mount', level: 'l3' }); }, onResetDemo: () => window.AdminL3Core.resetDemoBookings() });
+    window.AdminWaTemplates?.mount?.({ mountId: 'l3-wa-config-mount', level: 'l3' });
   }
 
   function toggleHolidayException(date) { const h = (window.AdminL3Core.state.holidays || []).map(x => x.date === date ? { ...x, isException: !x.isException } : x); window.AdminL3Core.setStorage('tucu_l3_holidays', h); window.AdminL3Core.state.holidays = h; window.AdminL3Core.renderActiveView(); }

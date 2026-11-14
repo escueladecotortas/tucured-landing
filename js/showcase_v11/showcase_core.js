@@ -11,6 +11,7 @@ import { ShowcaseBenefits } from './showcase_benefits.js';
 import { renderStageRubrosZone } from '../components/stage_rubros_zone.js';
 import { renderStageValueZone } from '../components/stage_value_zone.js';
 import { triggerSensoryFeedback } from '../utils/sound_fx.js';
+import { persistShowcaseBooking } from './showcase_booking_sync.js';
 
 export const ShowcaseCore = {
   _initialized: false,
@@ -52,14 +53,14 @@ export const ShowcaseCore = {
       },
       selectReason: (reasonIdx) => { ShowcaseState.selectedReason = reasonIdx; ShowcaseState.notify(); },
       toggleSelfService: (show) => ShowcaseState.setSelfService(show),
-      confirmBooking: () => { triggerSensoryFeedback(); ShowcaseState.setStep(4); },
+      confirmBooking: () => { triggerSensoryFeedback(); persistShowcaseBooking(ShowcaseState); ShowcaseState.setStep(4); },
       addToCalendar: () => {
         try {
           const s = ShowcaseState, r = s.rubros[s.currentRubro] || s.rubros.barberia;
           const activeSrvs = getActiveCatalogServices(s, r);
           const srv = (activeSrvs[s.selectedOption || 0] || activeSrvs[0])?.name || r.options[s.selectedOption || 0] || 'Servicio';
           const day = s.getSelectedDayLabel();
-          const token = s.currentLevel === 'l3' ? '#TK-92C1' : (s.currentLevel === 'l1' ? '#TK-71A0' : '#TK-84B2');
+          const token = s.lastBookingCode ? `#${s.lastBookingCode}` : (s.currentLevel === 'l3' ? '#TK-92C1' : (s.currentLevel === 'l1' ? '#TK-71A0' : '#TK-84B2'));
           const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TucuRed//Turnero Autonomo//ES\r\nBEGIN:VEVENT\r\nSUMMARY:${srv} - ${r.bizName}\r\nDESCRIPTION:Turno ${token} para ${s.clientFirstName} ${s.clientLastName}. Fecha: ${day} a las ${s.selectedTime} hs.\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\nEND:VCALENDAR`;
           const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
           const url = URL.createObjectURL(blob), a = document.createElement('a');

@@ -143,12 +143,20 @@ window.AdminL3Core = (function () {
 
   async function init() {
     initTheme();
+    const qParams = new URLSearchParams(window.location.search);
+    const qRubro = qParams.get('rubro'), qDate = qParams.get('date');
+    if (qRubro && DEFAULT_PRESETS[qRubro]) state.rubro = qRubro;
+    if (qDate && /^\d{4}-\d{2}-\d{2}$/.test(qDate)) state.selectedDate = qDate;
     const datePicker = document.getElementById('admin-date-picker');
     if (datePicker) {
       datePicker.value = state.selectedDate;
       datePicker.addEventListener('change', (e) => { state.selectedDate = e.target.value; state.dateRangeEnabled = false; renderActiveView(); });
     }
-    document.querySelectorAll('.rubro-tab').forEach(b => b.addEventListener('click', (e) => switchRubro(e.currentTarget.dataset.rubro)));
+    document.querySelectorAll('.rubro-tab').forEach(b => {
+      const isCur = b.dataset.rubro === state.rubro;
+      b.className = isCur ? 'rubro-tab admin-glass-pill is-active px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5' : 'rubro-tab admin-glass-pill px-2.5 py-1.5 rounded-xl font-semibold flex items-center gap-1.5';
+      b.addEventListener('click', (e) => switchRubro(e.currentTarget.dataset.rubro));
+    });
     document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', (e) => switchTab(e.currentTarget.dataset.tab)));
     syncRubroData(); renderActiveView();
   }
