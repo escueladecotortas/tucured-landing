@@ -1,9 +1,5 @@
 // Archivo: js/showcase_v11/showcase_state.js
-/**
- * ⚡ TucuRed Showcase v11.1 - Estado y Contratos de Datos Canónicos (SSOT v16.0)
- * Paginación de días operativos, salteo de domingos, Local-First y Protocolo PEAC (< 170L).
- */
-
+// Estado y Contratos Canónicos Showcase v11.1 (< 180 líneas, Local-First)
 export function getSystemCalendar(maxDays = 14) {
   const now = new Date(), diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'], diasReales = [];
   const rawMonth = now.toLocaleDateString('es-AR', { month: 'long' });
@@ -55,23 +51,30 @@ export function preloadShowcaseAssets() {
   Object.values(ShowcaseState.rubros).forEach(r => { if (r.heroImage) { const img = new Image(); img.src = r.heroImage; } });
 }
 
+export function normalizeShowroomRubro(raw) {
+  const s = String(raw || '').toLowerCase().trim();
+  if (s.includes('deport') || s.includes('club')) return 'deportes';
+  if (s.includes('estet')) return 'estetica';
+  if (s.includes('gastro') || s === 'resto') return 'gastronomia';
+  if (s.includes('salud') || s.includes('medic')) return 'salud';
+  if (s.includes('servic') || s.includes('consultor')) return 'servicios';
+  return 'peluqueria';
+}
+
 export function getActiveCatalogServices(state, rubro) {
   const isOk = (s) => Boolean(s && !s.deletedAt && s.isActive !== false && s.activo !== false && s.active !== false);
-  const rMap = { barberia: 'barberia', estetica: 'peluqueria_estetica', salud: 'salud_consultorio', deportes: 'deportes_clubes' };
+  const norm = normalizeShowroomRubro(rubro?.id || state?.currentRubro), lvl = ['l1', 'l2', 'l3'].includes(state?.currentLevel) ? state.currentLevel : 'l1';
+  const rMap = { peluqueria: 'barberia', estetica: 'peluqueria_estetica', salud: 'salud_consultorio', deportes: 'deportes_clubes', gastronomia: 'gastronomia', servicios: 'servicios' };
+  const fmt = (s) => ({ ...s, dur: s.dur || `${s.duration || 30} min • $${Number(s.price || 0).toLocaleString('es-AR')}` });
+  const key = lvl === 'l3' ? `tucu_l3_services_${rMap[norm] || 'barberia'}` : `tucu_${lvl}_services_${norm}`;
   try {
-    if (typeof localStorage !== 'undefined' && state?.currentLevel === 'l3') {
-      const stored = JSON.parse(localStorage.getItem(`tucu_l3_services_${rMap[rubro?.id] || rubro?.id}`) || 'null');
-      if (Array.isArray(stored) && stored.length > 0) {
-        return stored.filter(isOk).map(s => ({ ...s, dur: `${s.duration || 30} min • $${Number(s.price || 0).toLocaleString('es-AR')}` }));
-      }
-    }
-    if (typeof localStorage !== 'undefined' && state?.currentLevel === 'l1') {
-      const storedL1 = JSON.parse(localStorage.getItem('tucu_l1_services') || 'null');
-      if (Array.isArray(storedL1) && storedL1.length > 0) return storedL1.filter(isOk);
-    }
+    const stored = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem(key) || 'null') : null;
+    if (Array.isArray(stored) && stored.length > 0) return stored.filter(isOk).map(fmt);
   } catch (_) {}
-  if (state?.currentLevel === 'l3' && Array.isArray(rubro?.catalogL3)) return rubro.catalogL3.filter(isOk);
-  return (rubro?.options || []).filter(o => typeof o === 'string' || isOk(o)).map(o => (typeof o === 'string' ? { name: o } : o));
+  const base = Array.isArray(rubro?.catalogL3) && rubro.catalogL3.length > 0 ? rubro.catalogL3 : (rubro?.options || []).map(o => (typeof o === 'string' ? { name: o } : o));
+  const seed = base.filter(isOk).map((s, i) => ({ id: `srv-${norm}-${i + 1}`, ...s, isActive: true }));
+  try { if (typeof localStorage !== 'undefined' && seed.length) localStorage.setItem(key, JSON.stringify(seed)); } catch (_) {}
+  return seed.map(fmt);
 }
 
 const sysCalendar = getSystemCalendar();
@@ -109,61 +112,58 @@ export const ShowcaseState = {
 
   rubros: {
     estetica: {
-      id: 'estetica', name: 'Estética', bizName: 'Lumina Uñas & Estética', badgeL1: '★ ATENCIÓN PERSONALIZADA', subCategory: 'Estética & Bienestar',
+      id: 'estetica', name: 'Estética', bizName: 'Aura Estética & Spa', badgeL1: '★ ATENCIÓN PERSONALIZADA', subCategory: 'Estética & Bienestar',
       accentColor: '#D4AF37', btnClass: 'bg-gradient-to-r from-[#D4AF37] to-[#B18D28] text-[#0F0F10] font-bold shadow-lg shadow-[#D4AF37]/20', focusBorder: 'focus:border-[#D4AF37]', heroImage: '/assets/showcase/hero_unas.webp', iconSymbol: 'spa',
-      options: ['Lifting de Pestañas', 'Esmaltado Semipermanente', 'Limpieza Facial'], days: sysCalendar.diasReales.map(d => d.fullLabel),
+      options: ['Limpieza Facial Profunda', 'Esculpido de Cejas & Pestañas', 'Masaje Descontracturante'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Micaela (Master Lash)', 'Valentina (Cosmiatra)', 'Cualquiera (Sin Preferencia)'],
-      catalogL3: [{ name: 'Lifting + Nutrición', dur: '45 min • $18.000' }, { name: 'Limpieza Facial Profunda', dur: '60 min • $25.000' }]
+      catalogL3: [{ name: 'Limpieza Facial Profunda', duration: 60, price: 18000, dur: '60 min • $18.000' }, { name: 'Esculpido de Cejas & Pestañas', duration: 45, price: 14000, dur: '45 min • $14.000' }, { name: 'Masaje Descontracturante', duration: 50, price: 20000, dur: '50 min • $20.000' }]
     },
     resto: {
-      id: 'resto', name: 'Gastro', bizName: 'La Casona Restó', badgeL1: '🍷 RESERVA GASTRONÓMICA', subCategory: 'Gastronomía & Tragos',
+      id: 'resto', name: 'Gastro', bizName: 'Bistró & Parrilla El Encuentro', badgeL1: '🍷 RESERVA GASTRONÓMICA', subCategory: 'Gastronomía & Tragos',
       accentColor: '#E07A5F', btnClass: 'bg-gradient-to-r from-[#E07A5F] to-[#C85A3F] text-white font-bold shadow-lg shadow-[#E07A5F]/20', focusBorder: 'focus:border-[#E07A5F]', heroImage: '/assets/showcase/gastronomia.webp', iconSymbol: 'restaurant',
-      options: ['2 Personas', '4 Personas', '6 Personas', '+8 Grupo'], days: sysCalendar.diasReales.map(d => d.fullLabel),
+      options: ['Reserva Mesa 2 Personas', 'Mesa Salón Principal (4 pers.)', 'Degustación Nocturna'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Julián (Sommelier)', 'Automática (Mesa Libre)'],
-      catalogL3: [{ name: 'Maridaje Gourmet', dur: '120 min • $45.000' }, { name: 'Degustación de Vinos', dur: '60 min • $25.000' }]
+      catalogL3: [{ name: 'Reserva Mesa 2 Personas', duration: 90, price: 10000, dur: '90 min • $10.000' }, { name: 'Mesa Salón Principal (4 pers.)', duration: 120, price: 16000, dur: '120 min • $16.000' }, { name: 'Degustación Nocturna', duration: 120, price: 28000, dur: '120 min • $28.000' }]
     },
     barberia: {
-      id: 'barberia', name: 'Peluquería', bizName: 'The Hair Club Peluquería', badgeL1: '✂️ CORTE & ESTILO', subCategory: 'Peluquería & Estilo',
+      id: 'barberia', name: 'Peluquería', bizName: 'Peluquería & Barbería Central', badgeL1: '✂️ CORTE & ESTILO', subCategory: 'Peluquería & Estilo',
       accentColor: '#D97706', btnClass: 'bg-gradient-to-r from-[#D97706] to-[#B45309] text-white font-bold shadow-lg shadow-[#D97706]/20', focusBorder: 'focus:border-[#D97706]', heroImage: '/assets/showcase/hero_peluqueria.webp', iconSymbol: 'content_cut',
-      options: ['Corte Tradicional', 'Corte + Barba', 'Servicio VIP The Hair Club'], days: sysCalendar.diasReales.map(d => d.fullLabel),
+      options: ['Corte Clásico', 'Corte Degradé / Fade', 'Barba Toalla Caliente'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Franco (Master Fade)', 'Lucas (Corte & Estilo)', 'Cualquiera (Primer Sillón Libre)'],
-      catalogL3: [{ name: 'Corte Signature + Perfilado', dur: '45 min • $16.000' }, { name: 'Corte + Color Completo', dur: '60 min • $24.000' }]
+      catalogL3: [{ name: 'Corte Clásico', duration: 30, price: 8000, dur: '30 min • $8.000' }, { name: 'Corte Degradé / Fade', duration: 45, price: 10000, dur: '45 min • $10.000' }, { name: 'Barba Toalla Caliente', duration: 30, price: 6000, dur: '30 min • $6.000' }]
     },
     deportes: {
-      id: 'deportes', name: 'Deportes', bizName: 'Deportes Club', badgeL1: '⚡ CANCHA ILUMINADA', subCategory: 'Complejo Deportivo',
+      id: 'deportes', name: 'Deportes', bizName: 'Complejo Deportivo & Pádel Norte', badgeL1: '⚡ CANCHA ILUMINADA', subCategory: 'Complejo Deportivo',
       accentColor: '#84CC16', btnClass: 'bg-gradient-to-r from-[#84CC16] to-[#65A30D] text-[#0F0F10] font-bold shadow-lg shadow-[#84CC16]/20', focusBorder: 'focus:border-[#84CC16]', heroImage: '/assets/showcase/deportes.webp', iconSymbol: 'sports_tennis',
-      options: ['Turno 60 Minutos', 'Turno 90 Minutos', 'Clase Particular'], days: sysCalendar.diasReales.map(d => d.fullLabel),
+      options: ['Alquiler Cancha Pádel Cristal', 'Cancha Fútbol 5 Sintético', 'Clase Grupal Funcional'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Cancha 1 (Panorámica)', 'Cancha 2 (Techada Pro)', 'Cualquiera (Primera Libre)'],
-      catalogL3: [{ name: 'Turno Cancha Panorámica', dur: '90 min • $25.000' }, { name: 'Clase Particular con Profe', dur: '60 min • $30.000' }]
+      catalogL3: [{ name: 'Alquiler Cancha Pádel Cristal', duration: 90, price: 24000, dur: '90 min • $24.000' }, { name: 'Cancha Fútbol 5 Sintético', duration: 60, price: 32000, dur: '60 min • $32.000' }, { name: 'Clase Grupal Funcional', duration: 60, price: 14000, dur: '60 min • $14.000' }]
     },
     salud: {
-      id: 'salud', name: 'Salud', label: 'Salud & Consultorios', bizName: 'Centro Médico & Especialidades', badgeL1: '🩺 CONSULTORIO MÉDICO', subCategory: 'Medicina General & Odontología',
+      id: 'salud', name: 'Salud', label: 'Salud & Consultorios', bizName: 'Consultorios Médicos San Martín', badgeL1: '🩺 CONSULTORIO MÉDICO', subCategory: 'Medicina General & Odontología',
       accentColor: '#0D9488', btnClass: 'bg-gradient-to-r from-[#0D9488] to-[#0F766E] text-white font-bold shadow-lg shadow-[#0D9488]/20', focusBorder: 'focus:border-[#0D9488]', heroImage: '/assets/showcase/hero_salud.webp', iconSymbol: 'medical_services',
-      requireInsurance: true, options: ['Consulta Clínica General', 'Control Odontológico', 'Evaluación Diagnóstica'], days: sysCalendar.diasReales.map(d => d.fullLabel),
+      requireInsurance: true, options: ['Consulta Clínica General', 'Control Odontológico', 'Sesión Kinesiología'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Dra. Sofía Mendoza (Clínica)', 'Dr. Carlos Ruiz (Diagnóstico)', 'Dra. Lucía Albarracín (Odonto)'],
-      catalogL3: [{ name: 'Consulta Médica General', dur: '20 min • $20.000' }, { name: 'Evaluación Diagnóstica Completa', dur: '40 min • $35.000' }]
+      catalogL3: [{ name: 'Consulta Clínica General', duration: 30, price: 20000, dur: '30 min • $20.000' }, { name: 'Control Odontológico', duration: 30, price: 18000, dur: '30 min • $18.000' }, { name: 'Sesión Kinesiología', duration: 45, price: 16000, dur: '45 min • $16.000' }]
     }
   },
 
   subscribe(listener) { this.listeners.push(listener); },
   notify() { this.listeners.forEach(fn => fn(this)); },
 
-  setRubro(r) { 
-    this.currentRubro = r; 
+  setRubro(r) {
+    this.currentRubro = r; this.selectedOption = 0; this.selectedStaff = 0;
     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('tucured:rubro-selected', { detail: { rubro: r } }));
-    this.notify(); 
+    this.notify();
   },
   setLevel(l) { this.currentLevel = l; this.notify(); },
   setStep(s) { this.currentStep = s; this.notify(); },
   setViewMode(mode) { this.viewMode = mode; this.notify(); },
   setSelfService(val) { this.isSelfService = !!val; this.notify(); },
   selectDay(idx) { this.selectedDay = idx; this.calendarPage = Math.floor(idx / 4); this.notify(); },
-  prevDayPage() {
-    if (this.calendarPage > 0) { this.calendarPage--; this.selectedDay = this.calendarPage * 4; this.notify(); }
-  },
+  prevDayPage() { if (this.calendarPage > 0) { this.calendarPage--; this.selectedDay = this.calendarPage * 4; this.notify(); } },
   nextDayPage() {
-    const cal = this.systemCalendar || getSystemCalendar();
-    const maxPage = Math.max(0, Math.floor(((cal.diasReales || []).length - 1) / 4));
+    const cal = this.systemCalendar || getSystemCalendar(), maxPage = Math.max(0, Math.floor(((cal.diasReales || []).length - 1) / 4));
     if (this.calendarPage < maxPage) { this.calendarPage++; this.selectedDay = this.calendarPage * 4; this.notify(); }
   },
 

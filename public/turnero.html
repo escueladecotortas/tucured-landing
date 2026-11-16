@@ -1,0 +1,46 @@
+<!-- Archivo: public/turnero.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Reservar Turno — TucuRed Turnero Autónomo</title>
+  <script>(function(){if((localStorage.getItem('tucu_theme')||'light')==='dark')document.documentElement.classList.add('dark');})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{accent:'#800000'}}}}};</script>
+  <link rel="stylesheet" href="/css/admin_unified.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-[#EAE4DA] dark:bg-[#121110] text-stone-900 dark:text-stone-100">
+  <header class="w-full border-b border-[#D5CEC2] dark:border-stone-800 bg-[#FBFBF9]/90 dark:bg-[#1C1A19]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <span class="w-8 h-8 rounded-xl bg-[#800000] text-white flex items-center justify-center shadow-xs shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </span>
+      <div class="min-w-0"><h1 id="turnero-biz-name" class="font-title text-sm font-extrabold leading-tight truncate">TucuRed</h1><p id="turnero-rubro-label" class="text-[10px] text-stone-500 truncate">Turnero Web Autónomo</p></div>
+    </div>
+    <a id="btn-back-admin" href="/admin_l1.html" class="px-3 py-1.5 rounded-xl admin-glass-btn text-xs font-semibold flex items-center gap-1.5 shrink-0">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      <span>Panel Admin</span>
+    </a>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center p-4 sm:p-6">
+    <section id="turnero-root" class="admin-card w-full max-w-md shadow-xl">
+      <div class="py-10 text-center text-xs text-stone-500">Cargando catálogo de servicios...</div>
+    </section>
+  </main>
+
+  <footer class="text-center py-3 px-4 text-[11px] text-stone-500 dark:text-stone-400">
+    TucuRed · Turnero Web 24/7 · Confirmación instantánea
+  </footer>
+
+  <script src="/js/admin_shared/admin_holidays.js"></script>
+  <script src="/js/admin_shared/admin_shell.js"></script>
+  <script src="/js/admin_shared/admin_booking_engine.js"></script>
+  <script src="/js/admin_shared/admin_wa_templates.js"></script>
+  <script src="/js/admin_shared/turnero_catalog.js"></script>
+  <script src="/js/admin_shared/ticket_modal.js"></script>
+  <script src="/js/admin_shared/turnero_app.js"></script>
+</body>
+</html>

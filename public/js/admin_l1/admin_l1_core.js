@@ -38,41 +38,42 @@
   }
 
   async function injectClientBrand(slugParam) {
-    const params = new URLSearchParams(window.location.search);
-    const slug = (slugParam || params.get('slug') || getConfig().slug || 'demo-peluqueria').trim();
-    localStorage.setItem('tucu_l1_slug', slug);
+    const params = new URLSearchParams(window.location.search), seedMod = global.AdminDemoSeed;
+    const qRubro = params.get('rubro'), qSlug = slugParam || params.get('slug');
+    const isDemo = (s) => !s || s.startsWith('demo-') || s === 'mi-comercio';
+    const rubro = seedMod ? seedMod.resolveRubro(qRubro || qSlug || localStorage.getItem('tucu_l1_rubro') || 'peluqueria') : 'peluqueria';
+    const meta = seedMod ? seedMod.getRubroMeta(rubro) : DEFAULT_CONFIG;
+    const slug = (qSlug && (!qRubro || !isDemo(qSlug)) ? qSlug : (qRubro ? meta.slug : localStorage.getItem('tucu_l1_slug')) || meta.slug).trim();
+    localStorage.setItem('tucu_l1_rubro', rubro); localStorage.setItem('tucu_l1_slug', slug);
     let assets = null;
-    if (slug && slug !== 'demo-peluqueria') {
+    if (slug && !slug.startsWith('demo')) {
       for (const u of [`/api/portal/${slug}/config`, `/nexus_archives/tucu-red/clients/${slug}/client-assets.json`]) {
-        try {
-          const res = await fetch(u);
-          if (res.ok) { const d = await res.json(); assets = d.config || d.payload || d; if (assets?.business_name || assets?.name) break; }
-        } catch (_) {}
+        try { const res = await fetch(u); if (res.ok) { const d = await res.json(); assets = d.config || d.payload || d; if (assets?.business_name || assets?.name) break; } } catch (_) {}
       }
     }
     if (assets) {
-      const name = assets.business_name || assets.name || DEFAULT_CONFIG.bizName;
-      const sub = assets.subtitle || assets.subcategory || assets.category || DEFAULT_CONFIG.subtitle;
+      const name = assets.business_name || assets.name || meta.bizName, sub = assets.subtitle || assets.subcategory || meta.subtitle;
       const rawLogo = assets.logoUrl || assets.logo_url || assets.semantic_photos?.logo || '';
       const logo = rawLogo.startsWith('./') ? `/nexus_archives/tucu-red/clients/${slug}/${rawLogo.slice(2)}` : (rawLogo || '');
-      const accent = assets.accentColor || assets.brand_accent || assets.accent || '#800000';
-      document.documentElement.style.setProperty('--brand-accent', accent);
+      document.documentElement.style.setProperty('--brand-accent', assets.accentColor || assets.brand_accent || '#800000');
       localStorage.setItem('tucu_l1_biz_name', name); localStorage.setItem('tucu_l1_subtitle', sub); localStorage.setItem('tucu_l1_logo', logo);
       if (Array.isArray(assets.services) && assets.services.length > 0 && global.adminL1Pricing?.syncFromBrand) global.adminL1Pricing.syncFromBrand(assets.services);
     } else {
       document.documentElement.style.setProperty('--brand-accent', '#800000');
-      localStorage.setItem('tucu_l1_biz_name', DEFAULT_CONFIG.bizName);
-      localStorage.setItem('tucu_l1_subtitle', DEFAULT_CONFIG.subtitle);
+      localStorage.setItem('tucu_l1_biz_name', meta.bizName || DEFAULT_CONFIG.bizName);
+      localStorage.setItem('tucu_l1_subtitle', meta.subtitle || DEFAULT_CONFIG.subtitle);
       localStorage.setItem('tucu_l1_logo', '');
     }
     renderBrandIdentity();
-    if (global.adminL1Agenda?.loadBookings) global.adminL1Agenda.loadBookings(slug);
+    global.adminL1Pricing?.renderPricing?.();
+    if (global.adminL1Agenda?.loadBookings) global.adminL1Agenda.loadBookings(slug, rubro);
   }
 
   function renderBrandIdentity() {
-    const cfg = getConfig();
-    const isGeneric = !cfg.slug || cfg.slug === 'demo-peluqueria' || cfg.slug === 'mi-comercio';
-    const initials = isGeneric ? 'PB' : (cfg.bizName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'PB');
+    const cfg = getConfig(), seedMod = global.AdminDemoSeed;
+    const meta = seedMod ? seedMod.getRubroMeta(localStorage.getItem('tucu_l1_rubro') || cfg.slug) : null;
+    const isDemo = !cfg.slug || cfg.slug.startsWith('demo-') || cfg.slug === 'mi-comercio';
+    const initials = isDemo && meta?.initials ? meta.initials : (cfg.bizName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'PB');
     const tEl = document.getElementById('brand-title'), sEl = document.getElementById('brand-subtitle');
     const initEl = document.getElementById('brand-initials'), img = document.getElementById('brand-logo-img');
     const pinTitle = document.getElementById('pin-brand-title'), pinName = document.getElementById('pin-brand-name'), pinInit = document.getElementById('pin-brand-initials');
@@ -84,7 +85,7 @@
     if (pinName) pinName.textContent = cfg.bizName;
     if (pinTitle) pinTitle.textContent = `${cfg.bizName} — Panel`;
     if (img) {
-      if (cfg.logoUrl && !isGeneric) { img.src = cfg.logoUrl; img.classList.remove('hidden'); }
+      if (cfg.logoUrl && !isDemo) { img.src = cfg.logoUrl; img.classList.remove('hidden'); }
       else { img.classList.add('hidden'); }
     }
     document.title = `${cfg.bizName} — Panel de Gestión`;

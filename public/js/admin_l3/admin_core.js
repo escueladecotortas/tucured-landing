@@ -8,7 +8,6 @@ window.AdminL3Core = (function () {
     users: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
     space: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg>',
     clock: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 2"/></svg>',
-    msg: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>',
     tel: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
     edit: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
     trash: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
@@ -21,34 +20,49 @@ window.AdminL3Core = (function () {
     grid: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>'
   };
 
+  const RUBRO_ALIASES = { peluqueria: 'barberia', barberia: 'barberia', estetica: 'peluqueria_estetica', peluqueria_estetica: 'peluqueria_estetica', salud: 'salud_consultorio', salud_consultorio: 'salud_consultorio', deportes: 'deportes_clubes', deportes_clubes: 'deportes_clubes', resto: 'gastronomia', gastronomia: 'gastronomia', servicios: 'servicios' };
   const DEFAULT_PRESETS = {
     barberia: {
-      id: "barberia", name: "Barbería & Spa", code: "BR",
+      id: "barberia", name: "Peluquería & Barbería Central", code: "PB",
       labels: { staffSingular: "Barbero", staffPlural: "Barberos", resourceSingular: "Sillón / Box", resourcePlural: "Sillones & Boxes", serviceSingular: "Servicio", servicePlural: "Servicios" },
       staff: [{ id: "st-1", name: "Mateo Silva", role: "Master Barber", photo: "MS", phone: "3815111111", email: "mateo@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }, { id: "st-2", name: "Lucas Gómez", role: "Fade & Estilo", photo: "LG", phone: "3815222222", email: "lucas@nexus.ar", active: true, serviceIds: ["srv-1"] }, { id: "st-3", name: "Juan Bianchi", role: "Color & Spa", photo: "JB", phone: "3815333333", email: "juan@nexus.ar", active: true, serviceIds: ["srv-3"] }],
       resources: [{ id: "res-1", name: "Sillón Principal #1", type: "Sillón", icon: "S1", active: true }, { id: "res-2", name: "Sillón Secundario #2", type: "Sillón", icon: "S2", active: true }, { id: "res-3", name: "Box VIP Lavado & Spa", type: "Box", icon: "BX", active: true }],
-      services: [{ id: "srv-1", name: "Corte Clásico & Fade", duration: 30, price: 12000, resourceType: "Sillón", icon: "CF" }, { id: "srv-2", name: "Ritual de Barba", duration: 20, price: 9000, resourceType: "Sillón", icon: "RB" }, { id: "srv-3", name: "Spa Capilar VIP", duration: 45, price: 18000, resourceType: "Box", icon: "SC" }]
+      services: [{ id: "srv-1", name: "Corte Clásico", duration: 30, price: 8000, resourceType: "Sillón", icon: "CC" }, { id: "srv-2", name: "Corte Degradé / Fade", duration: 45, price: 10000, resourceType: "Sillón", icon: "CF" }, { id: "srv-3", name: "Barba Toalla Caliente", duration: 30, price: 6000, resourceType: "Box", icon: "BT" }]
     },
     peluqueria_estetica: {
-      id: "peluqueria_estetica", name: "Peluquería & Estética", code: "PE",
-      labels: { staffSingular: "Estilista", staffPlural: "Estilistas", resourceSingular: "Puesto / Gabinete", resourcePlural: "Puestos & Gabinetes", serviceSingular: "Tratamiento", servicePlural: "Tratamientos" },
-      staff: [{ id: "st-1", name: "Valeria Rossi", role: "Estilista Senior", photo: "VR", phone: "3815444444", email: "valeria@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }, { id: "st-2", name: "Micaela Flores", role: "Color & Lash", photo: "MF", phone: "3815555555", email: "mica@nexus.ar", active: true, serviceIds: ["srv-2", "srv-3"] }],
-      resources: [{ id: "res-1", name: "Estación Peinado A", type: "Sillón", icon: "EA", active: true }, { id: "res-2", name: "Estación Peinado B", type: "Sillón", icon: "EB", active: true }, { id: "res-3", name: "Gabinete Facial & Láser", type: "Gabinete", icon: "GF", active: true }],
-      services: [{ id: "srv-1", name: "Corte & Brushing", duration: 45, price: 16000, resourceType: "Sillón", icon: "CB" }, { id: "srv-2", name: "Color & Nutrición", duration: 90, price: 28000, resourceType: "Sillón", icon: "CN" }, { id: "srv-3", name: "Lifting de Pestañas", duration: 60, price: 14000, resourceType: "Gabinete", icon: "LP" }]
+      id: "peluqueria_estetica", name: "Aura Estética & Spa", code: "AE",
+      labels: { staffSingular: "Especialista", staffPlural: "Especialistas", resourceSingular: "Gabinete / Box", resourcePlural: "Gabinetes & Boxes", serviceSingular: "Tratamiento", servicePlural: "Tratamientos" },
+      staff: [{ id: "st-1", name: "Valeria Rossi", role: "Cosmiatra Senior", photo: "VR", phone: "3815444444", email: "valeria@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }, { id: "st-2", name: "Micaela Flores", role: "Cejas & Masajes", photo: "MF", phone: "3815555555", email: "mica@nexus.ar", active: true, serviceIds: ["srv-2", "srv-3"] }],
+      resources: [{ id: "res-1", name: "Gabinete Facial A", type: "Gabinete", icon: "GA", active: true }, { id: "res-2", name: "Gabinete Corporal B", type: "Gabinete", icon: "GB", active: true }, { id: "res-3", name: "Box Mirada & Spa", type: "Box", icon: "BM", active: true }],
+      services: [{ id: "srv-1", name: "Limpieza Facial Profunda", duration: 60, price: 18000, resourceType: "Gabinete", icon: "LF" }, { id: "srv-2", name: "Esculpido de Cejas & Pestañas", duration: 45, price: 14000, resourceType: "Box", icon: "EC" }, { id: "srv-3", name: "Masaje Descontracturante", duration: 50, price: 20000, resourceType: "Gabinete", icon: "MD" }]
     },
     salud_consultorio: {
-      id: "salud_consultorio", name: "Consultorio Médico & Salud", code: "SM",
+      id: "salud_consultorio", name: "Consultorios Médicos San Martín", code: "CM",
       labels: { staffSingular: "Profesional", staffPlural: "Profesionales Médicos", resourceSingular: "Consultorio", resourcePlural: "Consultorios Físicos", serviceSingular: "Consulta", servicePlural: "Consultas & Prácticas" },
-      staff: [{ id: "st-1", name: "Dra. Sofía Mendoza", role: "Médica Clínica", photo: "SM", phone: "3815666666", email: "dra.mendoza@nexus.ar", active: true, serviceIds: ["srv-1"] }, { id: "st-2", name: "Dr. Alejandro Rossi", role: "Traumatólogo", photo: "AR", phone: "3815777777", email: "dr.rossi@nexus.ar", active: true, serviceIds: ["srv-2"] }],
-      resources: [{ id: "res-1", name: "Consultorio 101 - Clínica", type: "Consultorio", icon: "C1", active: true }, { id: "res-2", name: "Consultorio 102 - Traumatología", type: "Consultorio", icon: "C2", active: true }, { id: "res-3", name: "Sala de Yesos & Curaciones", type: "Sala", icon: "SY", active: true }],
-      services: [{ id: "srv-1", name: "Consulta Clínica General", duration: 20, price: 22000, resourceType: "Consultorio", icon: "CG" }, { id: "srv-2", name: "Consulta Traumatología", duration: 30, price: 25000, resourceType: "Consultorio", icon: "TR" }]
+      staff: [{ id: "st-1", name: "Dra. Sofía Mendoza", role: "Médica Clínica", photo: "SM", phone: "3815666666", email: "dra.mendoza@nexus.ar", active: true, serviceIds: ["srv-1"] }, { id: "st-2", name: "Dr. Alejandro Rossi", role: "Odontología & Kine", photo: "AR", phone: "3815777777", email: "dr.rossi@nexus.ar", active: true, serviceIds: ["srv-2", "srv-3"] }],
+      resources: [{ id: "res-1", name: "Consultorio 101 - Clínica", type: "Consultorio", icon: "C1", active: true }, { id: "res-2", name: "Consultorio 102 - Odontología", type: "Consultorio", icon: "C2", active: true }, { id: "res-3", name: "Box Kinesiología", type: "Box", icon: "BK", active: true }],
+      services: [{ id: "srv-1", name: "Consulta Clínica General", duration: 30, price: 20000, resourceType: "Consultorio", icon: "CG" }, { id: "srv-2", name: "Control Odontológico", duration: 30, price: 18000, resourceType: "Consultorio", icon: "CO" }, { id: "srv-3", name: "Sesión Kinesiología", duration: 45, price: 16000, resourceType: "Box", icon: "SK" }]
     },
     deportes_clubes: {
-      id: "deportes_clubes", name: "Club Deportivo & Canchas", code: "DC",
-      labels: { staffSingular: "Profesor / Árbitro", staffPlural: "Staff Deportivo", resourceSingular: "Cancha", resourcePlural: "Canchas & Espacios", serviceSingular: "Turno / Clase", servicePlural: "Turnos de Cancha" },
-      staff: [{ id: "st-1", name: "Prof. Carlos Vega", role: "Instructor Pádel", photo: "CV", phone: "3815888888", email: "vega@nexus.ar", active: true, serviceIds: ["srv-2"] }, { id: "st-2", name: "Prof. Ignacio Ruiz", role: "Coordinador Turnos", photo: "IR", phone: "3815999999", email: "ruiz@nexus.ar", active: true, serviceIds: ["srv-1", "srv-3"] }],
-      resources: [{ id: "res-1", name: "Cancha Pádel Vidrio #1", type: "Cancha", icon: "P1", active: true }, { id: "res-2", name: "Cancha Pádel Césped #2", type: "Cancha", icon: "P2", active: true }, { id: "res-3", name: "Cancha Fútbol 5 Sintético", type: "Cancha", icon: "F5", active: true }],
-      services: [{ id: "srv-1", name: "Alquiler Cancha Pádel 90m", duration: 90, price: 24000, resourceType: "Cancha", icon: "P9" }, { id: "srv-2", name: "Clase Particular Pádel 60m", duration: 60, price: 18000, resourceType: "Cancha", icon: "CP" }, { id: "srv-3", name: "Alquiler Fútbol 5 (60m)", duration: 60, price: 32000, resourceType: "Cancha", icon: "F5" }]
+      id: "deportes_clubes", name: "Complejo Deportivo & Pádel Norte", code: "CD",
+      labels: { staffSingular: "Profesor / Cancha", staffPlural: "Staff & Canchas", resourceSingular: "Cancha", resourcePlural: "Canchas & Espacios", serviceSingular: "Turno / Clase", servicePlural: "Turnos & Clases" },
+      staff: [{ id: "st-1", name: "Prof. Carlos Vega", role: "Instructor Pádel", photo: "CV", phone: "3815888888", email: "vega@nexus.ar", active: true, serviceIds: ["srv-1", "srv-3"] }, { id: "st-2", name: "Prof. Ignacio Ruiz", role: "Coordinador Turnos", photo: "IR", phone: "3815999999", email: "ruiz@nexus.ar", active: true, serviceIds: ["srv-1", "srv-2"] }],
+      resources: [{ id: "res-1", name: "Cancha Pádel Cristal #1", type: "Cancha", icon: "P1", active: true }, { id: "res-2", name: "Cancha Fútbol 5 Sintético", type: "Cancha", icon: "F5", active: true }, { id: "res-3", name: "Salón Funcional #3", type: "Salón", icon: "SF", active: true }],
+      services: [{ id: "srv-1", name: "Alquiler Cancha Pádel Cristal", duration: 90, price: 24000, resourceType: "Cancha", icon: "PC" }, { id: "srv-2", name: "Cancha Fútbol 5 Sintético", duration: 60, price: 32000, resourceType: "Cancha", icon: "F5" }, { id: "srv-3", name: "Clase Grupal Funcional", duration: 60, price: 14000, resourceType: "Salón", icon: "CF" }]
+    },
+    gastronomia: {
+      id: "gastronomia", name: "Bistró & Parrilla El Encuentro", code: "BE",
+      labels: { staffSingular: "Anfitrión", staffPlural: "Equipo de Salón", resourceSingular: "Mesa / Sector", resourcePlural: "Mesas & Sectores", serviceSingular: "Experiencia", servicePlural: "Mesas & Menús" },
+      staff: [{ id: "st-1", name: "Julián Pereyra", role: "Maître Salón", photo: "JP", phone: "3815123123", email: "salon@nexus.ar", active: true }, { id: "st-2", name: "Camila Soraire", role: "Anfitriona Galería", photo: "CS", phone: "3815321321", email: "galeria@nexus.ar", active: true }],
+      resources: [{ id: "res-1", name: "Mesa Salón #1", type: "Salón", icon: "M1", active: true }, { id: "res-2", name: "Galería Norte #2", type: "Galería", icon: "M2", active: true }, { id: "res-3", name: "Mesa VIP Cava #3", type: "VIP", icon: "M3", active: true }],
+      services: [{ id: "srv-1", name: "Reserva Mesa 2 Personas", duration: 90, price: 10000, resourceType: "Salón", icon: "M2" }, { id: "srv-2", name: "Mesa Salón Principal (4 pers.)", duration: 120, price: 16000, resourceType: "Salón", icon: "M4" }, { id: "srv-3", name: "Degustación Nocturna", duration: 120, price: 28000, resourceType: "VIP", icon: "DN" }]
+    },
+    servicios: {
+      id: "servicios", name: "Estudio Jurídico & Contable Norte", code: "EN",
+      labels: { staffSingular: "Consultor", staffPlural: "Profesionales", resourceSingular: "Sala / Oficina", resourcePlural: "Salas & Oficinas", serviceSingular: "Servicio", servicePlural: "Servicios" },
+      staff: [{ id: "st-1", name: "Cr. Mariano Luján", role: "Impositivo Senior", photo: "ML", phone: "3815789789", email: "estudio@nexus.ar", active: true }, { id: "st-2", name: "Dra. Paula Paz", role: "Derecho Corporativo", photo: "PP", phone: "3815987987", email: "legal@nexus.ar", active: true }],
+      resources: [{ id: "res-1", name: "Oficina Central #1", type: "Oficina", icon: "O1", active: true }, { id: "res-2", name: "Sala Reuniones #2", type: "Sala", icon: "O2", active: true }, { id: "res-3", name: "Box Virtual / Meet", type: "Box", icon: "BV", active: true }],
+      services: [{ id: "srv-1", name: "Asesoría Inicial 45 min", duration: 45, price: 22000, resourceType: "Oficina", icon: "AI" }, { id: "srv-2", name: "Gestión Impositiva Mensual", duration: 60, price: 26000, resourceType: "Sala", icon: "GI" }, { id: "srv-3", name: "Auditoría Documental", duration: 60, price: 30000, resourceType: "Sala", icon: "AD" }]
     }
   };
 
@@ -64,14 +78,7 @@ window.AdminL3Core = (function () {
   const getStorage = (k, f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (_) { return f; } };
   const setStorage = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
 
-  function playDingSound() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)(), osc = ctx.createOscillator(), gain = ctx.createGain();
-      osc.type = 'sine'; osc.frequency.setValueAtTime(650, ctx.currentTime);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
-      osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.08);
-    } catch (_) {}
-  }
+  function playDingSound() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(), osc = ctx.createOscillator(), g = ctx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(650, ctx.currentTime); g.gain.setValueAtTime(0.2, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08); osc.connect(g); g.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.08); } catch (_) {} }
 
   function showToast(msg, type = 'success') {
     const toast = document.getElementById('toast-notification'), msgEl = document.getElementById('toast-message'), iconEl = document.getElementById('toast-icon');
@@ -92,21 +99,25 @@ window.AdminL3Core = (function () {
     state.resources = getStorage(`tucu_l3_resources_${state.rubro}`, p.resources || []);
     state.services = getStorage(`tucu_l3_services_${state.rubro}`, p.services || []);
     const eng = window.AdminBookingEngine, seed = window.AdminDemoSeed;
-    const rawBks = getStorage('tucu_l3_bookings', null);
-    const list = Array.isArray(rawBks) ? rawBks : (seed ? seed.getL3Seed(eng?.getConfig('l3')) : []);
+    const rawBks = getStorage('tucu_l3_bookings', []), partBks = getStorage(`tucu_l3_bookings_${state.rubro}`, []);
+    let list = [...(Array.isArray(partBks) ? partBks : []), ...(Array.isArray(rawBks) ? rawBks : [])].filter((b, i, a) => b && a.findIndex(x => x.id === b.id) === i);
+    if (!list.some(b => b.rubroId === state.rubro) && seed) list = [...list, ...seed.getL3Seed(eng?.getConfig('l3'), state.rubro)];
     state.bookings = eng ? list.map(b => eng.hydrateBooking(b, 'l3', b.price || 12000)) : list;
     state.telemetry = getStorage('tucu_l3_telemetry', state.telemetry);
     setStorage(`tucu_l3_staff_${state.rubro}`, state.staff); setStorage(`tucu_l3_resources_${state.rubro}`, state.resources);
     setStorage(`tucu_l3_services_${state.rubro}`, state.services); setStorage('tucu_l3_bookings', state.bookings);
+    setStorage(`tucu_l3_bookings_${state.rubro}`, state.bookings.filter(b => b.rubroId === state.rubro));
     const setT = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
-    setT('rubro-indicator', p.name);
+    setT('rubro-indicator', p.name); setT('l3-brand-title', p.name); setT('l3-brand-initials', p.code || 'T3');
     setT('tab-staff-label', p.labels?.staffPlural || 'Personal Humano');
     setT('tab-resources-label', p.labels?.resourcePlural || 'Recursos Físicos');
     setT('tab-services-label', p.labels?.servicePlural || 'Servicios');
   }
 
   function resetDemoBookings() {
-    state.bookings = window.AdminDemoSeed ? window.AdminDemoSeed.resetLevel('l3') : [];
+    const others = (state.bookings || []).filter(b => b.rubroId && b.rubroId !== state.rubro);
+    const fresh = window.AdminDemoSeed ? window.AdminDemoSeed.getL3Seed(window.AdminBookingEngine?.getConfig('l3'), state.rubro) : [];
+    state.bookings = [...others, ...fresh]; setStorage('tucu_l3_bookings', state.bookings);
     showToast('Base de práctica L3 restaurada'); renderActiveView();
   }
 
@@ -145,7 +156,8 @@ window.AdminL3Core = (function () {
     initTheme();
     const qParams = new URLSearchParams(window.location.search);
     const qRubro = qParams.get('rubro'), qDate = qParams.get('date');
-    if (qRubro && DEFAULT_PRESETS[qRubro]) state.rubro = qRubro;
+    const mappedRubro = RUBRO_ALIASES[String(qRubro || '').toLowerCase()] || qRubro;
+    if (mappedRubro && DEFAULT_PRESETS[mappedRubro]) state.rubro = mappedRubro;
     if (qDate && /^\d{4}-\d{2}-\d{2}$/.test(qDate)) state.selectedDate = qDate;
     const datePicker = document.getElementById('admin-date-picker');
     if (datePicker) {

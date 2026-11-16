@@ -1,11 +1,11 @@
 // Archivo: js/showcase_v11/showcase_templates_l1.js
 /**
- * ⚡ TucuRed Showcase v11.1 - Pieles Temáticas Stitch L1 (Aura Light)
- * Paginación semanal (< y >), salteo de días cerrados, y selección de horario fluida.
+ * TucuRed Showcase v11.1 - Pieles Temáticas Stitch L1 (Aura Light)
+ * Catálogo vivo por rubro, paginación semanal, salteo de domingos y selección horaria.
  * Restricción estricta: < 200 líneas (< 170L) y Protocolo PEAC.
  */
 
-import { getSystemCalendar, getVisibleDays, isSelectedDaySunday, isTimePast } from './showcase_state.js';
+import { getSystemCalendar, getVisibleDays, isSelectedDaySunday, isTimePast, getActiveCatalogServices } from './showcase_state.js';
 
 export const ShowcaseTemplatesL1 = {
   render(rubroId, state, rubro) {
@@ -53,12 +53,24 @@ export const ShowcaseTemplatesL1 = {
     </div>`;
   },
 
+  renderServiceSelector(r, state, activeColorClass, title = 'Elegir Servicio') {
+    const items = getActiveCatalogServices(state, r);
+    const listHtml = items.length === 0
+      ? '<div class="col-span-2 p-3 text-center text-xs text-slate-500 bg-slate-100 rounded-xl border border-slate-200">Sin servicios disponibles actualmente</div>'
+      : items.map((cat, idx) => `
+        <button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="p-2 rounded-xl text-left border cursor-pointer transition-all ${(state.selectedOption || 0) === idx ? `${activeColorClass} font-bold shadow-xs` : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">
+          <span class="block text-xs text-slate-900 truncate">${cat.name}</span>
+          ${cat.dur ? `<span class="block text-[10px] text-slate-500 font-mono mt-0.5 truncate">${cat.dur}</span>` : ''}
+        </button>`).join('');
+    return `<div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">${title}</h4><div class="grid grid-cols-2 gap-1.5">${listHtml}</div></div>`;
+  },
+
   renderSubmitBtn(gradientClass) {
     return `<button type="button" onclick="window.ShowcaseCore.nextStep()" class="w-full mt-2 ${gradientClass} font-bold text-xs py-2.5 rounded-xl shadow-md flex justify-center items-center gap-1.5 cursor-pointer"><span>Continuar con la Reserva</span><span class="material-symbols-outlined text-sm">arrow_forward</span></button>`;
   },
 
   renderEstetica(state, r) {
-    return `<div class="space-y-3">
+    return `<div class="space-y-2.5">${this.renderServiceSelector(r, state, 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#9A7D0A]')}
       <div>${this.renderDateHeader('Fecha', 'text-[#D4AF37]', state)}
         <div class="flex justify-center items-center gap-2.5 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#D4AF37]/15 border-2 border-[#D4AF37] text-[#9A7D0A] font-bold shadow-xs')}</div></div>
       <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>
@@ -67,10 +79,7 @@ export const ShowcaseTemplatesL1 = {
   },
 
   renderResto(state, r) {
-    return `<div class="space-y-2.5">
-      <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Cantidad de comensales</h4>
-        <div class="grid grid-cols-2 gap-1.5">${['2 Personas', '4 Personas', '6 Personas', '+8 Grupo'].map((p, idx) => `
-          <button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="py-2 rounded-xl text-xs font-semibold border cursor-pointer transition-all ${state.selectedOption === idx ? 'border-[#E07A5F] bg-[#E07A5F]/15 text-[#C85A3F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">${p}</button>`).join('')}</div></div>
+    return `<div class="space-y-2.5">${this.renderServiceSelector(r, state, 'border-[#E07A5F] bg-[#E07A5F]/15 text-[#C85A3F]', 'Experiencia / Mesa')}
       <div>${this.renderDateHeader('Fecha', 'text-[#E07A5F]', state)}
         <div class="flex justify-center items-center gap-2.5 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#E07A5F]/15 border-2 border-[#E07A5F] text-[#C85A3F] font-bold shadow-xs')}</div></div>
       <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5 flex items-center justify-between"><span>Horario de Noche</span><span class="material-symbols-outlined text-xs text-[#E07A5F]">schedule</span></h4>
@@ -79,7 +88,7 @@ export const ShowcaseTemplatesL1 = {
   },
 
   renderBarberia(state, r) {
-    return `<div class="space-y-2.5">
+    return `<div class="space-y-2.5">${this.renderServiceSelector(r, state, 'border-[#D97706] bg-[#D97706]/15 text-[#B45309]')}
       <div>${this.renderDateHeader('Fecha', 'text-[#D97706]', state)}
         <div class="flex justify-center items-center gap-2.5 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#D97706]/15 border-2 border-[#D97706] text-[#B45309] font-bold shadow-xs')}</div></div>
       <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5 flex items-center justify-between"><span>Horario</span><span class="material-symbols-outlined text-xs text-[#D97706]">schedule</span></h4>
@@ -88,12 +97,7 @@ export const ShowcaseTemplatesL1 = {
   },
 
   renderDeportes(state, r) {
-    return `<div class="space-y-2.5">
-      <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Duración del Turno</h4>
-        <div class="grid grid-cols-2 gap-1.5">
-          <button type="button" onclick="window.ShowcaseCore.selectOption(0)" class="p-2 rounded-xl border flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all ${state.selectedOption === 0 ? 'bg-[#84CC16]/20 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-base">timer</span><span class="text-xs">60 MIN</span></button>
-          <button type="button" onclick="window.ShowcaseCore.selectOption(1)" class="p-2 rounded-xl border flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all ${state.selectedOption === 1 ? 'bg-[#84CC16]/20 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}"><span class="material-symbols-outlined text-base">timer_play</span><span class="text-xs">90 MIN</span></button>
-        </div></div>
+    return `<div class="space-y-2.5">${this.renderServiceSelector(r, state, 'border-[#65A30D] bg-[#84CC16]/20 text-[#4D7C0F]', 'Modalidad / Turno')}
       <div>${this.renderDateHeader('Fecha', 'text-[#65A30D]', state)}
         <div class="flex justify-center items-center gap-2.5 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#84CC16]/20 border-2 border-[#65A30D] text-[#4D7C0F] font-bold shadow-xs')}</div></div>
       <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>
@@ -102,10 +106,7 @@ export const ShowcaseTemplatesL1 = {
   },
 
   renderSalud(state, r) {
-    return `<div class="space-y-2.5">
-      <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Especialidad / Consulta</h4>
-        <div class="flex flex-col gap-1">${r.options.map((opt, idx) => `
-          <button type="button" onclick="window.ShowcaseCore.selectOption(${idx})" class="p-2 rounded-xl text-left text-xs border transition-all cursor-pointer ${state.selectedOption === idx ? 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E] font-bold shadow-xs' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs'}">${opt}</button>`).join('')}</div></div>
+    return `<div class="space-y-2.5">${this.renderServiceSelector(r, state, 'border-[#0D9488] bg-[#0D9488]/15 text-[#0F766E]', 'Especialidad / Consulta')}
       <div>${this.renderDateHeader('Fecha', 'text-[#0D9488]', state)}
         <div class="flex justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1">${this.renderDates(state, 'bg-[#0D9488]/15 border-2 border-[#0D9488] text-[#0F766E] font-bold shadow-xs')}</div></div>
       <div><h4 class="text-[12px] font-bold tracking-wider uppercase text-slate-500 mb-1.5">Horarios Disponibles</h4>

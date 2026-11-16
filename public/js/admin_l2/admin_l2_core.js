@@ -2,7 +2,7 @@
 // Core L2: Warm Studio Tokens, Temas, Navegación & Utilidades (Nexus OS v11.1 - < 100 líneas)
 
 (function (global) {
-  const views = ['calendar', 'crm', 'config'];
+  const views = ['calendar', 'services', 'crm', 'config'];
   const SVG_OK = '<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
   const SVG_ERR = '<svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14l-7-14-7 14z"/></svg>';
 
@@ -54,13 +54,26 @@
     });
   }
 
+  function applyRubroIdentity() {
+    const p = new URLSearchParams(window.location.search), seedMod = global.AdminDemoSeed;
+    const qRubro = p.get('rubro'), qSlug = p.get('slug') || '', prevRubro = localStorage.getItem('tucu_l2_rubro') || '';
+    const slugHint = qSlug.startsWith('demo-') && qSlug !== 'demo-central' ? qSlug : '';
+    const rubro = seedMod ? seedMod.resolveRubro(qRubro || slugHint || prevRubro || 'estetica') : 'estetica';
+    const meta = seedMod?.getRubroMeta(rubro);
+    try { localStorage.setItem('tucu_l2_rubro', rubro); if (meta) localStorage.setItem('tucu_l2_biz_name', meta.bizName); } catch (_) {}
+    const setT = (id, v) => { const el = document.getElementById(id); if (el && v) el.textContent = v; };
+    if (meta) { setT('l2-brand-initials', meta.initials); setT('l2-brand-title', meta.bizName); setT('l2-brand-subtitle', meta.subtitle); document.title = `${meta.bizName} — Panel L2`; }
+  }
+
   function init() {
     initTheme();
+    applyRubroIdentity();
     views.forEach(v => {
       document.getElementById('main-view-btn-' + v)?.addEventListener('click', () => switchMainView(v));
       document.getElementById('mobile-nav-btn-' + v)?.addEventListener('click', () => switchMainView(v));
     });
     if (global.adminL2Calendar?.init) global.adminL2Calendar.init();
+    if (global.adminL2Services?.init) global.adminL2Services.init();
     if (global.adminL2Schedule?.init) global.adminL2Schedule.init();
     if (global.adminL2CRM?.init) global.adminL2CRM.init();
     if (global.adminL2Config?.init) global.adminL2Config.init();

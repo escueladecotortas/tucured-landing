@@ -5,25 +5,36 @@
   let rangeEnabled = false, statusFilter = 'ALL';
   const eng = () => global.AdminBookingEngine;
   const norm = (s) => (global.AdminShell ? global.AdminShell.normStr(s) : String(s || '').toLowerCase());
-  const SVG_CAL = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
-  const SVG_TEL = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>';
-  const SVG_USR = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>';
-  const SVG_MSG = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>';
-  const SVG_LNK = '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>';
+
+  const activeRubro = () => {
+    const p = new URLSearchParams(window.location.search), slug = p.get('slug') || '';
+    const raw = p.get('rubro') || (slug.startsWith('demo-') && slug !== 'demo-central' ? slug : '') || localStorage.getItem('tucu_l2_rubro') || 'estetica';
+    return global.AdminDemoSeed?.resolveRubro ? global.AdminDemoSeed.resolveRubro(raw) : 'estetica';
+  };
 
   function getBookings() {
-    let raw = null;
-    try { const str = localStorage.getItem('tucu_l2_bookings'); if (str) raw = JSON.parse(str); } catch (_) {}
-    if (!Array.isArray(raw) || raw.length === 0) raw = global.AdminDemoSeed ? global.AdminDemoSeed.getL2Seed(eng()?.getConfig('l2')) : [];
-    const hydrated = eng() ? raw.map(b => eng().hydrateBooking(b, 'l2', 12000)) : raw;
+    const r = activeRubro();
+    let part = [], mainList = [];
+    try { const s = localStorage.getItem(`tucu_l2_bookings_${r}`); if (s) part = JSON.parse(s) || []; } catch (_) {}
+    try { const m = localStorage.getItem('tucu_l2_bookings'); if (m) mainList = (JSON.parse(m) || []).filter(b => b && (b.rubroId === r || (!b.rubroId && part.length === 0 && r === (localStorage.getItem('tucu_l2_rubro') || 'estetica')))); } catch (_) {}
+    const combined = [...(Array.isArray(part) ? part : []), ...(Array.isArray(mainList) ? mainList : [])].filter((b, i, a) => b && a.findIndex(x => x.id === b.id) === i);
+    const raw = combined.length ? combined : (global.AdminDemoSeed ? global.AdminDemoSeed.getL2Seed(eng()?.getConfig('l2'), r) : []);
+    const hydrated = eng() ? raw.map(b => ({ ...eng().hydrateBooking(b, 'l2', 12000), rubroId: b.rubroId || r })) : raw;
     saveBookings(hydrated);
     return hydrated;
   }
 
-  function saveBookings(list) { try { localStorage.setItem('tucu_l2_bookings', JSON.stringify(list)); } catch (_) {} }
+  function saveBookings(list) {
+    const r = activeRubro(), tagged = (list || []).map(b => ({ ...b, rubroId: b.rubroId || r }));
+    try {
+      localStorage.setItem(`tucu_l2_bookings_${r}`, JSON.stringify(tagged));
+      const all = JSON.parse(localStorage.getItem('tucu_l2_bookings') || '[]'), others = Array.isArray(all) ? all.filter(b => b && b.rubroId && b.rubroId !== r) : [];
+      localStorage.setItem('tucu_l2_bookings', JSON.stringify([...tagged, ...others]));
+    } catch (_) {}
+  }
 
   function resetDemoBookings() {
-    if (global.AdminDemoSeed) global.AdminDemoSeed.resetLevel('l2');
+    if (global.AdminDemoSeed) global.AdminDemoSeed.resetLevel('l2', '', activeRubro());
     renderCalendar();
     global.adminL2Core?.showToast('Base de práctica L2 restaurada');
   }
@@ -47,15 +58,16 @@
       container.innerHTML = filtered.map(b => {
         const meta = eng().getMeta(b.status), muted = meta.key === 'CANCELLED' || meta.key === 'COMPLETED' || meta.key === 'NO_SHOW';
         return `<div class="p-4 flex items-center justify-between flex-wrap gap-3 hover:bg-stone-50/80 dark:hover:bg-stone-900/60 transition-colors ${muted ? 'opacity-75' : ''}">
-          <div class="flex items-center gap-3.5 min-w-0">
+          <div class="flex items-start gap-3.5 min-w-0">
             <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-300 border border-red-200/80 dark:border-red-900 flex items-center justify-center font-mono font-bold text-xs shrink-0 shadow-xs">${b.time || '--:--'}</div>
             <div class="min-w-0 space-y-1">
-              <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</span><span class="font-mono text-[10px] px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold">#${b.id}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(b.status, b.prevStatus, b)}</div>
-              <p class="text-xs text-stone-500 dark:text-stone-400 flex items-center flex-wrap gap-2.5"><span class="inline-flex items-center gap-1">${SVG_CAL} ${b.date || 'Hoy'}</span><span class="inline-flex items-center gap-1">${SVG_TEL} ${b.phone}</span><span class="inline-flex items-center gap-1">${SVG_USR} ${b.pax || '1'} pax</span></p>
-              ${eng().renderDepositHtml(b)}
+              <p class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</p>
+              <p class="text-xs font-medium text-stone-600 dark:text-stone-300">${b.service || 'Turno Reservado'}</p>
+              <div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(b)}${eng().renderUndoLabel(b.status, b.prevStatus, b)}</div>
+              ${eng().renderCollapsibleDetail(b)}
             </div>
           </div>
-          <div class="flex items-center flex-wrap gap-2">${eng().renderTicketAndWaLinks(b, 'l2')}${eng().renderActionButtons(b.id, b.status, 'adminL2Calendar', b.prevStatus)}</div>
+          <div class="flex items-center flex-wrap gap-2">${eng().renderActionButtons(b.id, b.status, 'adminL2Calendar', b.prevStatus)}</div>
         </div>`;
       }).join('');
     }

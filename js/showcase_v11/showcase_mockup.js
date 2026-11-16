@@ -10,7 +10,6 @@ import { ShowcaseTemplatesL2 } from './showcase_templates_l2.js';
 import { ShowcaseTemplatesL3 } from './showcase_templates_l3.js';
 import { ShowcaseSelfServiceL2 } from './showcase_self_service_l2.js';
 import { renderAdminPreview } from './showcase_admin_preview.js';
-import { buildStep4WaUrl } from './showcase_booking_sync.js';
 
 export const ShowcaseMockup = {
   render(containerId, state) {
@@ -136,7 +135,6 @@ export const ShowcaseMockup = {
     const statusBadge = needsDep
       ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">Pendiente Seña $${Number(rec.depositAmount).toLocaleString('es-AR')}</span>`
       : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Turno Confirmado</span>`;
-    const waHref = buildStep4WaUrl({ ...rec, id: code, client: clientName, service: serviceName, time: state.selectedTime }, state.currentLevel, rubro);
 
     return `
       <div class="space-y-2 text-center my-auto animate-[fadeIn_0.3s_ease-out]">
@@ -153,11 +151,15 @@ export const ShowcaseMockup = {
             ${rubro.requireInsurance ? `<div class="flex justify-between text-slate-600"><span>Cobertura:</span><span class="text-teal-700 font-medium">${state.clientInsurance || 'OSDE'}</span></div>` : ''}
             <div class="flex justify-between text-slate-600"><span>Cliente:</span><span class="text-slate-900 font-medium">${clientName}</span></div>
           </div>
+          <div id="showroom-wa-auto-notice" class="mt-1.5 p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span>Comprobante y enlace enviados automáticamente a tu WhatsApp</span>
+          </div>
         </div>
-        <div class="grid grid-cols-2 gap-1.5">
-          <a href="/gestion_turno.html?token=${encodeURIComponent(code)}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl text-[11px] font-bold bg-[#800000] hover:bg-[#660000] text-white shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">open_in_new</span><span>Ver Ticket Online</span></a>
-          <a href="${waHref}" target="_blank" rel="noopener" class="py-2 px-2 rounded-xl text-[11px] font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">chat</span><span>Copia WhatsApp</span></a>
-        </div>
+        <button type="button" id="btn-showroom-open-ticket" onclick="window.TucuTicketModal && window.TucuTicketModal.open('${code}', { origin: 'showroom', immediate: true })" class="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-[#800000] hover:bg-[#660000] text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+          <span>Ver Ticket Online</span>
+        </button>
         <button type="button" onclick="window.ShowcaseCore.addToCalendar()" class="w-full py-2 rounded-xl text-xs font-bold ${rubro.btnClass} shadow-md flex items-center justify-center gap-1.5 cursor-pointer"><span class="material-symbols-outlined text-sm">calendar_add_on</span><span>Agendar en mi Calendario</span></button>
         <button type="button" onclick="window.ShowcaseCore.toggleSelfService(true)" class="w-full py-1.5 rounded-xl text-[11px] font-medium bg-white border border-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-xs">settings</span><span>Cancelar o Reprogramar Turno</span></button>
         <button type="button" onclick="window.ShowcaseCore.selectStep(1)" class="w-full py-1 rounded-xl text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 cursor-pointer flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">refresh</span><span>Reiniciar Simulación</span></button>

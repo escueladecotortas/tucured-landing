@@ -40,3 +40,8 @@
 
 - **[IDEA-012] Migración / Soporte `whatsmeow` (`Evolution GO`) en Nodo Mini HP (`192.168.100.27`):** Evaluar puente WhatsApp en Go con *jitter* anti-ráfaga (5–15s entre mensajes) e incorporar en el contrato comercial de Tucu Red la tabla de límites operativos recomendados (1–25 msg/día en líneas nuevas; 1–80 msg/día en líneas maduras) bajo cláusula de uso transaccional responsable.
 - **[IDEA-013] Compuerta Fija de Paridad Dual & Normalización Temporal ART (`localTodayStr`):** Mantener como regla obligatoria en el enjambre que toda mutación sobre consolas o portal cliente en `tucured-landing` replique byte-a-byte en `C:\Users\leola\Downloads\tucured-engine\public\`, y evitar `toISOString().slice(0, 10)` para fechas operativas en Argentina (GMT-3) tras las 21:00 ART.
+
+### 8. Particionado Multi-Rubro, Modal In-App & Validación en Smartphone Real (Sesión 2026-11-16)
+
+- **[IDEA-014] Validación en Smartphone Real sobre `https://tucured.ar`:** Ejecutar recorrido completo desde teléfono físico (Showroom multi-rubro, Turnero Autónomo, Modal In-Place de Ticket, `/t/TK-XXXX` y consolas Admin PIN) tras el despliegue a producción.
+- **[IDEA-015] Particionado Estricto de Storage por Rubro & Flujo Post-Reserva In-App First:** Consolidar en futuras demos el aislamiento estricto por rubro (`_<rubro>`) validado con pruebas secuenciales sin `localStorage.clear()`, junto a modales in-place (`TucuTicketModal`) en lugar de salidas externas o ventanas nuevas.

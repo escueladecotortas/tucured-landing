@@ -14,25 +14,30 @@
   let editingId = null;
   const calcDep = (p, req = true) => (global.AdminBookingEngine ? global.AdminBookingEngine.calcDeposit(p, 'l1', req) : (req ? Math.round(p * 0.5) : 0));
 
+  const srvCtx = () => {
+    const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria', isCustom = Boolean(slug && !slug.startsWith('demo-') && slug !== 'mi-comercio');
+    const qR = new URLSearchParams(window.location.search).get('rubro'), rubro = global.AdminDemoSeed?.resolveRubro ? global.AdminDemoSeed.resolveRubro(qR || (!isCustom ? slug : '') || localStorage.getItem('tucu_l1_rubro') || 'peluqueria') : 'peluqueria';
+    return { slug, isCustom, rubro, key: isCustom ? `tucu_l1_services_${slug}` : `tucu_l1_services_${rubro}` };
+  };
+
   function getServices(includeDeleted = false) {
+    const { isCustom, rubro, key } = srvCtx();
     try {
-      const raw = localStorage.getItem('tucu_l1_services');
-      if (raw) {
-        const p = JSON.parse(raw);
-        if (Array.isArray(p) && p.length > 0 && !p.some(s => s.name?.includes('Atención Estándar'))) {
-          const norm = p.map(s => ({ ...s, depositAmount: calcDep(s.priceNumeric, s.requireDeposit !== false) })).sort((a, b) => (a.order || 0) - (b.order || 0));
-          return includeDeleted ? norm : norm.filter(s => !s.deletedAt);
-        }
+      const raw = localStorage.getItem(key) || (!isCustom && rubro === 'peluqueria' ? (localStorage.getItem('tucu_l1_services_demo-peluqueria') || localStorage.getItem('tucu_l1_services')) : null);
+      const p = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(p) && p.length > 0 && !p.some(s => s.name?.includes('Atención Estándar'))) {
+        const norm = p.map(s => ({ ...s, depositAmount: calcDep(s.priceNumeric, s.requireDeposit !== false) })).sort((a, b) => (a.order || 0) - (b.order || 0));
+        return includeDeleted ? norm : norm.filter(s => !s.deletedAt);
       }
     } catch (_) {}
-    return DEFAULT_SERVICES.map(s => ({ ...s, depositAmount: calcDep(s.priceNumeric, s.requireDeposit !== false) }));
+    const seed = global.AdminDemoSeed?.getServicesSeed ? global.AdminDemoSeed.getServicesSeed(rubro, 'l1') : DEFAULT_SERVICES;
+    return seed.map(s => ({ ...s, depositAmount: calcDep(s.priceNumeric, s.requireDeposit !== false) }));
   }
 
   function syncFromBrand(brandServices) {
     if (localStorage.getItem('tucu_l1_services') || !Array.isArray(brandServices) || !brandServices.length) return;
     const mapped = brandServices.map((s, idx) => {
-      const p = parseInt(String(s.priceNumeric || s.price || 8000).replace(/\D/g, ''), 10) || 8000;
-      const d = parseInt(String(s.duration || s.durationMinutes || 30).replace(/\D/g, ''), 10) || 30;
+      const p = parseInt(String(s.priceNumeric || s.price || 8000).replace(/\D/g, ''), 10) || 8000, d = parseInt(String(s.duration || s.durationMinutes || 30).replace(/\D/g, ''), 10) || 30;
       return { id: s.id || `srv_${idx + 1}`, order: s.order || idx + 1, name: s.name || s.title || 'Servicio', priceNumeric: p, durationMinutes: d, depositAmount: calcDep(p, s.requireDeposit !== false), isActive: s.isActive !== false, requireDeposit: s.requireDeposit !== false, priceHistory: [] };
     });
     localStorage.setItem('tucu_l1_services', JSON.stringify(mapped));
@@ -46,11 +51,11 @@
 
   async function saveServices(list, toastMsg = 'Catálogo sincronizado') {
     try {
-      localStorage.setItem('tucu_l1_services', JSON.stringify(list));
-      const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria';
-      if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
-        fetch(`/api/portal/${slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ services: list }) }).catch(() => {});
-      }
+      const { slug, isCustom, rubro, key } = srvCtx();
+      localStorage.setItem(key, JSON.stringify(list));
+      if (!isCustom) localStorage.setItem(`tucu_l1_services_demo-${rubro}`, JSON.stringify(list));
+      if (!isCustom && rubro === 'peluqueria') localStorage.setItem('tucu_l1_services', JSON.stringify(list));
+      if (isCustom && window.location.port !== '5174') fetch(`/api/portal/${slug}/config`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ services: list }) }).catch(() => {});
       showToast(toastMsg);
     } catch (_) {}
     renderPricing();

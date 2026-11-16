@@ -8,35 +8,27 @@ window.AdminShell = (function () {
     const g = (id) => document.getElementById(id);
     return { sidebar: g('admin-sidebar'), backdrop: g('sidebar-backdrop'), btnOpen: g('btn-open-sidebar'), btnClose: g('btn-close-sidebar'), btnTheme: g('btnThemeToggle'), iconSun: g('icon-theme-sun'), iconMoon: g('icon-theme-moon') };
   }
-
   function openSidebar() {
     const { sidebar, backdrop } = getElements();
     if (sidebar) sidebar.classList.add('is-open');
     if (backdrop) backdrop.classList.remove('hidden');
     if (window.innerWidth < 1024) document.body.style.overflow = 'hidden';
   }
-
   function closeSidebar() {
     const { sidebar, backdrop } = getElements();
     if (sidebar) sidebar.classList.remove('is-open');
     if (backdrop) backdrop.classList.add('hidden');
     document.body.style.overflow = '';
   }
-
   function toggleSidebar() { if (getElements().sidebar?.classList.contains('is-open')) closeSidebar(); else openSidebar(); }
-
   function updateThemeIcons(isDark) {
     const { iconSun, iconMoon } = getElements();
-    iconSun?.classList.toggle('hidden', !isDark);
-    iconMoon?.classList.toggle('hidden', isDark);
+    iconSun?.classList.toggle('hidden', !isDark); iconMoon?.classList.toggle('hidden', isDark);
   }
-
   function initTheme() {
     const isDark = (localStorage.getItem('tucu_theme') || 'light') === 'dark';
-    document.documentElement.classList.toggle('dark', isDark);
-    updateThemeIcons(isDark);
+    document.documentElement.classList.toggle('dark', isDark); updateThemeIcons(isDark);
   }
-
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     try { localStorage.setItem('tucu_theme', isDark ? 'dark' : 'light'); } catch (_) {}

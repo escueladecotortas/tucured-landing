@@ -15,27 +15,36 @@
     if (t) { const sp = t.querySelector('span'); if (sp) sp.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 2200); }
   }
 
-  function saveLocalBookings(slug, list) {
+  const activeRubro = (s, r = '') => (global.AdminDemoSeed?.resolveRubro ? global.AdminDemoSeed.resolveRubro(r || new URLSearchParams(window.location.search).get('rubro') || localStorage.getItem('tucu_l1_rubro') || s) : 'peluqueria');
+
+  function saveLocalBookings(slug, list, rubro = '') {
     bookings = list;
-    try { localStorage.setItem(`tucu_l1_bookings_${slug}`, JSON.stringify(list)); } catch (_) {}
+    const isCustom = Boolean(slug && !slug.startsWith('demo-') && slug !== 'mi-comercio'), r = activeRubro(slug, rubro);
+    try {
+      localStorage.setItem(`tucu_l1_bookings_${slug}`, JSON.stringify(list));
+      if (!isCustom) { localStorage.setItem(`tucu_l1_bookings_${r}`, JSON.stringify(list)); localStorage.setItem(`tucu_l1_bookings_demo-${r}`, JSON.stringify(list)); }
+    } catch (_) {}
     renderAgenda();
   }
 
   function resetDemoBookings(slug = currentSlug()) {
-    const seed = global.AdminDemoSeed ? global.AdminDemoSeed.resetLevel('l1', slug) : [];
-    saveLocalBookings(slug, seed);
+    const r = activeRubro(slug), seed = global.AdminDemoSeed ? global.AdminDemoSeed.resetLevel('l1', slug, r) : [];
+    saveLocalBookings(slug, seed, r);
     toast('Base de práctica L1 restaurada');
   }
 
-  async function loadBookings(slug) {
+  async function loadBookings(slug, rubro = '') {
     let raw = [];
+    const r = activeRubro(slug, rubro), isCustom = Boolean(slug && !slug.startsWith('demo-') && slug !== 'mi-comercio');
     try {
-      const parsed = JSON.parse(localStorage.getItem(`tucu_l1_bookings_${slug}`) || '[]');
-      if (Array.isArray(parsed) && parsed.length > 0) raw = parsed;
+      const s1 = JSON.parse(localStorage.getItem(`tucu_l1_bookings_${slug}`) || '[]');
+      const s2 = !isCustom ? JSON.parse(localStorage.getItem(`tucu_l1_bookings_${r}`) || '[]') : [];
+      const merged = [...(Array.isArray(s1) ? s1 : []), ...(Array.isArray(s2) ? s2 : [])].filter(b => b && !b.deletedAt && (!b.rubroId || b.rubroId === r));
+      raw = merged.filter((b, i, a) => a.findIndex(x => x.id === b.id) === i);
     } catch (_) {}
-    if (raw.length === 0) raw = global.AdminDemoSeed ? global.AdminDemoSeed.getL1Seed(eng()?.getConfig('l1')) : [];
+    if (raw.length === 0) raw = global.AdminDemoSeed ? global.AdminDemoSeed.getL1Seed(eng()?.getConfig('l1'), r) : [];
     bookings = eng() ? raw.map(b => eng().hydrateBooking(b, 'l1', 8000)) : raw;
-    saveLocalBookings(slug, bookings);
+    saveLocalBookings(slug, bookings, r);
     if (slug && !slug.startsWith('demo') && window.location.port !== '5174') {
       try {
         const res = await fetch(`/api/portal/${slug}/bookings`);
@@ -89,16 +98,17 @@
     if (!list.length) { box.innerHTML = `<div class="admin-card p-8 text-center text-xs text-stone-500">No hay turnos para este filtro en la agenda.</div>`; return; }
     box.innerHTML = list.map(bk => {
       const meta = eng().getMeta(bk.status), muted = meta.key === 'COMPLETED' || meta.key === 'CANCELLED' || meta.key === 'NO_SHOW';
-      return `<article class="admin-card flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${muted ? 'opacity-80' : ''}">
-        <div class="flex items-center gap-3.5 min-w-0">
-          <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex flex-col items-center justify-center shrink-0"><span class="text-sm font-bold text-stone-800 dark:text-stone-100 font-mono">${bk.time}</span><span class="text-[9px] text-stone-400 uppercase">${bk.dateStr || bk.day}</span></div>
+      return `<article class="admin-card flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 ${muted ? 'opacity-80' : ''}">
+        <div class="flex items-start gap-3.5 min-w-0">
+          <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex items-center justify-center shrink-0"><span class="text-sm font-extrabold text-[#800000] dark:text-red-300 font-mono">${bk.time}</span></div>
           <div class="min-w-0 space-y-1">
-            <div class="flex items-center gap-2 flex-wrap"><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100">${bk.clientName}</h4><span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">${bk.token}</span><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderUndoLabel(bk.status, bk.prevStatus, bk)}</div>
-            <p class="text-xs text-stone-500 dark:text-stone-400">${bk.service} (${fmt(bk.price)}) · <span class="font-mono">${bk.clientPhone}</span></p>
-            ${eng().renderDepositHtml(bk)}
+            <h4 class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${bk.clientName}</h4>
+            <p class="text-xs font-medium text-stone-600 dark:text-stone-300">${bk.service}</p>
+            <div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(bk)}${eng().renderUndoLabel(bk.status, bk.prevStatus, bk)}</div>
+            ${eng().renderCollapsibleDetail(bk)}
           </div>
         </div>
-        <div class="flex items-center flex-wrap gap-2 self-end lg:self-center shrink-0">${eng().renderTicketAndWaLinks(bk, 'l1')}${eng().renderActionButtons(bk.id, bk.status, 'adminL1Agenda', bk.prevStatus)}</div>
+        <div class="flex items-center flex-wrap gap-2 self-end lg:self-center shrink-0">${eng().renderActionButtons(bk.id, bk.status, 'adminL1Agenda', bk.prevStatus)}</div>
       </article>`;
     }).join('');
   }

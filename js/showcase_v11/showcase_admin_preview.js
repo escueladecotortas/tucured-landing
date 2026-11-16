@@ -5,19 +5,20 @@
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
+import { normalizeShowroomRubro } from './showcase_state.js';
 import { mapShowroomRubroToL3 } from './showcase_booking_sync.js';
 
 export function getAdminUrlForLevel(level, state = null) {
-  const lvl = String(level || 'l1').toLowerCase();
+  const lvl = String(level || 'l1').toLowerCase(), norm = encodeURIComponent(normalizeShowroomRubro(state?.currentRubro));
   if (lvl === 'l3' || lvl === 'multi_equipo' || lvl === 'multi-equipo') {
     const r = mapShowroomRubroToL3(state?.currentRubro);
     const d = state?.lastBookingRecord?.date || state?.systemCalendar?.diasReales?.[state?.selectedDay || 0]?.dateStr || '';
     return `/admin_l3.html?slug=demo-staff&embed=true&rubro=${encodeURIComponent(r)}${d ? `&date=${encodeURIComponent(d)}` : ''}`;
   }
   if (lvl === 'l2' || lvl === 'central_pro' || lvl === 'central-pro') {
-    return '/admin_l2.html?slug=demo-central&embed=true';
+    return `/admin_l2.html?slug=demo-${norm}&embed=true&rubro=${norm}`;
   }
-  return '/admin_l1.html?slug=demo-peluqueria&embed=true';
+  return `/admin_l1.html?slug=demo-${norm}&embed=true&rubro=${norm}`;
 }
 
 export function renderAdminPreview(state, curRubro, curLvl) {

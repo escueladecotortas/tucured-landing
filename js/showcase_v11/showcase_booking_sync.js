@@ -1,10 +1,10 @@
 // Archivo: js/showcase_v11/showcase_booking_sync.js
 // Sincronización en vivo Showroom -> LocalStorage L1/L2/L3 + URL WhatsApp interpolada (< 130L)
 
-import { getActiveCatalogServices } from './showcase_state.js';
+import { getActiveCatalogServices, normalizeShowroomRubro } from './showcase_state.js';
 
 const DEMO_WA_NUMBER = '5493815551234';
-const L3_RUBRO_MAP = { barberia: 'barberia', estetica: 'peluqueria_estetica', salud: 'salud_consultorio', deportes: 'deportes_clubes' };
+const L3_RUBRO_MAP = { barberia: 'barberia', peluqueria: 'barberia', estetica: 'peluqueria_estetica', peluqueria_estetica: 'peluqueria_estetica', salud: 'salud_consultorio', salud_consultorio: 'salud_consultorio', deportes: 'deportes_clubes', deportes_clubes: 'deportes_clubes', resto: 'gastronomia', gastronomia: 'gastronomia', servicios: 'servicios' };
 const TPL_1A_DEF = '¡Hola {{cliente}}! Registramos tu reserva en {{comercio}} para el {{fecha}} a las {{hora}} hs ({{servicio}}). Para confirmar tu lugar, aboná la seña de {{sena}} por transferencia: Alias: {{alias}} · CBU: {{cbu}}. Enviá el comprobante por este mismo chat para acreditarlo. Podés ver el estado de tu reserva desde tu ticket online: {{link_ticket}}';
 const TPL_1B_DEF = '¡Hola {{cliente}}! Tu turno en {{comercio}} quedó confirmado para el {{fecha}} a las {{hora}} hs ({{servicio}}). Podés consultar los datos o gestionar tu reserva desde tu ticket online: {{link_ticket}}';
 
@@ -64,26 +64,25 @@ export function persistShowcaseBooking(state) {
   const needsDep = dep > 0;
   let record;
 
+  const norm = normalizeShowroomRubro(state?.currentRubro), mergePush = (k, rec, byR = false) => {
+    const prev = readJson(k, []), clean = Array.isArray(prev) ? prev.filter(b => b.id !== rec.id && (!byR || !b.rubroId || b.rubroId !== rec.rubroId || b.id !== rec.id)) : [];
+    writeJson(k, [rec, ...clean]);
+  };
   if (lvl === 'l1') {
-    const key = 'tucu_l1_bookings_demo-peluqueria';
-    record = { id: code, token: `#${code}`, clientName: client, clientPhone: phone, service: srv.name, price, depositAmount: dep, depositPaid: !needsDep, day: dayObj.fullLabel || 'Hoy', dateStr, time, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, createdFromShowcase: true };
-    const prev = readJson(key, []);
-    writeJson(key, [record, ...(Array.isArray(prev) ? prev.filter(b => b.id !== code) : [])]);
+    record = { id: code, token: `#${code}`, rubroId: norm, clientName: client, clientPhone: phone, service: srv.name, price, depositAmount: dep, depositPaid: !needsDep, day: dayObj.fullLabel || 'Hoy', dateStr, time, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, createdFromShowcase: true };
+    mergePush(`tucu_l1_bookings_${norm}`, record); mergePush(`tucu_l1_bookings_demo-${norm}`, record);
   } else if (lvl === 'l2') {
-    const key = 'tucu_l2_bookings';
-    record = { id: code, client, phone, pax: state?.currentRubro === 'resto' ? 2 : 1, service: srv.name, date: dateStr, time, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
-    const prev = readJson(key, []);
-    writeJson(key, [record, ...(Array.isArray(prev) ? prev.filter(b => b.id !== code) : [])]);
+    record = { id: code, rubroId: norm, client, phone, pax: norm === 'gastronomia' ? 2 : 1, service: srv.name, date: dateStr, time, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
+    mergePush(`tucu_l2_bookings_${norm}`, record); mergePush('tucu_l2_bookings', record);
   } else {
-    const rL3 = mapShowroomRubroToL3(state?.currentRubro), key = 'tucu_l3_bookings';
+    const rL3 = mapShowroomRubroToL3(state?.currentRubro);
     const staffList = readJson(`tucu_l3_staff_${rL3}`, []);
     const idx = state?.selectedStaff || 0;
     const staffObj = Array.isArray(staffList) && staffList[idx] ? staffList[idx] : { id: `st-${Math.min(3, idx + 1)}`, name: rubro?.staff?.[idx] || 'Especialista' };
     const resList = readJson(`tucu_l3_resources_${rL3}`, []);
     const resObj = (Array.isArray(resList) && resList.find(r => !r.deletedAt && r.active !== false)) || { id: 'res-1', name: 'Espacio Principal' };
     record = { id: code, rubroId: rL3, staffId: staffObj.id, staffName: staffObj.name, resourceId: resObj.id, resourceName: resObj.name, serviceId: srv.id || 'srv-1', serviceName: srv.name, duration: srv.duration || 30, price, depositAmount: dep, depositPaid: !needsDep, date: dateStr, time, client, phone, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
-    const prev = readJson(key, []);
-    writeJson(key, [record, ...(Array.isArray(prev) ? prev.filter(b => b.id !== code) : [])]);
+    mergePush(`tucu_l3_bookings_${rL3}`, record); mergePush('tucu_l3_bookings', record);
   }
 
   state.lastBookingCode = code;
