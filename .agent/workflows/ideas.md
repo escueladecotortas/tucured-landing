@@ -45,3 +45,8 @@
 
 - **[IDEA-014] Validación en Smartphone Real sobre `https://tucured.ar`:** Ejecutar recorrido completo desde teléfono físico (Showroom multi-rubro, Turnero Autónomo, Modal In-Place de Ticket, `/t/TK-XXXX` y consolas Admin PIN) tras el despliegue a producción.
 - **[IDEA-015] Particionado Estricto de Storage por Rubro & Flujo Post-Reserva In-App First:** Consolidar en futuras demos el aislamiento estricto por rubro (`_<rubro>`) validado con pruebas secuenciales sin `localStorage.clear()`, junto a modales in-place (`TucuTicketModal`) en lugar de salidas externas o ventanas nuevas.
+
+### 9. Nivelación Multi-Nivel, CRM Firestore-Ready & Cero Jerga (Sesión 2026-11-17)
+
+- **[IDEA-016] Evolución Firestore Multi-Tenant L2/L3:** Conectar el esquema canónico de clientes (`tenants/{tenantId}/customers/{id}` con `email`, `birthday`, `isRestricted`, `deletedAt`), turnos y configuración ya estandarizado en `localStorage` hacia colecciones Firestore al iniciar los onboardings reales.
+- **[IDEA-017] Compuerta de Lenguaje Comercial Cero Jerga & Visor Full-Width:** Mantener prohibida toda jerga técnica (`Baileys`, `Cron`, `Daemon`, `Hash Idempotencia`) en UI/manuales/landing, usar confirmación custom + baja lógica (`AdminShell.confirmAsync` + `deletedAt`) y conservar el patrón de 1 sola columna full-width para visores integrados en consolas con sidebar.
