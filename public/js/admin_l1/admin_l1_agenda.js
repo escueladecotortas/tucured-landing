@@ -150,7 +150,8 @@
     const depositAmount = eng().calcDeposit(price, 'l1', req), paid = depositAmount === 0 ? true : (document.getElementById('nb-dep-paid')?.checked ?? true);
     const method = paid ? (depositAmount === 0 ? null : document.getElementById('nb-method')?.value || 'Efectivo') : null;
     const name = document.getElementById('nb-name')?.value.trim() || 'Cliente Mostrador', phone = document.getElementById('nb-phone')?.value.replace(/\D/g, '') || '3810000000';
-    saveLocalBookings(currentSlug(), [{ id: 'mbk_' + Date.now(), token: '#TK-' + Math.random().toString(36).substring(2, 6).toUpperCase(), clientName: name, clientPhone: phone, service: sel.value, price, depositAmount, depositPaid: paid, paymentMethod: method, paidAt: paid ? new Date().toISOString() : null, day: date === today ? 'Hoy' : date, time, status: paid ? 'confirmado' : 'pendiente', dateStr: date, prevStatus: null }, ...bookings]);
+    const cfg = global.adminL1Core?.getConfig?.() || {};
+    saveLocalBookings(currentSlug(), [{ id: 'mbk_' + Date.now(), token: '#TK-' + Math.random().toString(36).substring(2, 6).toUpperCase(), rubroId: activeRubro(currentSlug()), bizName: cfg.bizName || '', address: cfg.address || '', clientName: name, clientPhone: phone, service: sel.value, price, depositAmount, depositPaid: paid, paymentMethod: method, paidAt: paid ? new Date().toISOString() : null, day: date === today ? 'Hoy' : date, time, status: paid ? 'confirmado' : 'pendiente', dateStr: date, prevStatus: null }, ...bookings]);
     closeModal(); toast('Turno agendado correctamente');
   }
 

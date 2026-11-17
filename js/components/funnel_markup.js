@@ -1,7 +1,7 @@
 // Archivo: js/components/funnel_markup.js
 /**
  * 🧙 Tucu Red Web V2 - Markup del Wizard Transaccional en 4 Pasos (SSOT v15.0)
- * Selector de 14 ciudades de Tucumán, 10 rubros ampliados y checkout QR de $1.000 ARS.
+ * Selector de 15 ciudades de Tucumán, 10 rubros ampliados y checkout QR de $4.999 ARS.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -147,7 +147,7 @@ export function getFunnelMarkup(draft = {}, selectedRubro = 'estetica', selected
                 <span class="material-symbols-outlined text-base">arrow_back</span><span>Volver</span>
               </button>
               <button type="button" id="btn-goto-step-4" class="px-8 py-3.5 rounded-xl btn-aura-cta font-headline font-bold text-sm flex items-center gap-2 cursor-pointer">
-                <span>Continuar a Activación y Pago ($1.000)</span><span class="material-symbols-outlined text-lg">arrow_forward</span>
+                <span>Continuar a Activación y Pago ($4.999)</span><span class="material-symbols-outlined text-lg">arrow_forward</span>
               </button>
             </div>
           </div>

@@ -58,10 +58,11 @@ export const FUNNEL_LEVELS = [
 ];
 
 export const TUCURED_CHECKOUT_CONFIG = {
-  pricePromo: '$1.000 ARS',
-  promoPeriod: 'Mes 1 - Promo Lanzamiento',
-  aliasCbu: 'tucured.mp',
+  pricePromo: '$4.999 ARS',
+  promoPeriod: 'Mes Fundador - Primer Mes',
+  aliasCbu: 'tucured',
   cbuNumber: '0000003100012345678901',
+  mpPaymentUrl: 'https://mpago.la/2CTGHu2',
   titular: 'Tucu Red Tecnología Digital',
   qrImageUrl: '/assets/qr_pago_tucured.svg'
 };

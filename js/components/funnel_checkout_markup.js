@@ -1,7 +1,7 @@
 // Archivo: js/components/funnel_checkout_markup.js
 /**
  * 💳 Tucu Red Web V2 - Markup del Paso 4 (Checkout QR & Alias Interoperable)
- * Resumen de alta comercial, código QR, alias copiable y activación $1.000.
+ * Resumen de alta comercial, código QR, alias copiable y activación $4.999 (Mes Fundador).
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
@@ -17,7 +17,7 @@ export function getCheckoutStepMarkup() {
           <span>Paso 4: Activación y Cierre Transaccional</span>
         </h3>
         <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold font-mono border border-emerald-200">
-          PROMO $1.000 ARS
+          MES FUNDADOR $4.999 ARS
         </span>
       </div>
 
@@ -54,14 +54,14 @@ export function getCheckoutStepMarkup() {
               <div><span class="text-slate-500 block text-[11px]">Comercio:</span><strong id="checkout-summary-name" class="text-slate-900 font-bold">Tu Comercio</strong></div>
               <div><span class="text-slate-500 block text-[11px]">Localidad:</span><strong id="checkout-summary-city" class="text-slate-900 font-bold">Yerba Buena</strong></div>
               <div><span class="text-slate-500 block text-[11px]">Rubro:</span><strong id="checkout-summary-rubro" class="text-slate-900 font-bold">Estética & Spa</strong></div>
-              <div><span class="text-slate-500 block text-[11px]">Total Mes 1:</span><strong class="text-emerald-700 font-black text-sm font-mono">${cfg.pricePromo}</strong></div>
+              <div><span class="text-slate-500 block text-[11px]">Total Mes Fundador:</span><strong class="text-emerald-700 font-black text-sm font-mono">${cfg.pricePromo}</strong></div>
             </div>
           </div>
 
           <!-- Caja de Alias Copiable -->
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-slate-500">Alias CBU / CVU oficial:</span>
+              <span class="text-xs font-semibold text-slate-500">Alias transferencia directa (0% comisión):</span>
               <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
                 <span class="material-symbols-outlined text-xs">bolt</span> Transferencia Inmediata
               </span>
@@ -84,11 +84,11 @@ export function getCheckoutStepMarkup() {
           <span>Volver a Contacto</span>
         </button>
         <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-          <a href="https://mpago.la/pos/tucured" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-600 hover:text-indigo-800 underline font-medium text-center">
+          <a id="btn-mp-direct-pay" href="${cfg.mpPaymentUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-indigo-600 hover:text-indigo-800 underline font-medium text-center">
             Pagar con tarjeta o saldo de Mercado Pago (Link directo)
           </a>
           <button type="submit" id="funnel-submit-btn" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl btn-aura-cta font-headline font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer shadow-lg">
-            <span>Ya transferí $1.000 • Activar mi local</span>
+            <span>Ya transferí $4.999 • Activar mi local</span>
             <span class="material-symbols-outlined text-lg">check_circle</span>
           </button>
         </div>

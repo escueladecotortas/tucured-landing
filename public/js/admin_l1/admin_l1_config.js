@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_l1/admin_l1_config.js
-// Horarios 2 Bloques (Mañana/Tarde), Feriados Oficiales & Gateway Baileys (Nexus OS v11.1 - < 165 líneas)
+// Horarios 2 Bloques (Mañana/Tarde), Feriados Oficiales & Conexión WhatsApp QR (Nexus OS v11.1 - < 180 líneas)
 
 (function (global) {
   const dayNames = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado', 0: 'Domingo' };
@@ -55,7 +55,10 @@
   }
 
   function populateInputs() {
-    const v = (id) => document.getElementById(id);
+    const v = (id) => document.getElementById(id), r = localStorage.getItem('tucu_l1_rubro') || 'peluqueria';
+    const meta = global.AdminDemoSeed?.getRubroMeta?.(r);
+    if (v('cfg-biz-name')) v('cfg-biz-name').value = localStorage.getItem(`tucu_l1_biz_name_${r}`) || localStorage.getItem('tucu_l1_biz_name') || meta?.bizName || 'Peluquería & Barbería Central';
+    if (v('cfg-biz-address')) v('cfg-biz-address').value = localStorage.getItem(`tucu_l1_address_${r}`) || localStorage.getItem('tucu_l1_address') || meta?.address || '25 de Mayo 480, S. M. de Tucumán';
     if (v('cfg-deposit-toggle')) v('cfg-deposit-toggle').checked = configData.requireDeposit !== false;
     if (v('cfg-deposit-type')) v('cfg-deposit-type').value = configData.depositType || 'percentage';
     if (v('cfg-deposit-value')) v('cfg-deposit-value').value = configData.depositValue || 50;
@@ -68,11 +71,15 @@
   }
 
   function saveConfig() {
-    const v = (id) => document.getElementById(id);
+    const v = (id) => document.getElementById(id), r = localStorage.getItem('tucu_l1_rubro') || 'peluqueria';
+    const meta = global.AdminDemoSeed?.getRubroMeta?.(r);
     const prevExt = global.AdminBookingEngine ? global.AdminBookingEngine.getConfig('l1') : {};
     const waTpls = global.AdminWaTemplates?.saveTemplates?.('l1') || {};
+    const bizName = v('cfg-biz-name')?.value.trim() || meta?.bizName || 'Peluquería & Barbería Central';
+    const address = v('cfg-biz-address')?.value.trim() || meta?.address || '25 de Mayo 480, S. M. de Tucumán';
     configData = {
       ...prevExt,
+      bizName, address,
       requireDeposit: v('cfg-deposit-toggle')?.checked ?? true,
       depositType: v('cfg-deposit-type')?.value || 'percentage',
       depositValue: Math.max(0, parseInt(v('cfg-deposit-value')?.value, 10) || 0),
@@ -81,13 +88,16 @@
       waNumber: global.AdminWaTemplates?.DEMO_WA_NUMBER || '5493815551234',
       reminders: { h24: v('chk-remind-24h')?.checked ?? true, h2: v('chk-remind-2h')?.checked ?? true },
       blockHolidays: v('cfg-feriados-toggle')?.checked ?? true,
-      template: waTpls.confirm || configData.template,
+      template: waTpls.t1a || configData.template,
       schedule
     };
     localStorage.setItem('tucu_schedule', JSON.stringify(schedule));
     if (global.AdminBookingEngine) global.AdminBookingEngine.saveConfig('l1', configData);
     else localStorage.setItem('tucu_l1_cfg_ext', JSON.stringify(configData));
     if (global.adminL1Pricing?.renderPricing) global.adminL1Pricing.renderPricing();
+    localStorage.setItem('tucu_l1_biz_name', bizName); localStorage.setItem(`tucu_l1_biz_name_${r}`, bizName);
+    localStorage.setItem('tucu_l1_address', address); localStorage.setItem(`tucu_l1_address_${r}`, address);
+    if (v('brand-title')) v('brand-title').textContent = bizName;
     localStorage.setItem('tucu_l1_alias', configData.alias);
     localStorage.setItem('tucu_l1_cbu', configData.cbu);
     localStorage.setItem('tucu_l1_feriados', configData.blockHolidays ? 'true' : 'false');
@@ -101,7 +111,7 @@
   }
 
   function updatePreview() {
-    global.AdminWaTemplates?.renderPreview?.({ mountId: 'l1-wa-config-mount', level: 'l1', aliasInputId: 'inputAlias' });
+    global.AdminWaTemplates?.renderPreview?.({ mountId: 'l1-wa-config-mount', level: 'l1', bizInputId: 'cfg-biz-name', addressInputId: 'cfg-biz-address', aliasInputId: 'inputAlias' });
   }
 
   function copyAlias() {
@@ -117,7 +127,7 @@
     root.innerHTML = `<div id="baileysModal" class="fixed inset-0 z-50 bg-[#121110]/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="w-full max-w-sm rounded-2xl border border-[#E8E6DF] dark:border-[#2D2A28] bg-white dark:bg-[#1C1A19] p-6 shadow-2xl text-center space-y-4">
         <div class="flex items-center justify-between pb-2 border-b border-[#E8E6DF] dark:border-[#2D2A28]">
-          <h3 class="text-sm font-bold text-[#1C1A17] dark:text-[#F5F3EF] flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Gateway WhatsApp (Baileys)</span></h3>
+          <h3 class="text-sm font-bold text-[#1C1A17] dark:text-[#F5F3EF] flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Vinculación QR de WhatsApp</span></h3>
           <button type="button" onclick="adminL1Config.closeBaileysModal()" aria-label="Cerrar" class="p-1 text-[#7A766E] hover:text-[#1C1A17] dark:hover:text-white cursor-pointer"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
         <div class="p-3 bg-white rounded-xl border border-slate-200 inline-block shadow-inner mx-auto">
@@ -136,7 +146,7 @@
 
   function init() {
     loadLocal(); renderSchedule();
-    global.AdminWaTemplates?.mount?.({ mountId: 'l1-wa-config-mount', level: 'l1', aliasInputId: 'inputAlias', onChange: saveConfig });
+    global.AdminWaTemplates?.mount?.({ mountId: 'l1-wa-config-mount', level: 'l1', bizInputId: 'cfg-biz-name', addressInputId: 'cfg-biz-address', aliasInputId: 'inputAlias', onChange: saveConfig });
     populateInputs();
     if (global.AdminHolidays) { global.AdminHolidays.renderLabel('l1-holidays-label'); global.AdminHolidays.loadHolidays(); }
     if (global.AdminBookingEngine?.mountPaymentConfigPanel) {
@@ -146,7 +156,7 @@
         onResetDemo: () => { const slug = localStorage.getItem('tucu_l1_slug') || 'demo-peluqueria'; global.adminL1Agenda?.resetDemoBookings(slug); }
       });
     }
-    ['cfg-deposit-toggle', 'cfg-deposit-type', 'cfg-deposit-value', 'inputAlias', 'inputCbu', 'chk-remind-24h', 'chk-remind-2h', 'cfg-feriados-toggle'].forEach(id => {
+    ['cfg-biz-name', 'cfg-biz-address', 'cfg-deposit-toggle', 'cfg-deposit-type', 'cfg-deposit-value', 'inputAlias', 'inputCbu', 'chk-remind-24h', 'chk-remind-2h', 'cfg-feriados-toggle'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.addEventListener('input', saveConfig); el.addEventListener('change', saveConfig); }
     });
@@ -161,6 +171,6 @@
     toggleSplit: (d) => { schedule[d].isSplit = !schedule[d].isSplit; saveConfig(); renderSchedule(); },
     updateHour: (d, f, v) => { schedule[d][f] = v; saveConfig(); },
     cloneLunVie: () => { const ref = schedule[2] || schedule[1]; [1,2,3,4,5].forEach(d => { if (schedule[d]) schedule[d] = JSON.parse(JSON.stringify(ref)); }); saveConfig(); renderSchedule(); },
-    saveConfig, copyAlias, updatePreview, openBaileysModal, closeBaileysModal, getConfigData: () => configData
+    populateInputs, saveConfig, copyAlias, updatePreview, openBaileysModal, closeBaileysModal, getConfigData: () => configData
   };
 })(typeof window !== 'undefined' ? window : global);

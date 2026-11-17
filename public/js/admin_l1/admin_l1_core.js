@@ -5,17 +5,19 @@
   const DEFAULT_CONFIG = {
     slug: 'demo-peluqueria',
     bizName: 'Peluquería & Barbería Central',
+    address: '25 de Mayo 480, S. M. de Tucumán',
     subtitle: 'Cortes Clásicos, Fades y Cuidado de Barba',
     logoUrl: '',
     isActive: true
   };
-  const views = ['citas', 'catalogo', 'configuracion'];
+  const views = ['citas', 'catalogo', 'configuracion', 'manual'];
 
   function getConfig() {
     const g = (k, d) => localStorage.getItem(k) || d;
     return {
       slug: g('tucu_l1_slug', DEFAULT_CONFIG.slug),
       bizName: g('tucu_l1_biz_name', DEFAULT_CONFIG.bizName),
+      address: g('tucu_l1_address', DEFAULT_CONFIG.address),
       subtitle: g('tucu_l1_subtitle', DEFAULT_CONFIG.subtitle),
       logoUrl: g('tucu_l1_logo', DEFAULT_CONFIG.logoUrl),
       isActive: localStorage.getItem('tucu_l1_is_active') !== 'false'
@@ -53,18 +55,21 @@
     }
     if (assets) {
       const name = assets.business_name || assets.name || meta.bizName, sub = assets.subtitle || assets.subcategory || meta.subtitle;
+      const addr = assets.address || meta.address || DEFAULT_CONFIG.address;
       const rawLogo = assets.logoUrl || assets.logo_url || assets.semantic_photos?.logo || '';
       const logo = rawLogo.startsWith('./') ? `/nexus_archives/tucu-red/clients/${slug}/${rawLogo.slice(2)}` : (rawLogo || '');
       document.documentElement.style.setProperty('--brand-accent', assets.accentColor || assets.brand_accent || '#800000');
-      localStorage.setItem('tucu_l1_biz_name', name); localStorage.setItem('tucu_l1_subtitle', sub); localStorage.setItem('tucu_l1_logo', logo);
+      localStorage.setItem('tucu_l1_biz_name', name); localStorage.setItem('tucu_l1_address', addr); localStorage.setItem('tucu_l1_subtitle', sub); localStorage.setItem('tucu_l1_logo', logo);
       if (Array.isArray(assets.services) && assets.services.length > 0 && global.adminL1Pricing?.syncFromBrand) global.adminL1Pricing.syncFromBrand(assets.services);
     } else {
       document.documentElement.style.setProperty('--brand-accent', '#800000');
-      localStorage.setItem('tucu_l1_biz_name', meta.bizName || DEFAULT_CONFIG.bizName);
+      localStorage.setItem('tucu_l1_biz_name', localStorage.getItem(`tucu_l1_biz_name_${rubro}`) || meta.bizName || DEFAULT_CONFIG.bizName);
+      localStorage.setItem('tucu_l1_address', localStorage.getItem(`tucu_l1_address_${rubro}`) || meta.address || DEFAULT_CONFIG.address);
       localStorage.setItem('tucu_l1_subtitle', meta.subtitle || DEFAULT_CONFIG.subtitle);
       localStorage.setItem('tucu_l1_logo', '');
     }
     renderBrandIdentity();
+    global.adminL1Config?.populateInputs?.();
     global.adminL1Pricing?.renderPricing?.();
     if (global.adminL1Agenda?.loadBookings) global.adminL1Agenda.loadBookings(slug, rubro);
   }
@@ -133,6 +138,7 @@
     });
     renderTurneroSwitch();
     injectClientBrand();
+    global.AdminManualViewer?.mount?.({ containerId: 'l1-manual-mount', level: 'l1' });
     if (global.adminL1Agenda?.init) global.adminL1Agenda.init();
   }
 

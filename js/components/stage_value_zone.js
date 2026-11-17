@@ -7,49 +7,49 @@
 
 const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Autónomo • Cero Turnos Superpuestos',
+    badge: 'Nivel 1: Autónomo • Agenda Web 24/7',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
-    architecture: 'Turnero Autónomo • Cero Turnos Superpuestos • Comprobante Digital #TK',
-    microMetrica: 'Turnero activo 24/7 • Bloqueo de colisiones • Cancelación en 1 clic',
+    architecture: 'Turnero Autónomo • Seña Configurable • Ticket Online #TK',
+    microMetrica: 'Agenda web 24/7 • Dirección y .ics en ticket • Feriados 2026 por mes',
     clientFeatures: [
-      { icon: 'touch_app', title: 'Turnero web de 3 toques (4 pasos guiados)', desc: 'Reserva ágil desde el celular sin descargas, sin registros ni contraseñas.' },
-      { icon: 'block', title: 'Bloqueo automático de turnos ocupados en tiempo real', desc: 'Previene colisiones y solapamientos en vivo para evitar turnos duplicados.' },
-      { icon: 'confirmation_number', title: 'Comprobante digital con botón de calendario', desc: 'Descarga directa de recordatorio (.ics) y autogestión/cancelación en 1 clic.' }
+      { icon: 'touch_app', title: 'Agenda web autónoma sin registros ni apps', desc: 'Reserva ágil desde el celular en pasos simples con horarios reales en vivo.' },
+      { icon: 'payments', title: 'Seña configurable por servicio a tu Alias', desc: 'Podés exigir seña en prestaciones clave o confirmar turnos directos sin seña.' },
+      { icon: 'confirmation_number', title: 'Ticket Online con dirección y calendario (.ics)', desc: 'Incluye dirección del local, código QR y autogestión de cita en 1 clic.' }
     ],
     adminFeatures: [
-      { icon: 'calendar_month', title: 'Agenda operativa en vivo y citas manuales', desc: 'Alta de mostrador, botón para pausar/abrir recepción y catálogo con duración.' },
-      { icon: 'schedule', title: 'Turno partido (siesta) y feriados oficiales', desc: 'Horarios configurables con salteo automático de feriados nacionales.' },
-      { icon: 'payments', title: 'Confirmaciones directas y cobro de seña oficial', desc: 'Avisos directos al cliente y validación de seña con tu propio Alias CBU/CVU.' }
+      { icon: 'calendar_month', title: 'Panel de dueño y carga manual de citas', desc: 'Pausa o abre recepción al instante, acredita señas y edita duraciones.' },
+      { icon: 'schedule', title: 'Turno partido y Feriados 2026 por mes', desc: 'Horarios de mañana y tarde con interruptor individual para abrir feriados puntuales.' },
+      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y vinculación QR', desc: 'Avisos automáticos 24h / 2h antes con tu propia línea vinculada.' }
     ]
   },
   l2: {
-    badge: 'Nivel 2: Central Pro • Control Total de Ausencias',
+    badge: 'Nivel 2: Central Pro • CRM & Contactos',
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    architecture: 'Central Operativa • Carga Ágil de Mostrador • Control Anti-Ausencias',
-    microMetrica: 'Ocupación comercial en vivo • Lista Negra activa • Mostrador sincronizado',
+    architecture: 'Central Operativa • CRM & Contactos • Bloqueos y Vacaciones',
+    microMetrica: 'Importación desde celular • Email y Cumpleaños • Papelera restaurable',
     clientFeatures: [
-      { icon: 'verified', title: 'Experiencia premium para tus clientes', desc: 'Bloqueo en vivo, comprobante digital y enlace público de autogestión.' },
-      { icon: 'notifications_active', title: 'Confirmación y recordatorios por WhatsApp', desc: 'Avisos directos sin fricción y validación de seña en línea.' }
+      { icon: 'verified', title: 'Todo lo de Nivel 1 con confirmación ágil', desc: 'Ticket Online con dirección del local, bloqueo en vivo y autogestión.' },
+      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y cobro directo', desc: 'Plantillas configurables, validación de seña y avisos automáticos.' }
     ],
     adminFeatures: [
-      { icon: 'dashboard', title: 'SPA Administrativa avanzada de 3 vistas', desc: 'Control en tiempo real de agenda diaria, catálogo de precios y configuración.' },
-      { icon: 'point_of_sale', title: 'Gestión ágil de turnos telefónicos y mostrador', desc: 'Carga inmediata de citas presenciales con bloqueo instantáneo.' },
-      { icon: 'shield', title: 'Gestión Inteligente de Asistencias y Clientes VIP', desc: 'Control de ausencias reiteradas y atención prioritaria para tus clientes habituales.' }
+      { icon: 'contacts', title: 'CRM & Contactos desde la agenda del celular', desc: 'Importa desde el celular o .vcf/.csv con Email y Fecha de Cumpleaños.' },
+      { icon: 'shield', title: 'Bloqueo preventivo y papelera restaurable', desc: 'Restringe teléfonos cuando sea necesario y restaura fichas archivadas en 1 clic.' },
+      { icon: 'event_busy', title: 'Historial de precios, bloqueos y vacaciones', desc: 'Control de ajustes de tarifas, cierres especiales y slots bloqueados.' }
     ]
   },
   l3: {
-    badge: 'Nivel 3: Multi-Equipo • Canchas, Consultorios y Franquicias',
+    badge: 'Nivel 3: Multi-Equipo • Staff, Boxes y 2hs',
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
-    architecture: 'Multi-Staff Ilimitado • Recursos Físicos • Recordatorios Automáticos',
-    microMetrica: 'Múltiples agendas en paralelo • Recursos modelados • Recordatorios T-2hs',
+    architecture: 'Multi-Staff • Horarios Partidos (Mañana / Tarde) • Confirmación 2hs',
+    microMetrica: 'Sillones y boxes • Agendas en paralelo • Confirmación 2hs activable',
     clientFeatures: [
-      { icon: 'group_work', title: 'Selección de especialista o primer libre', desc: 'El cliente elige a su profesional preferido o el turno más próximo disponible.' },
-      { icon: 'more_time', title: 'Cálculo de bloques contiguos por servicio', desc: 'Disponibilidad exacta según la duración acumulada del catálogo.' }
+      { icon: 'group_work', title: 'Selección de profesional o primer turno libre', desc: 'El cliente elige especialista preferido o la primera disponibilidad real.' },
+      { icon: 'more_time', title: 'Duraciones personalizadas por servicio', desc: 'Cálculo exacto de bloques contiguos según la prestación elegida.' }
     ],
     adminFeatures: [
-      { icon: 'groups', title: 'Múltiples profesionales con agendas individuales', desc: 'Horarios semanales diferenciados para staff, terapeutas o colaboradores.' },
-      { icon: 'meeting_room', title: 'Modelado de recursos físicos por rubro', desc: 'Sillones, gabinetes, consultorios médicos o canchas deportivas.' },
-      { icon: 'alarm_on', title: 'Reconfirmación automática inteligente T-2hs por WhatsApp', desc: 'Aviso automático con confirmación 2 horas antes; si cancelan, el turno se libera al instante.' }
+      { icon: 'groups', title: 'Multi-Staff con horarios partidos Mañana / Tarde', desc: 'Agendas individuales por profesional sincronizadas en tiempo real.' },
+      { icon: 'meeting_room', title: 'Asignación de sillones, boxes o canchas', desc: 'Organización simultánea de consultorios, gabinetes, sillones o pistas.' },
+      { icon: 'alarm_on', title: 'Confirmación y Liberación Automática (2 hs antes)', desc: 'Activable o pausable con un toque para confirmar citas y liberar huecos.' }
     ]
   }
 };
@@ -130,11 +130,11 @@ export function renderStageValueZone(containerId, state) {
           onclick="window.activateFromShowroom && window.activateFromShowroom('${state.currentRubro}', '${curLvlId}')"
           class="w-full py-4 px-6 rounded-2xl btn-aura-cta font-headline font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg group cursor-pointer"
         >
-          <span>Activar este Turnero por $1.000*</span>
+          <span>Activar este Turnero por $4.999*</span>
           <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
         </button>
         <p class="text-[11px] text-center text-slate-500 mt-2 font-medium">
-          *Tarifa promocional mes de lanzamiento. Luego abono regular según nivel.
+          *Promoción Mes Fundador (primer mes para cualquier nivel). Luego abono regular según nivel.
         </p>
       </div>
     </div>

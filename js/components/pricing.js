@@ -1,7 +1,7 @@
 // Archivo: js/components/pricing.js
 /**
  * 🏷️ Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes (SSOT v16.0)
- * 3 Niveles con identidad técnica diferenciada, gancho $1.000 ARS y conexión a #funnel.
+ * 3 Niveles con identidad técnica diferenciada, gancho $4.999 ARS (Mes Fundador) y conexión a #funnel.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -15,17 +15,17 @@ export const PRICING_PLANS = [
     themeClass: 'border-sky-300/80 shadow-sky-100 hover:border-sky-500',
     accentText: 'text-sky-700',
     accentBadge: 'bg-sky-50 text-sky-800 border-sky-200',
-    hookPrice: '$1.000 ARS',
-    hookPeriod: 'Mes 1 - Lanzamiento',
-    regularPrice: '$18.000 ARS / mes',
+    hookPrice: '$4.999 ARS',
+    hookPeriod: 'Mes Fundador - Primer Mes',
+    regularPrice: '$14.900 ARS / mes',
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 1',
     features: [
-      'Reserva ágil en 4 pasos desde el celular sin descargas ni contraseñas.',
-      'Comprobante digital #TK con botón para agendar en Google/Apple Calendar.',
-      'Portal de autogestión: el cliente cancela o reprograma en 1 clic y libera el slot.',
-      'Panel de dueño en vivo para pausar o abrir recepción y cargar citas al instante.',
-      'Respeta tu horario de siesta, feriados oficiales y cobro de seña a tu Alias.'
+      'Agenda web autónoma 24/7 sin descargas ni contraseñas.',
+      'Seña configurable por servicio directo a tu Alias/CBU (0% comisión).',
+      'Ticket Online #TK con dirección del local, calendario .ics y autogestión.',
+      'Horarios partidos y Feriados Nacionales 2026 configurables por mes.',
+      'Recordatorios por WhatsApp y panel de dueño para pausar recepción o cargar citas.'
     ]
   },
   {
@@ -33,21 +33,21 @@ export const PRICING_PLANS = [
     levelNumber: 2,
     title: 'Nivel 2',
     subtitle: 'Central Operativa & Agenda Pro',
-    badge: 'Control Total de Ausencias',
+    badge: 'CRM & Gestión Operativa',
     themeClass: 'border-indigo-400 shadow-indigo-100/50 hover:border-indigo-600',
     accentText: 'text-indigo-700',
     accentBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200',
-    hookPrice: '$1.000 ARS',
-    hookPeriod: 'Mes 1 - Lanzamiento',
-    regularPrice: '$32.000 ARS / mes',
+    hookPrice: '$4.999 ARS',
+    hookPeriod: 'Mes Fundador - Primer Mes',
+    regularPrice: '$24.900 ARS / mes',
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 2',
     features: [
-      'Todo lo de Nivel 1 con velocidad de respuesta instantánea y soporte prioritario.',
-      'Carga ágil de citas telefónicas y mostrador sin riesgo de doble turno.',
-      'Gestión Inteligente de Asistencias: control de ausencias reiteradas y atención prioritaria para tus clientes habituales.',
-      'Tablero de métricas en vivo: porcentaje de ocupación diaria y facturación.',
-      'Confirmaciones y recordatorios automáticos para asegurar la asistencia.'
+      'Todo lo de Nivel 1 con carga ágil de turnos presenciales y telefónicos.',
+      'CRM & Contactos con importación directa desde la agenda del celular.',
+      'Ficha completa de clientes con Email y Fecha de Cumpleaños.',
+      'Bloqueo preventivo de reservas y papelera restaurable en 1 clic.',
+      'Historial de precios, cierres por vacaciones y bloqueos de horarios.'
     ]
   },
   {
@@ -59,17 +59,17 @@ export const PRICING_PLANS = [
     themeClass: 'border-amber-400 shadow-amber-100/50 hover:border-amber-600',
     accentText: 'text-amber-800',
     accentBadge: 'bg-amber-50 text-amber-900 border-amber-200',
-    hookPrice: '$1.000 ARS',
-    hookPeriod: 'Mes 1 - Lanzamiento',
-    regularPrice: '$58.000 ARS / mes',
+    hookPrice: '$4.999 ARS',
+    hookPeriod: 'Mes Fundador - Primer Mes',
+    regularPrice: '$34.900 ARS / mes',
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 3',
     features: [
-      'Todo lo de Nivel 1 y Nivel 2 con gestión multi-recurso en simultáneo.',
-      'Agendas independientes por cada profesional con horarios y pausas propias.',
-      'Modelado de recursos físicos: canchas de pádel, consultorios médicos o sillones.',
-      'Selección de profesional preferido o primer turno disponible para el cliente.',
-      'Recordatorios automáticos 2 horas antes de cada cita para erradicar olvidos.'
+      'Todo lo de Nivel 2 con gestión Multi-Staff y agendas en paralelo.',
+      'Horarios partidos (Mañana / Tarde) por profesional sincronizados en vivo.',
+      'Asignación de sillones, boxes, consultorios o canchas por servicio.',
+      'Confirmación y Liberación Automática (2 hs antes) activable o pausable.',
+      'Selección de profesional preferido o primer turno disponible.'
     ]
   }
 ];
@@ -98,7 +98,7 @@ export function renderPricing(containerId = 'app-pricing') {
           <span>Planes y Precios Transparentes</span>
         </div>
         <h2 class="font-headline font-extrabold text-3xl sm:text-4xl lg:text-5xl text-slate-900 tracking-tight leading-tight">
-          Inversión clara y predecible. Lanzamiento por solo $1.000.
+          Inversión clara y predecible. Activá tu Mes Fundador por $4.999.
         </h2>
         <p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto">
           0% comisiones por turno. Te lo entregamos 100% configurado y listo para usar, con soporte directo.

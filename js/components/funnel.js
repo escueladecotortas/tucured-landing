@@ -1,7 +1,7 @@
 // Archivo: js/components/funnel.js
 /**
  * 🧙 Tucu Red Web V2 - Wizard Transaccional de 4 Pasos (Local-First Controller)
- * Flujo de alta comercial, checkout QR $1.000, alias copiable y pasarela WhatsApp.
+ * Flujo de alta comercial, checkout QR $4.999 (Mes Fundador), alias tucured y pasarela WhatsApp.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -152,7 +152,7 @@ export function renderFunnel(containerId = 'app-funnel') {
           <span class="material-symbols-outlined text-4xl">check_circle</span>
         </div>
         <h4 class="font-headline font-extrabold text-2xl text-emerald-950">¡Excelente! El sistema para ${payload.nombre} está registrado.</h4>
-        <p class="text-sm text-emerald-800 leading-relaxed">Verificamos tu transferencia de $1.000 para habilitar tu dominio y turnero oficial en el día.</p>
+        <p class="text-sm text-emerald-800 leading-relaxed">Verificamos tu transferencia de $4.999 para habilitar tu dominio y turnero oficial en el día.</p>
         <div class="p-3.5 rounded-2xl bg-white border border-emerald-200 text-left space-y-1.5 text-xs">
           <div class="flex justify-between"><span class="text-slate-500">Turnero Público:</span><a href="${turneroLink}" target="_blank" class="font-mono text-indigo-600 font-bold underline truncate max-w-[240px]">${turneroLink}</a></div>
           <div class="flex justify-between"><span class="text-slate-500">Panel de Control:</span><a href="${adminLink}" target="_blank" class="font-mono text-indigo-600 font-bold underline truncate max-w-[240px]">${adminLink}</a></div>

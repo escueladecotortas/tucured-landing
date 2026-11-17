@@ -1,99 +1,101 @@
-<!-- Archivo: .agent/audit/audit_features_l1_l2_l3.md -->
-# 🛡️ AUDITORÍA CRUZADA DE ALCANCE POR NIVELES (L1, L2, L3)
-**Nexus OS v11.1 — Protocolo PEAC de Auditoría Forense**  
-**Fecha:** 07 de Noviembre de 2026  
-**Auditores del Enjambre:** `@Argus` (Juez Pasivo & QA) • `@Atenea` (Mapeo UI/UX) • Supervisión: `@Nexus` (COO)  
-**Objetivo:** Contrastar de forma exhaustiva las promesas comerciales de la landing (`pricing.js`, `features.js`, `stage_value_zone.js`, `funnel_data.js`, `showcase_state.js`) frente a la implementación técnica real en disco (`showcase_v11`, `admin_l1`, `admin_l2`, `admin_l3`).
+// Archivo: .agent/audit/audit_features_l1_l2_l3.md
+# 🛡️ INVENTARIO MAESTRO DE FUNCIONALIDADES VIGENTES (L1, L2, L3)
+**Nexus OS v11.1 — Protocolo PEAC de Auditoría Forense (Cierre Post TASK-084)**  
+**Fecha de Emisión:** 16 de Noviembre de 2026  
+**Auditores del Enjambre:** `@Codi` (Ingeniería) • `@Kael` (Integridad & Paridad) • `@Argus` (Gatekeeper QA)  
+**Alcance Auditado en Disco:** `public/turnero.html`, `public/gestion_turno.html`, `public/admin_l1.html`, `public/admin_l2.html`, `public/admin_l3.html`, `public/js/admin_shared/*`, `public/js/admin_l1/*`, `public/js/admin_l2/*`, `public/js/admin_l3/*` y `js/showcase_v11/*`.
 
 ---
 
-## 📊 1. RESUMEN EJECUTIVO DE COBERTURA
+## 📊 1. RESUMEN EJECUTIVO DE COBERTURA (100% OPERATIVO EN DISCO)
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│ ESTADO GENERAL DE COBERTURA TÉCNICA VS PROMESAS COMERCIALES           │
-├──────────────────────┬─────────────┬──────────────┬────────────────────┤
-│ Nivel de Producto    │ Prometido   │ Construido   │ Brecha Principal   │
-├──────────────────────┼─────────────┼──────────────┼────────────────────┤
-│ L1: Autónomo         │ 100%        │ 90%          │ Copy desalineado   │
-│ L2: Central Pro      │ 100%        │ 95%          │ Enlace roto cliente│
-│ L3: Multi-Recurso    │ 100%        │ 70%          │ Deuda UI & Cron L3 │
-└──────────────────────┴─────────────┴──────────────┴────────────────────┘
-```
+| Nivel de Producto | Prometido | Construido en Disco | Estética & UX | Paridad `tucured-engine` |
+| :--- | :---: | :---: | :--- | :---: |
+| **L1: Profesional Independiente** | 100% | **100% Operativo** | Warm Studio / Aura Light + Tema Día/Noche | ✅ SHA-256 Certificado |
+| **L2: Central Pro Multi-Box** | 100% | **100% Operativo** | Warm Studio / Aura Light + Tema Día/Noche | ✅ SHA-256 Certificado |
+| **L3: Multi-Staff & Recursos** | 100% | **100% Operativo** | Warm Studio / Aura Light + Tema Día/Noche | ✅ SHA-256 Certificado |
 
-* **Nivel 1 (Autónomo):** La lógica del cliente en el showroom se elevó con éxito al estándar de 4 pasos con Hash `#TK-71A0` y descarga `.ics` Local-First (TASK-064-B). El panel `admin_l1` está 100% modularizado en Aura Light. La principal brecha es de **consistencia editorial**: la landing y el funnel aún conservan textos obsoletos que mencionan *"despacho wa.me sin backend"*.
-* **Nivel 2 (Central Pro):** Es el nivel más sólido y maduro. La SPA `admin_l2` está desacoplada en 5 submódulos Aura Light (< 165L), con CRM de Lista Negra/VIP y modal de mostrador. La brecha principal es un **enlace roto** en el header hacia `/demo_l2_cliente.html`.
-* **Nivel 3 (Multi-Staff & Clubes/Clínicas):** Existe una base funcional sólida de multi-staff y catálogo con duración, pero mantiene una **fuerte deuda técnica visual** (sigue en Dark Mode rígido `bg-zinc-950`), carece de telemetría visual del Cron T-2hs y requiere formalizar el modelado de recursos físicos independientes (canchas y consultorios).
+- **Estado de Brechas Históricas:** 0 enlaces rotos (404 erradicados), 0 menciones expuestas a tecnicismos internos en UI comercial, paridad funcional y documental completa hasta `TASK-084`, y compliance estricto con la Ley de 200 Líneas.
 
 ---
 
-## 🔎 2. MATRIZ FORENSE POR NIVEL
+## 🌐 2. DIFERENCIALES TRANSVERSALES DEL ECOSISTEMA (COMUNES A L1, L2 Y L3)
 
-### 🟢 2.1 NIVEL 1: TURNERO AUTÓNOMO EXPRESS
+### 2.1 Multi-Rubro con Aislamiento Estricto por Rubro (`admin_demo_seed.js`, `showcase_state.js`, `turnero_catalog.js`)
+- Soporte nativo para **6 rubros canónicos** con identidad, subtítulo, dirección y catálogo propios: `peluqueria` (`barberia`), `estetica` (`peluqueria_estetica`), `gastronomia` (`resto`), `salud` (`salud_consultorio`, con selector condicional de Obra Social/Cobertura), `servicios` y `deportes` (`deportes_clubes`).
+- **Particionado estricto en `localStorage`:** Todas las claves críticas (`tucu_${lvl}_services_${rubro}`, `tucu_${lvl}_bookings_${rubro}`, `tucu_${lvl}_biz_name_${rubro}`, `tucu_${lvl}_address_${rubro}`, `tucu_${lvl}_alias_${rubro}`, `tucu_${lvl}_cbu_${rubro}`, `tucu_${lvl}_holidays_state_${rubro}`) se almacenan aisladas por nivel y rubro para garantizar cero contaminación cruzada al alternar demos.
 
-| Característica Prometida (Landing / Pricing) | Estado Real en Disco | Brecha / Faltante Detectado | Severidad |
-| :--- | :--- | :--- | :---: |
-| **Reserva web ágil en el celular** | **Construido y Operativo:** Flujo de 4 pasos en `showcase_mockup.js` y `showcase_templates_l1.js` (Horarios $\rightarrow$ Datos $\rightarrow$ Resumen $\rightarrow$ Ticket). | **Brecha de Copy:** En `funnel_data.js` dice *"Reserva en 3 toques, seña 50% y despacho wa.me sin backend"*. Debe actualizarse para reflejar el flujo de 4 pasos con confirmación web. | 🟡 Media |
-| **Bloqueo en tiempo real (Base Multitenant)** | **Simulado en memoria / Local-First:** En `showcase_state.js`, domingos y slots pasados se bloquean en vivo. En `admin_l1_agenda.js`, consulta `/api/portal/:slug/bookings` con fallback a `localStorage`. | **Aislamiento Sandbox:** En la landing estática pura no hay concurrencia multi-navegador real; la sincronización entre distintos dispositivos depende del backend Node en `tucured-engine`. | 🟢 Baja (Esperado) |
-| **Comprobante Digital Hash `#TK-XXXX`** | **Construido y Operativo:** Emisión de token canónico `#TK-71A0` en el showroom y `#TK-8421` / `#TK-3319` en `admin_l1_agenda.js`. | **Ninguna:** Coherencia total entre cliente y trastienda. | ⚪ Conforme |
-| **Portal de autogestión y cancelación en 1 clic** | **Construido en memoria:** Módulo `showcase_self_service_l2.js` integrado al showroom con motivos de cancelación y reprogramación. | **Faltante Standalone:** No existe un archivo físico `public/gestion_turno.html` para acceso autónomo directo por URL fuera del showroom. | 🟡 Media |
-| **Catálogo con duración variable y cobro de señas** | **Construido:** `admin_l1_pricing.js` gestiona duración (30 a 60 min), precios y seña porcentual. Integrado con Alias oficial `tucured.mp`. | **Ninguna:** Plenamente operativo en admin y showroom. | ⚪ Conforme |
-| **Salteo de feriados nacionales y corte de siesta** | **Construido:** `admin_l1_config.js` implementa horarios en 2 bloques (mañana/tarde) y salteo de feriados. El showroom saltea domingos automáticamente con paginación `<` y `>`. | **Ninguna:** Cumplimiento estricto. | ⚪ Conforme |
-| **Despacho y confirmación vía WhatsApp Gateway** | **Construido en Admin:** `admin_l1_baileys.js` implementa modal con QR de vinculación Baileys y test de despacho. En el showroom se aisló en Sandbox Local-First. | **Brecha Visual en Landing:** `showcase_benefits.js` (L70-L85) aún renderiza una tarjeta de WhatsApp bubble antigua (*"Mensaje listo en tu WhatsApp"*). Debe reemplazarse por el Ticket Digital #TK. | 🔴 Alta |
-| **Panel de Control Backoffice (`admin_l1.html`)** | **Construido:** 100% Aura Light, PIN táctil 3x4 + WebAuthn biometría, switch de recepción abierta/pausada y buscador reactivo. | **Ninguna:** Certificado bajo compuerta Argus 41/41 (TASK-064). | ⚪ Conforme |
+### 2.2 Turnero Autónomo en 3 Pasos + Showroom Interactivo (`turnero.html`, `turnero_app.js`, `showcase_v11/*`)
+- **Turnero Autónomo (`/turnero.html`):** Flujo móvil sin contraseñas en **3 pasos + Paso 4 de confirmación**:
+  1. *Paso 1 (Servicio):* Lista de prestaciones activas ordenadas por `order`, con precio, duración (`min`) y badge dinámico `Seña $X` o `Sin seña previa`.
+  2. *Paso 2 (Fecha y Horario):* Selector de profesional/recurso (en L2/L3), días hábiles futuros y franjas libres filtradas en tiempo real contra feriados activos, vacaciones, horarios pasados (`AdminShell.filterFutureSlots`), bloqueos manuales y turnos existentes.
+  3. *Paso 3 (Confirmar Reserva):* Resumen con dirección del local, Nombre, WhatsApp numérico y Obra Social (solo Salud).
+  4. *Paso 4 (Ticket Generado):* Código hash `#TK-XXXX`, ruta corta `/t/TK-XXXX`, aviso de despacho automático por WhatsApp y botón in-place `"Ver Ticket Online"`.
+- **Showroom Interactivo (`showcase_mockup.js`, `showcase_core.js`):** Flujo en vivo de 4 pasos (Servicios/Fecha/Hora $\rightarrow$ Datos $\rightarrow$ Resumen $\rightarrow$ Ticket) con descarga de evento `.ics` para calendario local (`addToCalendar`) y botón `"Ver Tu Panel de Dueño"`.
+
+### 2.3 Ticket Online In-Place (`ticket_modal.js`), Portal `/t/:token` (`gestion_turno.html`, `ticket_portal.js`) & Máquina de 5 Estados (`admin_booking_engine.js`)
+- **Ticket Online In-Place + Standalone:** Apertura superpuesta `TucuTicketModal` desde Showroom y Turnero sin pérdida de contexto, más acceso directo por URL corta `/t/TK-XXXX` o `/gestion_turno.html?token=TK-XXXX` (con buscador de código y retorno inteligente `Volver al Turnero`).
+- **Carga y Reporte de Comprobante:** Selector `<input type="file" accept="image/*,.pdf">` y botón `"Informar transferencia realizada"` que guarda `depositReceiptReported`, `depositReceiptName` y `depositReceiptAt` sincronizados con el panel del comercio.
+- **Máquina Unificada de 5 Estados Canónicos:**
+  1. `PENDING_DEPOSIT` (`pendiente` en L1): *Pendiente Seña* — muestra alias/CBU copiables y carga de comprobante.
+  2. `CONFIRMED` (`confirmado` en L1): *Confirmado / Reserva Confirmada* — distingue confirmación inmediata post-reserva de confirmación de asistencia vía recordatorio (`clientConfirmed`).
+  3. `COMPLETED` (`finalizado` en L1): *Finalizado* — turno atendido y contabilizado en KPIs.
+  4. `CANCELLED` (`cancelado` en L1): *Cancelado* — libera inmediatamente el horario en Turnero/Showroom y guarda `prevStatus`.
+  5. `NO_SHOW` (`ausente` en L1): *Ausente* — marca inasistencia para trazabilidad.
+- **Reversión Explícita (`undoTransition`):** Botón `"Reabrir turno"` en L1, L2 y L3 que restaura `prevStatus`, `prevDepositPaid`, `prevPaymentMethod` y `prevPaidAt`.
+
+### 2.4 Cobro de Seña Directo al Alias del Comercio (Sin Intermediarios)
+- El dinero ingresa 100% directo a la cuenta del comercio sin pasarelas ni comisiones retenidas:
+  - Toggle global `Exigir Seña Web`, cálculo en `% Porcentaje` o `$ Monto Fijo`, campos `Alias` y `CBU / CVU` (22 dígitos) con copiado en 1 clic, medios habilitados configurables (`Efectivo`, `Transferencia / Alias`, `Mercado Pago`, `Tarjeta Débito / Crédito`) y selector `openPaymentPicker` al acreditar seña en el panel.
+
+### 2.5 Toggles Individuales de Seña, Duración Flexible e Historial de Precios por Servicio
+- En L1 (`admin_l1_pricing.js`), L2 (`admin_l2_services.js`) y L3 (`view_services.js`): checkbox por servicio `Exige seña web` (`requireDeposit`, mostrando badge `Sin seña` en admin y Turnero), selector de duración (`15`, `30`, `45`, `60`, `90 min` o **personalizada de 5 a 480 min**), orden manual (`order`) e **historial auditable de precios** (`priceHistory` con modal `showPriceHistory`).
+
+### 2.6 Plantillas Estructuradas de WhatsApp & Vinculación QR vía Baileys (`admin_wa_templates.js`)
+- **3 Plantillas Multilínea Editables:** `1A — Reserva con Seña`, `1B — Reserva Confirmada sin Seña` y `2 — Recordatorio Previo (24 hs / 2 hs)` con vista previa en vivo, migración automática de formatos legacy y **12 variables**: `{{cliente}}`, `{{comercio}}`, `{{direccion}}`, `{{servicio}}`, `{{fecha}}`, `{{hora}}`, `{{codigo}}`, `{{sena}}`, `{{porcentaje}}`, `{{alias}}`, `{{cbu}}`, `{{link_ticket}}`.
+- **Vinculación QR Baileys & Sonda de Estado:** Modal con **QR SVG inline autónomo** (sin dependencias externas) y sonda `AdminShell.probeWhatsAppStatus` (`/api/wa/status` en producción, modo demo en local), presentando copy comercial limpio (`"WhatsApp"` / `"Vinculación QR de WhatsApp"`).
+
+### 2.7 Dirección del Local End-to-End, Feriados 2026 con Excepción & Importador de Contactos `\mamatila`
+- **Dirección Física (`#cfg-biz-address`):** Editable por rubro en L1, L2 y L3; se propaga en vivo al header y Paso 3 del Turnero, Ticket Modal/Portal, evento `.ics` y variable `{{direccion}}` de WhatsApp.
+- **Excepción de Feriados (`admin_holidays.js`):** Catálogo anual 2026 de **16 feriados en 11 meses** (`api.argentinadatos.com` + fallback offline). Cada fecha inicia bloqueada por defecto con toggle individual `Bloqueado / Abierto` (`tucu_${level}_holidays_state_${rubro}`) reflejado al instante en Turnero y Showroom.
+- **Motor de Contactos `\mamatila` (`admin_contacts_parser.js`, `admin_contacts_manager.js`):** Normalización internacional **E.164 (`+549381...`)**, importación directa desde la agenda del smartphone vía **Contact Picker API** (`navigator.contacts.select`), carga de archivos `.vcf` / `.csv`, deduplicación sin sobrescribir nombres manuales, ingesta desde reservas, buscador NFD y baja lógica.
+
+### 2.8 Seguridad PIN, Baja Lógica Universal & Manual de Uso Interactivo
+- **Acceso & Recepción (`admin_pin_gate.js`, `admin_shell.js`):** Compuerta PIN táctil/teclado de 4 dígitos, switch `Recepción Web` (`Turnero Abierto / En Pausa`) sincronizado desktop/móvil y modal de confirmación `AdminShell.confirmAsync` para baja lógica (`deletedAt`) en servicios, staff, recursos, categorías, bloqueos, vacaciones, CRM y contactos.
+- **Manual de Uso Interactivo (`admin_manual_viewer.js`, `admin_manual_data_l1/l2/l3.js`):** Pestaña dedicada en L1, L2 y L3 con índice lateral, pasos numerados, contador de secciones activas y buscador NFD insensible a tildes con resaltado `<mark>`.
+
+---
+
+## ⚖️ 3. MATRIZ COMPARATIVA EXACTA DE FUNCIONALIDADES EXCLUSIVAS POR NIVEL
+
+| Capacidad / Eje Operativo | Nivel 1: Profesional Independiente | Nivel 2: Local Multi-Box / Canchas / Gabinetes | Nivel 3: Clínica / Salón Multi-Staff |
+| :--- | :--- | :--- | :--- |
+| **Archivos Consola Backoffice** | `admin_l1.html` + `public/js/admin_l1/*` | `admin_l2.html` + `public/js/admin_l2/*` | `admin_l3.html` + `public/js/admin_l3/*` |
+| **Vistas de Consola** | 4: Agenda, Catálogo, Configuración, Manual | 5: Agenda, Catálogo, CRM & Contactos, Config (3 tabs), Manual | 8: Agenda Dual, Staff, Recursos, Servicios, Contactos & CRM, Telemetría Cron, Config, Manual |
+| **Modelo de Atención** | Monopuesto / 1 profesional único | Local centralizado / primer turno libre / Pax | **Multi-Staff + Recursos Físicos desacoplados** |
+| **KPIs en Tiempo Real** | 3: Turnos Programados, Señas Acreditadas, Tasa Asistencia | 4: Confirmados, Señas, Cancelados/Ausentes, **% Ocupación** | 4 + 3 CRM: Turnos, Señas vs Esperados, Confirmados, Finalizados/Ausentes + Clientes/VIP/Facturado |
+| **Filtros Agenda & Vistas** | `Hoy`, `Semana`, `Mes`, `Rango` + 5 estados + buscador | `Hoy`, `Semana`, `Mes`, `Todos`, `Rango`, fecha puntual + 5 estados | **Grilla Multi-Columna / Tabla**, toggle **Por Especialista / Por Recurso**, `Hoy`/`Semana`/`Mes`/`Todos`/`Rango` |
+| **Carga de Turnos Mostrador** | Modal `Nueva Cita Manual` (servicio, fecha/hora, pago) | Modal `Nuevo Turno Manual` con selector de **Pax** y servicio | Modal **`Sobreturno Dual`** (Especialista + Recurso Físico + Servicio + Pago) |
+| **Horarios y Bloqueos** | Grilla semanal 7 días + `Clonar Lun a Vie` + switch feriados | Grilla corrido/partido + **Feriados 2026 por mes** + **Vacaciones por rango** + **Slots bloqueados** con historial | **Horarios propios por cada profesional** (`isSplit` + clonar) + **Bloqueos por servicio/rango** + Feriados 2026 por mes |
+| **CRM & Contactos** | Datos de cliente en tarjeta colapsable de agenda | **Lista Blanca VIP**, **Lista Restringida (Blacklist)** + Directorio `\mamatila` | **CRM Financiero (visitas + gasto `$ ARS` + historial modal)** + Directorio `\mamatila` |
+| **Recordatorios & Cron** | Checkboxes 24h / 2h + Plantillas 1A/1B/2 + QR WhatsApp | Checkboxes 24h / 2h + Wizard QR 3 pasos + Plantillas 1A/1B/2 | Checkboxes 24h / 2h + **Monitor Cron T-2hs en vivo** (barrido manual, logs `#CRON-XXXX`, inspeccionados/liberados) |
+
+### Detalle de Exclusividades por Nivel
+- **Exclusivo Nivel 1 (Profesional Independiente):** Consola liviana monousuario de 4 secciones sin fricción administrativa; panel de configuración en pantalla única (Identidad, Horarios 2 bloques, Señas/Alias/CBU, Medios de Pago y Plantillas WhatsApp) y sincronización directa con `/api/portal/:slug/*` cuando opera con slug personalizado.
+- **Exclusivo Nivel 2 (Local Multi-Box / Canchas / Gabinetes):** Gobernanza preventiva anti-no-show (**Lista Blanca VIP** y **Lista Restringida**), gestión de **Cierres Especiales / Vacaciones** por rango (`tucu_l2_vacations_${rubro}`), **Slots Bloqueados Manualmente** con auditoría histórica (`tucu_l2_occupied_slots_history_${rubro}`), selector de **Pax** en reservas y mostrador, y cálculo de **% Ocupación Estimada**.
+- **Exclusivo Nivel 3 (Clínica / Salón Multi-Staff):**
+  1. **Agenda Dual Multi-Columna & Tabla:** Alterna columnas por **Especialista** o por **Recurso Físico** con carga directa de sobreturno sobre la columna elegida.
+  2. **ABM de Personal Humano (`view_staff.js`):** Horarios independientes de 7 días por profesional con **turno partido (`isSplit`/`open2`/`close2`)**, clonación `Lun a Vie`, asignación de servicios por especialista y estado `ACTIVO/PAUSA` sincronizado con Showroom y Turnero.
+  3. **ABM de Recursos Físicos (`view_resources.js`):** Entidad separada para sillones, gabinetes, consultorios, canchas, mesas o salas con contador de ocupación diaria y estado `ACTIVO/PAUSA`.
+  4. **Catálogo con Categorías & Antelación (`view_services.js`):** Filtro por categorías personalizadas, horas de antelación (`advanceHours`) y visibilidad web de precio/duración.
+  5. **CRM Financiero (`view_clients.js`) & Telemetría Cron T-2hs (`view_telemetry.js`):** Ranking de clientes frecuentes (`VIP >= 3 citas`), facturación acumulada (`LTV`), historial modal de citas por cliente y monitor en vivo del daemon barredor Cron T-2hs con ejecución bajo demanda.
 
 ---
 
-### 🔵 2.2 NIVEL 2: CENTRAL OPERATIVA & AGENDA PRO
-
-| Característica Prometida (Landing / Pricing) | Estado Real en Disco | Brecha / Faltante Detectado | Severidad |
-| :--- | :--- | :--- | :---: |
-| **Instancia aislada de alto rendimiento** | **Modelada en Admin:** `public/admin_l2.html` opera con aislamiento por comercio mediante `?slug=...` y almacenamiento en `localStorage` (`tucu_l2_bookings_{slug}`). | **Aislamiento Backend:** Persistencia cloud dedicada configurada en `tucured-engine` (`tenants/{slug}`). | 🟢 Baja (Esperado) |
-| **SPA Avanzada de 3 Vistas Operativas** | **Construida:** `public/admin_l2.html` estructurada en 5 submódulos (< 165L): Agenda en Vivo, CRM Gobernanza y Configuración de Horarios. | **Ninguna:** Estándar Aura Light impecable. | ⚪ Conforme |
-| **Carga de Turnos de Mostrador / Telefónicos** | **Construida:** Modal interactivo en `admin_l2_calendar.js` con cálculo preventivo de solapamientos de horario. | **Ninguna:** Totalmente funcional en el backoffice. | ⚪ Conforme |
-| **Gobernanza Anti-No-Show (Lista Negra y VIP)** | **Construida:** `admin_l2_crm.js` implementa ABM completo de clientes, bloqueo preventivo en Lista Negra y fidelización en Lista Blanca VIP. | **Ninguna:** Persistencia reactiva verificada. | ⚪ Conforme |
-| **Métricas de ocupación comercial en tiempo real** | **Construida:** `admin_l2_calendar.js` reporta % de ocupación diaria, volumen de citas activas y recaudación en \$ ARS. | **Ninguna:** Reflejado en panel y showroom. | ⚪ Conforme |
-| **Enlace de Acceso a Turnero Cliente desde Admin** | **Incompleto / Roto:** En `public/admin_l2.html` (L39), el botón apunta a `<a href="/demo_l2_cliente.html">📱 Turnero Cliente</a>`. | **Enlace Roto:** `demo_l2_cliente.html` no existe en `public/` (produce HTTP 404). Debe redirigir al showroom o proveerse el archivo cliente. | 🔴 Alta |
-| **Portal de autogestión para clientes** | **Simulado en showroom:** Opera mediante `showcase_self_service_l2.js` con token `#TK-84B2`. | **Faltante Standalone:** Ausencia de `gestion_turno.html` independiente para el cliente final. | 🟡 Media |
+## 🗺️ 4. MAPA DE ARCHIVOS VERIFICADOS EN DISCO (`tucured-landing` & `tucured-engine`)
+- **Portales Cliente:** `public/turnero.html` (`46L`), `public/gestion_turno.html` (`51L`), `public/js/admin_shared/turnero_catalog.js` (`147L`), `turnero_app.js` (`156L`), `ticket_modal.js` (`167L`), `ticket_portal.js` (`170L`).
+- **Núcleo Compartido (`public/js/admin_shared/`):** `admin_booking_engine.js` (`179L`), `admin_demo_seed.js` (`156L`), `admin_shell.js` (`158L`), `admin_pin_gate.js` (`153L`), `admin_wa_templates.js` (`165L`), `admin_holidays.js` (`166L`), `admin_contacts_parser.js` (`133L`), `admin_contacts_manager.js` (`161L`), `admin_manual_viewer.js` (`106L`), `admin_manual_data_l1/l2/l3.js` (`83L` c/u).
+- **Consolas & Showroom:** `public/admin_l1.html` (`163L`) + `admin_l1/*`, `public/admin_l2.html` (`159L`) + `admin_l2/*`, `public/admin_l3.html` (`83L`) + `admin_l3/*`, `public/css/admin_unified.css` (`153L`) y `js/showcase_v11/*` (11 módulos `<= 178L`).
 
 ---
-
-### 🟡 2.3 NIVEL 3: MULTI-STAFF, CLUBES & CLÍNICAS
-
-| Característica Prometida (Landing / Pricing) | Estado Real en Disco | Brecha / Faltante Detectado | Severidad |
-| :--- | :--- | :--- | :---: |
-| **Suite Multi-Staff con Agendas Simultáneas** | **Construida en base JS modular:** `public/js/admin_l3/view_agenda.js` y `view_staff.js` soportan columnas por cada profesional con horarios propios. | **Deuda UI/UX Crítica:** `public/admin_l3.html` permanece en **Dark Mode rígido** (`bg-zinc-950`). Requiere refactorización urgente al estándar **Aura Light** (TASK-065). | 🔴 Alta |
-| **Modelado de Recursos Físicos (Canchas / Sillones / Consultorios)** | **Parcialmente modelado:** En `showcase_templates_l3.js` se modelan canchas y sillones. En `admin_l3`, `view_staff.js` trata a los recursos como personas del staff; no hay un selector ni entidad de recursos físicos desacoplada. | **Faltante Funcional:** Falta modelar la entidad de "Recursos Físicos" diferenciada de "Profesionales" en `admin_l3` (alcance de TASK-065). | 🔴 Alta |
-| **Selección de especialista o primer libre** | **Construida en Showroom:** `showcase_templates_l3.js` implementa selector interactivo de profesional o "Cualquiera (Primer Libre)". | **Ninguna:** Totalmente interactivo en el showroom. | ⚪ Conforme |
-| **Cálculo de bloques contiguos por servicio** | **Construido:** Duración dinámica por servicio modelada en `showcase_templates_l3.js` y `view_services.js`. | **Ninguna:** Algoritmo de ocupación funcional. | ⚪ Conforme |
-| **Microservicio Cron T-2hs para Recordatorios** | **Construido en Engine / Ausente en UI:** `cron_recordatorios.cjs` existe en el backend de `tucured-engine`. En `view_system.js` hay un switch de recordatorios, pero **no hay telemetría visual del cron en la consola**. | **Faltante de Telemetría:** El panel L3 debe mostrar una tarjeta de telemetría en vivo del Cron T-2hs (estado activo, última pasada, turnos notificados). | 🔴 Alta |
-| **CRM Financiero con Gasto Acumulado** | **Construido:** `view_clients.js` calcula el historial de visitas y facturación acumulada en \$ ARS por cliente. | **Ninguna:** Implementado y operativo. | ⚪ Conforme |
-| **Enlace Roto en Topbar de Admin L3** | **Enlace Roto:** `public/admin_l3.html` (L36) contiene `<a href="/tucu_widgets.html">` que apunta a un archivo inexistente. | **Limpieza:** Remover el enlace roto o apuntar a la landing. | 🟡 Media |
-
----
-
-## 📋 3. LISTA CONSOLIDADA DE PIEZAS TÉCNICAS PENDIENTES (Pre-Cierre)
-
-Antes de realizar el redespliegue y la auditoría final de conversión (TASK-066), el enjambre debe abordar de forma estricta las siguientes tareas:
-
-### 1. Saneamiento Editorial & Copys de Conversión (Atenea & Lorem)
-- [ ] **`funnel_data.js` (L43):** Corregir la descripción de L1 eliminando `"despacho wa.me sin backend"`. Sustituir por: `"Turnero autónomo en 4 pasos, bloqueo en tiempo real y comprobante digital #TK-XXXX"`.
-- [ ] **`showcase_benefits.js` (L68-L87):** Erradicar el mockup de chat de WhatsApp para L1. Reemplazarlo por la tarjeta de previsualización del **Ticket Digital #TK-71A0 con descarga de recordatorio `.ics` y portal de autogestión**.
-- [ ] **`pricing.js` y `stage_value_zone.js`:** Revisar que todas las menciones a L1 señalen el flujo autónomo de 4 pasos con confirmación en agenda y comprobante digital.
-
-### 2. Reparación de Enlaces Rotos en Backoffice (`public/`)
-- [ ] **`public/admin_l2.html` (L39):** El enlace `<a href="/demo_l2_cliente.html">` produce error 404. Redirigir hacia el simulador interactivo de la landing (`/#showroom`) o generar un alias de previsualización.
-- [ ] **`public/admin_l3.html` (L36):** El botón con enlace a `/tucu_widgets.html` produce error 404. Reemplazarlo por un enlace al Home (`/`) o suprimirlo en modo embebido.
-
-### 3. Ejecución Prioritaria de TASK-065 (Refactor Admin L3 Aura Light)
-- [ ] **Transformación Estética:** Migrar `public/admin_l3.html` y sus vistas (`view_agenda.js`, `view_staff.js`, `view_services.js`, `view_clients.js`, `view_system.js`) al estándar **Aura Light** (`bg-slate-50`, tarjetas blancas, bordes `border-slate-200`, acentos luminosos).
-- [ ] **Telemetría Cron T-2hs:** Añadir en la barra superior o en `view_system.js` una tarjeta de estado en vivo para el microservicio Cron de recordatorios (simulando daemon activo con idempotencia).
-- [ ] **Modelado de Recursos Físicos:** Formalizar en `view_staff.js` o en un submódulo independiente la distinción clara entre "Profesionales / Especialistas" y "Recursos Físicos" (Canchas deportivas, Sillones, Consultorios).
-- [ ] **Compuerta de Modularización Argus:** Mantener de forma irrestricta todos los archivos de `admin_l3` por debajo de 180 líneas.
-
-### 4. Portal de Autogestión Standalone (Opcional / Fase de Cierre)
-- [ ] Evaluar la creación de un template HTML ligero `public/gestion_turno.html?token=TK-XXXX` que permita simular de forma autónoma la consulta, reprogramación y cancelación de una cita con almacenamiento Local-First.
-
----
-*Reporte certificado por `@Argus` bajo Protocolo PEAC de la Doctrina de Hierro Nexus OS v11.1.*
-
+*Inventario certificado por `@Codi`, `@Kael` y `@Argus` bajo Protocolo PEAC & Ley de 200L — Nexus OS v11.1.*

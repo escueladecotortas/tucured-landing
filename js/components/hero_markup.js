@@ -20,7 +20,7 @@ export function getHeroMarkup() {
           <div class="pt-2">
             <div class="flex flex-wrap items-center gap-4">
               <a href="#precios" id="hero-cta-primary" class="px-8 py-4 rounded-2xl btn-aura-cta font-headline font-bold text-base sm:text-lg flex items-center gap-2.5 group cursor-pointer shadow-lg">
-                <span>Activar por $1.000*</span>
+                <span>Activar por $4.999*</span>
                 <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </a>
               <a href="#showroom" class="px-6 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-headline font-semibold text-base border border-slate-200/80 shadow-sm transition-all flex items-center gap-2">
@@ -29,7 +29,7 @@ export function getHeroMarkup() {
               </a>
             </div>
             <p class="text-xs text-slate-500 mt-2.5 font-medium leading-relaxed">
-              *Tarifa promocional mes de lanzamiento. Luego abono regular según nivel.
+              *Promoción Mes Fundador (primer mes para cualquier nivel). Luego abono regular según nivel.
             </p>
           </div>
           <div class="pt-4 grid grid-cols-3 gap-4 max-w-xl border-t border-slate-200/70">
@@ -90,7 +90,7 @@ export function getHeroMarkup() {
                     </div>
                     <div>
                       <p class="text-xs font-extrabold text-slate-900">Corte Clásico + Perfilado</p>
-                      <p class="text-[11px] text-slate-500 font-medium">Barbero: <span class="font-bold text-slate-700">Mateo (Staff VIP)</span></p>
+                      <p class="text-[11px] text-slate-500 font-medium">Barbero: <span class="font-bold text-slate-700">Mateo (Barbero Senior)</span></p>
                     </div>
                   </div>
                   <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-extrabold font-mono">$12.000</span>

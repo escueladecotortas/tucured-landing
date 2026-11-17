@@ -49,6 +49,7 @@
       <button id="main-view-btn-citas" class="admin-nav-item active"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agenda de Citas</span></button>
       <button id="main-view-btn-catalogo" class="admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg><span>Catálogo & Precios</span></button>
       <button id="main-view-btn-configuracion" class="admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg><span>Configuración</span></button>
+      <button id="main-view-btn-manual" class="admin-nav-item"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg><span>Manual de Uso</span></button>
     </nav>
 
     <!-- Footer Sidebar -->
@@ -111,6 +112,13 @@
 
     <section id="view-section-configuracion" class="hidden space-y-6">
       <div class="admin-card space-y-3">
+        <div><h3 class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">Identidad & Ubicación</h3><p class="text-xs text-stone-500">Datos visibles en tu ticket online y mensajes de WhatsApp</p></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label for="cfg-biz-name" class="block text-[10px] text-stone-400 uppercase mb-1">Nombre del Comercio</label><input id="cfg-biz-name" type="text" placeholder="Ej. Peluquería & Barbería Central" class="w-full bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-900 dark:text-stone-100 outline-none"></div>
+          <div><label for="cfg-biz-address" class="block text-[10px] text-stone-400 uppercase mb-1">Dirección del Local</label><input id="cfg-biz-address" type="text" placeholder="Ej. 25 de Mayo 480, S. M. de Tucumán" class="w-full bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-900 dark:text-stone-100 outline-none"></div>
+        </div>
+      </div>
+      <div class="admin-card space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div><h3 class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">Horarios de Atención</h3><p class="text-xs text-stone-500">Franjas continuas y turnos partidos</p></div><div class="flex items-center gap-2"><label class="flex items-center gap-1.5 text-xs cursor-pointer"><input id="cfg-feriados-toggle" type="checkbox" checked class="w-4 h-4 rounded accent-[#800000]"><span id="l1-holidays-label" class="text-stone-600 dark:text-stone-400">Feriados Nacionales</span></label><button onclick="adminL1Config.cloneLunVie()" class="rounded-xl px-3 py-1 text-xs font-semibold admin-glass-btn">Clonar Lun a Vie</button></div></div>
         <div id="weekly-schedule-compact-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </div>
@@ -133,6 +141,7 @@
         <div id="l1-wa-config-mount"></div>
       </div>
     </section>
+    <section id="view-section-manual" class="hidden space-y-4"><div id="l1-manual-mount"></div></section>
   </main>
 
   <!-- Modales Operativos -->
@@ -149,6 +158,6 @@
   </div>
   <div id="dynamicModalRoot"></div>
   <div id="saveToast" class="hidden fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#181B22] text-xs font-semibold text-red-900 dark:text-red-400 shadow-2xl flex items-center gap-2"><svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Cambios guardados</span></div>
-  <script src="/js/admin_shared/admin_holidays.js"></script><script src="/js/admin_shared/admin_shell.js"></script><script src="/js/admin_shared/admin_pin_gate.js"></script><script src="/js/admin_shared/admin_wa_templates.js"></script><script src="/js/admin_shared/admin_booking_engine.js"></script><script src="/js/admin_shared/admin_demo_seed.js"></script><script src="/js/admin_l1/admin_l1_auth.js"></script><script src="/js/admin_l1/admin_l1_pricing.js"></script><script src="/js/admin_l1/admin_l1_config.js"></script><script src="/js/admin_l1/admin_l1_agenda.js"></script><script src="/js/admin_l1/admin_l1_core.js"></script>
+  <script src="/js/admin_shared/admin_holidays.js"></script><script src="/js/admin_shared/admin_shell.js"></script><script src="/js/admin_shared/admin_pin_gate.js"></script><script src="/js/admin_shared/admin_wa_templates.js"></script><script src="/js/admin_shared/admin_booking_engine.js"></script><script src="/js/admin_shared/admin_demo_seed.js"></script><script src="/js/admin_shared/admin_manual_data_l1.js"></script><script src="/js/admin_shared/admin_manual_viewer.js"></script><script src="/js/admin_l1/admin_l1_auth.js"></script><script src="/js/admin_l1/admin_l1_pricing.js"></script><script src="/js/admin_l1/admin_l1_config.js"></script><script src="/js/admin_l1/admin_l1_agenda.js"></script><script src="/js/admin_l1/admin_l1_core.js"></script>
 </body>
 </html>

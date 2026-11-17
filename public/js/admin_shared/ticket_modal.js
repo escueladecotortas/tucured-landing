@@ -1,8 +1,15 @@
 // Archivo: public/js/admin_shared/ticket_modal.js
-// Modal Superpuesto In-Place de Ticket Online Warm Studio (L1/L2/L3 + Showroom < 175L)
+// Modal Superpuesto In-Place de Ticket Online Warm Studio (L1/L2/L3 + Showroom <= 175L)
 
 window.TucuTicketModal = (function () {
   const MODAL_ID = 'tucu-ticket-modal-overlay';
+  const ADDR_DEF = {
+    peluqueria: '25 de Mayo 480, S. M. de Tucumán', barberia: '25 de Mayo 480, S. M. de Tucumán',
+    estetica: 'Av. Aconquija 1320, Yerba Buena', peluqueria_estetica: 'Av. Aconquija 1320, Yerba Buena',
+    gastronomia: 'Crisóstomo Álvarez 615, S. M. de Tucumán', resto: 'Crisóstomo Álvarez 615, S. M. de Tucumán',
+    salud: 'San Martín 845, S. M. de Tucumán', salud_consultorio: 'San Martín 845, S. M. de Tucumán',
+    servicios: 'Laprida 310, S. M. de Tucumán', deportes: 'Av. Perón 1850, Yerba Buena', deportes_clubes: 'Av. Perón 1850, Yerba Buena'
+  };
   const SVG = {
     x: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>',
     cal: '<svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
@@ -24,18 +31,17 @@ window.TucuTicketModal = (function () {
 
   function findRecord(tok) {
     const keys = [], seen = new Set(), add = (k, level) => { if (k && !seen.has(k)) { seen.add(k); keys.push({ k, level }); } };
+    const pref = curOpts.level;
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i) || ''; if (pref && k.startsWith(`tucu_${pref}_bookings`)) add(k, pref); }
     for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith('tucu_l1_bookings_')) add(k, 'l1');
-      else if (k && k.startsWith('tucu_l2_bookings_')) add(k, 'l2');
-      else if (k && k.startsWith('tucu_l3_bookings_')) add(k, 'l3');
+      const k = localStorage.key(i) || '';
+      if (k.startsWith('tucu_l1_bookings')) add(k, 'l1'); else if (k.startsWith('tucu_l2_bookings')) add(k, 'l2'); else if (k.startsWith('tucu_l3_bookings')) add(k, 'l3');
     }
     add('tucu_l2_bookings', 'l2'); add('tucu_l3_bookings', 'l3');
     for (const { k, level } of keys) {
       try {
         const list = JSON.parse(localStorage.getItem(k) || 'null');
-        if (!Array.isArray(list)) continue;
-        const idx = list.findIndex(b => !b.deletedAt && (cleanTok(b.token) === tok || cleanTok(b.id) === tok));
+        const idx = Array.isArray(list) ? list.findIndex(b => !b.deletedAt && (cleanTok(b.token) === tok || cleanTok(b.id) === tok)) : -1;
         if (idx >= 0) return { key: k, level, list, booking: list[idx] };
       } catch (_) {}
     }
@@ -49,6 +55,12 @@ window.TucuTicketModal = (function () {
     return 'CONFIRMED';
   }
 
+  function resolveAddress(b, lvl) {
+    const rKey = String(b?.rubroId || curOpts.rubro || '').toLowerCase().trim();
+    const byRubro = rKey ? localStorage.getItem(`tucu_${lvl}_address_${rKey}`) : '';
+    return b?.address || byRubro || localStorage.getItem(`tucu_${lvl}_address`) || ADDR_DEF[rKey] || '25 de Mayo 480, S. M. de Tucumán';
+  }
+
   function persist(rec) {
     const ct = cleanTok(rec.booking.token || rec.booking.id), pref = `tucu_${rec.level}_bookings`;
     for (let i = 0; i < localStorage.length; i++) {
@@ -56,38 +68,31 @@ window.TucuTicketModal = (function () {
       if (!k.startsWith(pref)) continue;
       try { const l = JSON.parse(localStorage.getItem(k) || 'null'), idx = Array.isArray(l) ? l.findIndex(b => cleanTok(b.token) === ct || cleanTok(b.id) === ct) : -1; if (idx >= 0) { l[idx] = rec.booking; localStorage.setItem(k, JSON.stringify(l)); } } catch (_) {}
     }
+    if (window.ShowcaseState && cleanTok(window.ShowcaseState.lastBookingCode) === ct) {
+      window.ShowcaseState.lastBookingRecord = { ...rec.booking };
+      window.ShowcaseState.notify?.();
+    }
   }
   function close() { document.getElementById(MODAL_ID)?.remove(); askCancel = false; toastMsg = ''; }
-
-  function copyVal(text, label) {
-    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
-    toastMsg = `${label} copiado al portapapeles`; render();
-  }
+  function copyVal(text, label) { if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {}); toastMsg = `${label} copiado al portapapeles`; render(); }
 
   function reportReceipt(tok) {
     const rec = findRecord(tok); if (!rec) return;
     const file = document.getElementById('inp-receipt-file')?.files?.[0];
-    rec.booking.depositReceiptReported = true;
-    rec.booking.depositReceiptName = file?.name || 'Comprobante informado en portal';
-    rec.booking.depositReceiptAt = new Date().toISOString();
-    persist(rec);
-    toastMsg = 'Comprobante informado — en validación por el comercio'; render();
+    Object.assign(rec.booking, { depositReceiptReported: true, depositReceiptName: file?.name || 'Comprobante informado en portal', depositReceiptAt: new Date().toISOString() });
+    persist(rec); toastMsg = 'Comprobante informado — en validación por el comercio'; render();
   }
-
   function confirmAttendance(tok) {
     const rec = findRecord(tok); if (!rec) return;
-    rec.booking.clientConfirmed = true;
-    rec.booking.clientConfirmedAt = new Date().toISOString();
-    persist(rec);
-    toastMsg = 'Asistencia confirmada'; render();
+    rec.booking.clientConfirmed = true; rec.booking.clientConfirmedAt = new Date().toISOString();
+    persist(rec); toastMsg = 'Asistencia confirmada'; render();
   }
-
   function confirmCancel(tok) {
-    const rec = findRecord(tok); if (!rec) return;
+    const ct = cleanTok(tok || curToken), rec = findRecord(ct); if (!rec) return;
     if (window.AdminBookingEngine) window.AdminBookingEngine.applyTransition(rec.booking, 'CANCELLED', rec.level);
-    else { rec.booking.status = rec.level === 'l1' ? 'cancelado' : 'CANCELLED'; rec.booking.cancelledAt = new Date().toISOString(); }
-    persist(rec); askCancel = false;
-    toastMsg = 'Turno cancelado y horario liberado'; render();
+    else Object.assign(rec.booking, { prevStatus: rec.booking.status || (rec.level === 'l1' ? 'confirmado' : 'CONFIRMED'), prevDepositPaid: !!rec.booking.depositPaid, prevPaymentMethod: rec.booking.paymentMethod || null, prevPaidAt: rec.booking.paidAt || null, status: rec.level === 'l1' ? 'cancelado' : 'CANCELLED' });
+    rec.booking.cancelledAt = new Date().toISOString();
+    persist(rec); askCancel = false; toastMsg = 'Turno cancelado y horario liberado'; render();
   }
 
   function buildStatusBadge(canon) {
@@ -97,24 +102,16 @@ window.TucuTicketModal = (function () {
   }
 
   function renderDepositSection(b, code, lvl, depNum) {
-    const alias = localStorage.getItem(`tucu_${lvl}_alias`) || localStorage.getItem('tucu_l1_alias') || 'tucured.estudio.mp';
-    const cbu = localStorage.getItem(`tucu_${lvl}_cbu`) || localStorage.getItem('tucu_l1_cbu') || '0000003100012345678901';
+    const r = String(b?.rubroId || '').toLowerCase().trim();
+    const alias = (r && localStorage.getItem(`tucu_${lvl}_alias_${r}`)) || localStorage.getItem(`tucu_${lvl}_alias`) || localStorage.getItem('tucu_l1_alias') || 'tucured.estudio.mp';
+    const cbu = (r && localStorage.getItem(`tucu_${lvl}_cbu_${r}`)) || localStorage.getItem(`tucu_${lvl}_cbu`) || localStorage.getItem('tucu_l1_cbu') || '0000003100012345678901';
     const banner = b.depositReceiptReported ? `<div id="receipt-reported-banner" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between gap-2"><span class="inline-flex items-center gap-1.5">${SVG.ok}<span>Comprobante informado — en validación por el comercio</span></span>${b.depositReceiptName ? `<span class="font-mono text-[10px] opacity-80 truncate max-w-[110px]">${b.depositReceiptName}</span>` : ''}</div>` : '';
-    return `<div class="rounded-2xl bg-amber-50/70 border border-amber-200 p-3.5 space-y-2.5 text-xs">
-      <div class="flex items-center justify-between"><span class="font-bold text-amber-900">Seña pendiente para confirmar</span><strong class="font-mono text-sm text-[#800000]">${fmtMoney(depNum)}</strong></div>
-      <div class="grid grid-cols-1 gap-1.5">
-        <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-xl border border-amber-200/70"><div class="min-w-0 truncate"><span class="text-[10px] text-stone-400 block">Alias</span><span class="font-mono font-bold text-stone-800">${alias}</span></div><button type="button" id="btn-copy-alias" onclick="TucuTicketModal.copyVal('${alias}','Alias')" class="px-2 py-1 rounded-lg bg-stone-100 border border-[#D5CEC2] text-stone-700 text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer">${SVG.copy}<span>Copiar</span></button></div>
-        <div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-xl border border-amber-200/70"><div class="min-w-0 truncate"><span class="text-[10px] text-stone-400 block">CBU / CVU</span><span class="font-mono font-bold text-stone-800">${cbu}</span></div><button type="button" id="btn-copy-cbu" onclick="TucuTicketModal.copyVal('${cbu}','CBU')" class="px-2 py-1 rounded-lg bg-stone-100 border border-[#D5CEC2] text-stone-700 text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer">${SVG.copy}<span>Copiar</span></button></div>
-      </div>${banner}
-      <div class="space-y-2 pt-1.5 border-t border-amber-200/60"><label for="inp-receipt-file" class="block text-[10px] font-bold uppercase tracking-wider text-amber-900">Adjuntar comprobante (opcional)</label><input id="inp-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-[11px] text-stone-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-stone-200/80 file:text-stone-800"><button type="button" id="btn-report-receipt" onclick="TucuTicketModal.reportReceipt('${code}')" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors">${SVG.upload}<span>Informar transferencia realizada</span></button></div>
-    </div>`;
+    return `<div class="rounded-2xl bg-amber-50/70 border border-amber-200 p-3.5 space-y-2.5 text-xs"><div class="flex items-center justify-between"><span class="font-bold text-amber-900">Seña pendiente para confirmar</span><strong class="font-mono text-sm text-[#800000]">${fmtMoney(depNum)}</strong></div><div class="grid grid-cols-1 gap-1.5"><div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-xl border border-amber-200/70"><div class="min-w-0 truncate"><span class="text-[10px] text-stone-400 block">Alias</span><span class="font-mono font-bold text-stone-800">${alias}</span></div><button type="button" id="btn-copy-alias" onclick="TucuTicketModal.copyVal('${alias}','Alias')" class="px-2 py-1 rounded-lg bg-stone-100 border border-[#D5CEC2] text-stone-700 text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer">${SVG.copy}<span>Copiar</span></button></div><div class="flex items-center justify-between bg-white px-3 py-1.5 rounded-xl border border-amber-200/70"><div class="min-w-0 truncate"><span class="text-[10px] text-stone-400 block">CBU / CVU</span><span class="font-mono font-bold text-stone-800">${cbu}</span></div><button type="button" id="btn-copy-cbu" onclick="TucuTicketModal.copyVal('${cbu}','CBU')" class="px-2 py-1 rounded-lg bg-stone-100 border border-[#D5CEC2] text-stone-700 text-[10px] font-bold inline-flex items-center gap-1 shrink-0 cursor-pointer">${SVG.copy}<span>Copiar</span></button></div></div>${banner}<div class="space-y-2 pt-1.5 border-t border-amber-200/60"><label for="inp-receipt-file" class="block text-[10px] font-bold uppercase tracking-wider text-amber-900">Adjuntar comprobante (opcional)</label><input id="inp-receipt-file" type="file" accept="image/*,.pdf" class="w-full text-[11px] text-stone-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-stone-200/80 file:text-stone-800"><button type="button" id="btn-report-receipt" onclick="TucuTicketModal.reportReceipt('${code}')" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors">${SVG.upload}<span>Informar transferencia realizada</span></button></div></div>`;
   }
 
   function renderConfirmedState(b, code) {
     if (b.clientConfirmed) return `<div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-1.5">${SVG.ok}<span>Asistencia confirmada por cliente</span></div>`;
-    if (curOpts.mode === 'reminder' || curOpts.immediate === false) {
-      return `<div class="space-y-1.5"><p class="text-[11px] font-semibold text-stone-600 text-center">¿Confirmás que vas a asistir a tu turno?</p><button type="button" id="btn-confirm-attendance" onclick="TucuTicketModal.confirmAttendance('${code}')" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors">${SVG.ok}<span>Confirmar asistencia</span></button></div>`;
-    }
+    if (curOpts.mode === 'reminder' || curOpts.immediate === false) return `<div class="space-y-1.5"><p class="text-[11px] font-semibold text-stone-600 text-center">¿Confirmás que vas a asistir a tu turno?</p><button type="button" id="btn-confirm-attendance" onclick="TucuTicketModal.confirmAttendance('${code}')" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors">${SVG.ok}<span>Confirmar asistencia</span></button></div>`;
     return `<div id="immediate-confirmed-banner" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-1.5 text-center">${SVG.ok}<span>Reserva confirmada — te esperamos en el día y horario acordados</span></div>`;
   }
 
@@ -133,7 +130,7 @@ window.TucuTicketModal = (function () {
     }
     const b = rec.booking, code = cleanTok(b.token || b.id), lvl = rec.level, canon = resolveCanon(b), badge = buildStatusBadge(canon);
     const biz = b.bizName || localStorage.getItem(`tucu_${lvl}_biz_name`) || localStorage.getItem('tucu_biz_name') || 'Estudio Central TucuRed';
-    const srv = b.serviceName || b.service || 'Servicio Reservado', client = b.clientName || b.client || 'Cliente';
+    const addr = resolveAddress(b, lvl), srv = b.serviceName || b.service || 'Servicio Reservado', client = b.clientName || b.client || 'Cliente';
     const priceNum = Number(b.price) || 0, depNum = Number(b.depositAmount) || 0, balance = Math.max(0, priceNum - (b.depositPaid ? depNum : 0));
     const isActive = canon === 'PENDING_DEPOSIT' || canon === 'CONFIRMED';
 
@@ -146,6 +143,7 @@ window.TucuTicketModal = (function () {
       <div class="rounded-2xl bg-stone-50 border border-[#D5CEC2] p-3.5 space-y-2 text-xs">
         <div class="flex justify-between gap-2"><span class="text-stone-500">Servicio</span><strong class="text-stone-900 text-right">${srv}</strong></div>
         <div class="flex justify-between gap-2"><span class="text-stone-500 flex items-center gap-1">${SVG.cal} Fecha y hora</span><strong class="text-stone-900 capitalize">${fmtDate(b.dateStr || b.date)} · ${b.time || '--:--'} hs</strong></div>
+        <div class="flex justify-between gap-2"><span class="text-stone-500">Dirección</span><strong id="modal-ticket-address" class="text-stone-900 text-right">${addr}</strong></div>
         ${b.staffName ? `<div class="flex justify-between gap-2"><span class="text-stone-500">Especialista</span><strong class="text-stone-900">${b.staffName}</strong></div>` : ''}
         <div class="flex justify-between gap-2"><span class="text-stone-500">Titular</span><span class="font-semibold text-stone-800">${client}</span></div>
         <div class="flex justify-between gap-2 pt-1.5 border-t border-stone-200/80"><span class="text-stone-500">Saldo en local</span><strong class="font-mono text-stone-900">${fmtMoney(balance)}</strong></div>
@@ -160,9 +158,10 @@ window.TucuTicketModal = (function () {
     </div>`;
   }
 
-  return {
-    open: (tok, opts = { immediate: true }) => { curToken = cleanTok(tok); curOpts = opts || { immediate: true }; askCancel = false; toastMsg = ''; render(); },
-    close, copyVal, reportReceipt, confirmAttendance, confirmCancel,
-    toggleCancel: (v) => { askCancel = v; render(); }
-  };
+  function open(tok, levelOrOpts = { immediate: true }, rubroOpt = '', extraOpts = {}) {
+    curToken = cleanTok(tok);
+    curOpts = typeof levelOrOpts === 'string' ? { origin: 'showroom', immediate: true, level: levelOrOpts, rubro: rubroOpt, ...extraOpts } : (levelOrOpts || { immediate: true });
+    askCancel = !!curOpts.askCancel; toastMsg = ''; render();
+  }
+  return { open, openForCancel: (tok, lvl, rubro) => open(tok, lvl, rubro, { askCancel: true }), close, copyVal, reportReceipt, confirmAttendance, confirmCancel, toggleCancel: (v) => { askCancel = v; render(); } };
 })();

@@ -7,8 +7,8 @@
 
 const FAQS_DATA = [
   {
-    q: '¿Cómo funciona la promoción de $1.000 del primer mes?',
-    a: 'Abonás $1.000 ARS por transferencia (Alias oficial tucured.mp o QR interoperable). Durante 30 días probás el software completo en tu local. A partir del segundo mes, abonás la tarifa regular del nivel que elijas, sin contratos de permanencia ni penalizaciones.'
+    q: '¿Cómo funciona la promoción Mes Fundador de $4.999 del primer mes?',
+    a: 'Abonás $4.999 ARS por transferencia directa (Alias oficial tucured, 0% comisión) o mediante nuestro link de pago electrónico en Mercado Pago. Durante 30 días probás el software completo en tu local. A partir del segundo mes, abonás la tarifa regular del nivel que elijas, sin contratos de permanencia ni penalizaciones.'
   },
   {
     q: '¿Mis clientes tienen que descargar alguna app o crearse una cuenta?',

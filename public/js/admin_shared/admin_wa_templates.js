@@ -1,13 +1,14 @@
 // Archivo: public/js/admin_shared/admin_wa_templates.js
-// WA Demo Readonly + 3 Plantillas (1A Seña, 1B Confirmado, 2 Recordatorio) (< 180 líneas)
+// WA Demo Readonly + 3 Plantillas Estructuradas (1A Seña, 1B Confirmado, 2 Recordatorio < 180L)
 
 (function (global) {
   const DEMO_WA_NUMBER = '5493815551234';
   const DAYS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  const VARS = ['{{cliente}}', '{{comercio}}', '{{servicio}}', '{{fecha}}', '{{hora}}', '{{codigo}}', '{{sena}}', '{{porcentaje}}', '{{alias}}', '{{cbu}}', '{{link_ticket}}'];
-  const TPL_1A = '¡Hola {{cliente}}! Registramos tu reserva en {{comercio}} para el {{fecha}} a las {{hora}} hs ({{servicio}}). Para confirmar tu lugar, aboná la seña de {{sena}} por transferencia: Alias: {{alias}} · CBU: {{cbu}}. Enviá el comprobante por este mismo chat para acreditarlo. Podés ver el estado de tu reserva desde tu ticket online: {{link_ticket}}';
-  const TPL_1B = '¡Hola {{cliente}}! Tu turno en {{comercio}} quedó confirmado para el {{fecha}} a las {{hora}} hs ({{servicio}}). Podés consultar los datos o gestionar tu reserva desde tu ticket online: {{link_ticket}}';
-  const TPL_2 = 'Hola {{cliente}}, te recordamos tu turno en {{comercio}} el {{fecha}} a las {{hora}} hs ({{servicio}}). Ingresá a tu ticket online para confirmar asistencia o cancelar si surgió un imprevisto: {{link_ticket}}';
+  const VARS = ['{{cliente}}', '{{comercio}}', '{{direccion}}', '{{servicio}}', '{{fecha}}', '{{hora}}', '{{codigo}}', '{{sena}}', '{{porcentaje}}', '{{alias}}', '{{cbu}}', '{{link_ticket}}'];
+  const TPL_1A = 'Hola *{{cliente}}*, registramos tu reserva en *{{comercio}}*.\n\n*Código:* #{{codigo}}\n*Servicio:* {{servicio}}\n*Fecha y hora:* {{fecha}} · {{hora}} hs\n*Dirección:* {{direccion}}\n\nPara confirmar tu lugar, aboná la seña de *{{sena}}* por transferencia:\n*Alias:* {{alias}}\n*CBU:* {{cbu}}\n\nEnviá el comprobante por este mismo chat para acreditarlo. Consultá el estado desde tu ticket online:\n{{link_ticket}}';
+  const TPL_1B = 'Hola *{{cliente}}*, tu turno en *{{comercio}}* quedó confirmado.\n\n*Código:* #{{codigo}}\n*Servicio:* {{servicio}}\n*Fecha y hora:* {{fecha}} · {{hora}} hs\n*Dirección:* {{direccion}}\n\nConsultá los datos o gestioná tu reserva desde tu ticket online:\n{{link_ticket}}';
+  const TPL_2 = 'Hola *{{cliente}}*, te recordamos tu próximo turno en *{{comercio}}*.\n\n*Código:* #{{codigo}}\n*Servicio:* {{servicio}}\n*Fecha y hora:* {{fecha}} · {{hora}} hs\n*Dirección:* {{direccion}}\n\nIngresá a tu ticket online para consultar detalles o gestionar tu asistencia:\n{{link_ticket}}';
+  const LEGACY_RX = /^¡?Hola \{\{cliente\}\}[!,\s]+(Registramos tu reserva|Tu turno en|te recordamos tu turno|Cita en)/i;
 
   let activeTab = '1a';
 
@@ -20,60 +21,69 @@
     return `${DAYS_ES[d.getDay()]} ${dd}/${mm}`;
   }
 
-  function storageKey(level) { return `tucu_${level}_wa_templates_v2`; }
+  const storageKey = (level) => `tucu_${level}_wa_templates_v2`;
+  const isLegacy = (str) => typeof str === 'string' && !str.includes('\n') && !str.includes('{{direccion}}') && LEGACY_RX.test(str.trim());
 
   function getTemplates(level = 'l1') {
     try {
       const s = JSON.parse(localStorage.getItem(storageKey(level)) || 'null');
-      if (s && (s.t1a || s.t1b || s.t2)) return { waNumber: DEMO_WA_NUMBER, t1a: s.t1a || TPL_1A, t1b: s.t1b || TPL_1B, t2: s.t2 || TPL_2 };
+      if (s && (s.t1a || s.t1b || s.t2)) {
+        if (!s.customManual && (isLegacy(s.t1a) || isLegacy(s.t1b) || isLegacy(s.t2))) {
+          const migrated = { waNumber: DEMO_WA_NUMBER, t1a: isLegacy(s.t1a) ? TPL_1A : (s.t1a || TPL_1A), t1b: isLegacy(s.t1b) ? TPL_1B : (s.t1b || TPL_1B), t2: isLegacy(s.t2) ? TPL_2 : (s.t2 || TPL_2), migratedV3: true };
+          localStorage.setItem(storageKey(level), JSON.stringify(migrated));
+          return migrated;
+        }
+        return { waNumber: DEMO_WA_NUMBER, t1a: s.t1a || TPL_1A, t1b: s.t1b || TPL_1B, t2: s.t2 || TPL_2 };
+      }
     } catch (_) {}
     return { waNumber: DEMO_WA_NUMBER, t1a: TPL_1A, t1b: TPL_1B, t2: TPL_2 };
   }
 
-  function saveTemplates(level = 'l1') {
-    const g = (id, def) => document.getElementById(id)?.value || def;
-    const payload = { waNumber: DEMO_WA_NUMBER, t1a: g('cfg-msg-confirm1a', TPL_1A), t1b: g('cfg-msg-confirm1b', TPL_1B), t2: g('cfg-msg-reminder', TPL_2) };
+  function saveTemplates(level = 'l1', isManual = false) {
+    const g = (id, def) => document.getElementById(id)?.value ?? def;
+    const t1a = g('cfg-msg-confirm1a', TPL_1A), t1b = g('cfg-msg-confirm1b', TPL_1B), t2 = g('cfg-msg-reminder', TPL_2);
+    let prev = null; try { prev = JSON.parse(localStorage.getItem(storageKey(level)) || 'null'); } catch (_) {}
+    const payload = { waNumber: DEMO_WA_NUMBER, t1a, t1b, t2, customManual: Boolean(isManual || prev?.customManual || t1a !== TPL_1A || t1b !== TPL_1B || t2 !== TPL_2), migratedV3: true };
     try { localStorage.setItem(storageKey(level), JSON.stringify(payload)); localStorage.setItem(`tucu_${level}_wa_number`, DEMO_WA_NUMBER); } catch (_) {}
     return payload;
   }
 
   function resolveLevelConfig(level = 'l1', opts = {}) {
     const ext = global.AdminBookingEngine?.getConfig?.(level) || { requireDeposit: true, depositType: 'percentage', depositValue: 50 };
-    const bizInput = opts.bizInputId ? document.getElementById(opts.bizInputId)?.value?.trim() : document.getElementById('cfg-biz-name')?.value?.trim();
-    const aliasInput = opts.aliasInputId ? document.getElementById(opts.aliasInputId)?.value?.trim() : document.getElementById('inputAlias')?.value?.trim();
-    const cbuInput = document.getElementById('inputCbu')?.value?.trim();
-    const defBiz = level === 'l3' ? 'Estudio Multi-Staff TucuRed' : (level === 'l2' ? 'TucuRed Central' : 'Peluquería & Barbería Central');
+    const bizInput = document.getElementById(opts.bizInputId || 'cfg-biz-name')?.value?.trim();
+    const addrInput = document.getElementById(opts.addressInputId || 'cfg-biz-address')?.value?.trim();
+    const aliasInput = document.getElementById(opts.aliasInputId || 'inputAlias')?.value?.trim();
+    const cbuInput = document.getElementById(opts.cbuInputId || 'inputCbu')?.value?.trim();
+    const r = localStorage.getItem(`tucu_${level}_rubro`) || '';
+    const seedMeta = global.AdminDemoSeed?.getRubroMeta?.(r);
+    let payByR = {}; try { payByR = JSON.parse(localStorage.getItem(`tucu_${level}_pay_cfg_${r}`) || '{}'); } catch (_) {}
+    const defBiz = seedMeta?.bizName || (level === 'l3' ? 'Estudio Multi-Staff TucuRed' : (level === 'l2' ? 'TucuRed Central' : 'Peluquería & Barbería Central'));
     const biz = bizInput || localStorage.getItem(`tucu_${level}_biz_name`) || localStorage.getItem('tucu_biz_name') || defBiz;
-    const alias = aliasInput || localStorage.getItem(`tucu_${level}_alias`) || ext.alias || 'tucured.estudio.mp';
-    const cbu = cbuInput || localStorage.getItem(`tucu_${level}_cbu`) || ext.cbu || '0000003100012345678901';
+    const address = addrInput || localStorage.getItem(`tucu_${level}_address`) || seedMeta?.address || '25 de Mayo 480, S. M. de Tucumán';
+    const alias = aliasInput || (r && localStorage.getItem(`tucu_${level}_alias_${r}`)) || payByR.alias || localStorage.getItem(`tucu_${level}_alias`) || ext.alias || 'tucured.estudio.mp';
+    const cbu = cbuInput || (r && localStorage.getItem(`tucu_${level}_cbu_${r}`)) || payByR.cbu || localStorage.getItem(`tucu_${level}_cbu`) || ext.cbu || '0000003100012345678901';
     const pct = ext.depositType === 'fixed' ? `$${Number(ext.depositValue || 4000).toLocaleString('es-AR')} fijo` : `${ext.depositValue ?? 50}%`;
-    return { ext, biz, alias, cbu, pct };
+    return { ext, biz, address, alias, cbu, pct };
   }
 
   function getContext(opts = {}, booking = null) {
     const level = opts.level || 'l1', cfg = resolveLevelConfig(level, opts);
     const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-    const codeRaw = booking?.id || booking?.token || 'TK-8492';
-    const cleanCode = String(codeRaw).replace(/^#/, '');
+    const codeRaw = booking?.id || booking?.token || 'TK-8492', cleanCode = String(codeRaw).replace(/^#/, '');
     const depNum = booking ? (Number(booking.depositAmount) || 0) : (cfg.ext.depositType === 'fixed' ? Number(cfg.ext.depositValue || 4000) : Math.round(12000 * ((cfg.ext.depositValue ?? 50) / 100)));
     return {
       cliente: booking?.clientName || booking?.client || booking?.name || 'Martín Gómez',
-      comercio: cfg.biz,
+      comercio: booking?.bizName || cfg.biz, direccion: booking?.address || cfg.address,
       servicio: booking?.serviceName || booking?.service || (level === 'l3' ? 'Corte Clásico & Fade' : (level === 'l2' ? 'Sesión Central Pro' : 'Corte & Barba Premium')),
-      fecha: formatNaturalDate(booking?.dateStr || booking?.date || tomorrow),
-      hora: booking?.time || '17:30',
-      codigo: cleanCode,
-      sena: '$' + depNum.toLocaleString('es-AR'),
-      porcentaje: cfg.pct,
-      alias: cfg.alias,
-      cbu: cfg.cbu,
+      fecha: formatNaturalDate(booking?.dateStr || booking?.date || tomorrow), hora: booking?.time || '17:30', codigo: cleanCode,
+      sena: '$' + depNum.toLocaleString('es-AR'), porcentaje: cfg.pct, alias: cfg.alias, cbu: cfg.cbu,
       link_ticket: `https://tucured.ar/t/${cleanCode}`
     };
   }
 
   function interpolate(text, ctx) {
     return String(text || '')
-      .replace(/\{\{cliente\}\}/g, ctx.cliente).replace(/\{\{comercio\}\}/g, ctx.comercio)
+      .replace(/\{\{cliente\}\}/g, ctx.cliente).replace(/\{\{comercio\}\}/g, ctx.comercio).replace(/\{\{direccion\}\}/g, ctx.direccion)
       .replace(/\{\{servicio\}\}/g, ctx.servicio).replace(/\{\{fecha\}\}/g, ctx.fecha)
       .replace(/\{\{hora\}\}/g, ctx.hora).replace(/\{\{codigo\}\}/g, ctx.codigo).replace(/\{\{id\}\}/g, ctx.codigo)
       .replace(/\{\{sena\}\}/g, ctx.sena).replace(/\{\{monto_seña\}\}/g, ctx.sena).replace(/\{\{porcentaje\}\}/g, ctx.porcentaje)
@@ -103,8 +113,7 @@
     const tpl = getTemplates(level);
     const canon = global.AdminBookingEngine?.normalizeKey?.(booking?.status) || 'CONFIRMED';
     const key = forcedKey || (canon === 'PENDING_DEPOSIT' ? '1a' : '1b');
-    const raw = key === '1a' ? tpl.t1a : (key === '2' ? tpl.t2 : tpl.t1b);
-    return interpolate(raw, getContext({ level }, booking));
+    return interpolate(key === '1a' ? tpl.t1a : (key === '2' ? tpl.t2 : tpl.t1b), getContext({ level }, booking));
   }
 
   function buildWaUrl(booking, level = 'l1', forcedKey = null) {
@@ -121,7 +130,7 @@
     const panel = (key, title, badge, inId, outId, val, cls) => `
       <div id="wa-panel-${key}" class="${key === activeTab ? '' : 'hidden'} p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-900/60 border border-[#D5CEC2] dark:border-stone-800 space-y-2.5">
         <div class="flex items-center justify-between gap-2 flex-wrap"><h4 class="text-xs font-bold text-stone-900 dark:text-stone-100">${title}</h4><span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${cls}">${badge}</span></div>
-        <textarea id="${inId}" rows="4" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2.5 text-xs text-stone-800 dark:text-stone-100 font-mono outline-none">${val}</textarea>
+        <textarea id="${inId}" rows="7" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl p-2.5 text-xs text-stone-800 dark:text-stone-100 font-mono outline-none">${val}</textarea>
         <div class="space-y-1"><span class="text-[10px] font-bold uppercase text-stone-500">Vista previa en vivo</span><div id="${outId}" class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/35 border border-emerald-200 dark:border-emerald-900 text-[11px] text-emerald-900 dark:text-emerald-100 whitespace-pre-line leading-relaxed"></div></div>
       </div>`;
 
@@ -140,14 +149,14 @@
 
     box.querySelectorAll('[data-watab]').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.watab)));
     ['cfg-msg-confirm1a', 'cfg-msg-confirm1b', 'cfg-msg-reminder'].forEach(id => {
-      document.getElementById(id)?.addEventListener('input', () => { saveTemplates(level); renderPreview(opts); opts.onChange?.(); });
+      document.getElementById(id)?.addEventListener('input', () => { saveTemplates(level, true); renderPreview(opts); opts.onChange?.(); });
     });
     box.querySelectorAll('[data-wa-var]').forEach(b => b.addEventListener('click', () => {
       const id = activeTab === '1a' ? 'cfg-msg-confirm1a' : (activeTab === '1b' ? 'cfg-msg-confirm1b' : 'cfg-msg-reminder');
       const el = document.getElementById(id); if (!el) return;
       const st = el.selectionStart ?? el.value.length;
       el.value = el.value.slice(0, st) + b.dataset.waVar + el.value.slice(el.selectionEnd ?? st);
-      saveTemplates(level); renderPreview(opts); opts.onChange?.();
+      saveTemplates(level, true); renderPreview(opts); opts.onChange?.();
     }));
     renderPreview(opts);
   }

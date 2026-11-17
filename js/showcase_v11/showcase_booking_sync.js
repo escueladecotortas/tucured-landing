@@ -1,12 +1,13 @@
 // Archivo: js/showcase_v11/showcase_booking_sync.js
-// Sincronización en vivo Showroom -> LocalStorage L1/L2/L3 + URL WhatsApp interpolada (< 130L)
+// Sincronización en vivo Showroom -> LocalStorage L1/L2/L3 + URL WhatsApp interpolada (< 150L)
 
 import { getActiveCatalogServices, normalizeShowroomRubro } from './showcase_state.js';
 
 const DEMO_WA_NUMBER = '5493815551234';
 const L3_RUBRO_MAP = { barberia: 'barberia', peluqueria: 'barberia', estetica: 'peluqueria_estetica', peluqueria_estetica: 'peluqueria_estetica', salud: 'salud_consultorio', salud_consultorio: 'salud_consultorio', deportes: 'deportes_clubes', deportes_clubes: 'deportes_clubes', resto: 'gastronomia', gastronomia: 'gastronomia', servicios: 'servicios' };
-const TPL_1A_DEF = '¡Hola {{cliente}}! Registramos tu reserva en {{comercio}} para el {{fecha}} a las {{hora}} hs ({{servicio}}). Para confirmar tu lugar, aboná la seña de {{sena}} por transferencia: Alias: {{alias}} · CBU: {{cbu}}. Enviá el comprobante por este mismo chat para acreditarlo. Podés ver el estado de tu reserva desde tu ticket online: {{link_ticket}}';
-const TPL_1B_DEF = '¡Hola {{cliente}}! Tu turno en {{comercio}} quedó confirmado para el {{fecha}} a las {{hora}} hs ({{servicio}}). Podés consultar los datos o gestionar tu reserva desde tu ticket online: {{link_ticket}}';
+const TPL_1A_DEF = 'Hola *{{cliente}}*, registramos tu reserva en *{{comercio}}*.\n\n*Código:* #{{codigo}}\n*Servicio:* {{servicio}}\n*Fecha y hora:* {{fecha}} · {{hora}} hs\n*Dirección:* {{direccion}}\n\nPara confirmar tu lugar, aboná la seña de *{{sena}}* por transferencia:\n*Alias:* {{alias}}\n*CBU:* {{cbu}}\n\nEnviá el comprobante por este mismo chat para acreditarlo. Consultá el estado desde tu ticket online:\n{{link_ticket}}';
+const TPL_1B_DEF = 'Hola *{{cliente}}*, tu turno en *{{comercio}}* quedó confirmado.\n\n*Código:* #{{codigo}}\n*Servicio:* {{servicio}}\n*Fecha y hora:* {{fecha}} · {{hora}} hs\n*Dirección:* {{direccion}}\n\nConsultá los datos o gestioná tu reserva desde tu ticket online:\n{{link_ticket}}';
+const LEGACY_TPL_RX = /^¡?Hola \{\{cliente\}\}[!,\s]+(Registramos tu reserva|Tu turno en|te recordamos tu turno|Cita en)/i;
 
 export function mapShowroomRubroToL3(rubroId) {
   return L3_RUBRO_MAP[String(rubroId || '').toLowerCase()] || 'barberia';
@@ -15,11 +16,9 @@ export function mapShowroomRubroToL3(rubroId) {
 function readJson(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (_) { return fallback; }
 }
-
 function writeJson(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) {}
 }
-
 function formatNaturalDate(dateStr) {
   if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) return 'próximo día';
   const d = new Date(`${dateStr}T12:00:00`);
@@ -27,7 +26,6 @@ function formatNaturalDate(dateStr) {
   const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   return `${days[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
-
 function parseSrvPrice(srv) {
   if (typeof srv?.price === 'number' && srv.price > 0) return srv.price;
   const m = String(srv?.dur || '').match(/\$\s*([\d.]+)/);
@@ -37,11 +35,15 @@ function parseSrvPrice(srv) {
 function resolvePayCfg(level, rubro) {
   const key = level === 'l1' ? 'tucu_l1_cfg_ext' : `tucu_${level}_payment_cfg`;
   const saved = readJson(key, {}), l1Cfg = level === 'l1' ? readJson('tucu_l1_cfg', {}) : {};
-  const str = (k) => { try { return localStorage.getItem(k); } catch (_) { return ''; } };
+  const str = (k) => { try { return localStorage.getItem(k) || ''; } catch (_) { return ''; } };
+  const normR = normalizeShowroomRubro(rubro?.id || ''), activeR = str(`tucu_${level}_rubro`);
+  const payByR = readJson(`tucu_${level}_pay_cfg_${normR}`, {});
+  const sameRubro = !activeR || (level === 'l3' ? L3_RUBRO_MAP[normR] === activeR : normR === activeR);
   return {
-    bizName: str(`tucu_${level}_biz_name`) || saved.bizName || l1Cfg.bizName || rubro?.bizName || 'TucuRed Studio',
-    alias: str(`tucu_${level}_alias`) || saved.alias || saved.mpAlias || l1Cfg.alias || 'tucured.estudio.mp',
-    cbu: str(`tucu_${level}_cbu`) || saved.cbu || saved.mpCbu || l1Cfg.cbu || '0000003100012345678901',
+    bizName: str(`tucu_${level}_biz_name_${normR}`) || (sameRubro ? str(`tucu_${level}_biz_name`) : '') || rubro?.bizName || saved.bizName || l1Cfg.bizName || 'TucuRed Studio',
+    address: str(`tucu_${level}_address_${normR}`) || (sameRubro ? str(`tucu_${level}_address`) : '') || rubro?.address || saved.address || l1Cfg.address || '25 de Mayo 480, S. M. de Tucumán',
+    alias: str(`tucu_${level}_alias_${normR}`) || payByR.alias || (sameRubro ? str(`tucu_${level}_alias`) : '') || saved.alias || saved.mpAlias || l1Cfg.alias || 'tucured.estudio.mp',
+    cbu: str(`tucu_${level}_cbu_${normR}`) || payByR.cbu || (sameRubro ? str(`tucu_${level}_cbu`) : '') || saved.cbu || saved.mpCbu || l1Cfg.cbu || '0000003100012345678901',
     requireDeposit: saved.requireDeposit !== false,
     depositType: saved.depositType || 'percentage',
     depositValue: Number.isFinite(Number(saved.depositValue)) ? Number(saved.depositValue) : 50
@@ -59,8 +61,8 @@ export function persistShowcaseBooking(state) {
   const client = `${state?.clientFirstName || 'Cliente'} ${state?.clientLastName || 'Web'}`.trim();
   const phone = String(state?.clientPhone || '3815554321').replace(/\D/g, '') || '3815554321';
   const code = 'TK-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-  const price = parseSrvPrice(srv), cfg = resolvePayCfg(lvl, rubro);
-  const dep = !cfg.requireDeposit ? 0 : (cfg.depositType === 'fixed' ? Math.min(price, Math.round(cfg.depositValue)) : Math.round((price * cfg.depositValue) / 100));
+  const price = parseSrvPrice(srv), cfg = resolvePayCfg(lvl, rubro), srvReq = srv?.requireDeposit !== false;
+  const dep = (!cfg.requireDeposit || !srvReq) ? 0 : (cfg.depositType === 'fixed' ? Math.min(price, Math.round(cfg.depositValue)) : Math.round((price * cfg.depositValue) / 100));
   const needsDep = dep > 0;
   let record;
 
@@ -69,46 +71,54 @@ export function persistShowcaseBooking(state) {
     writeJson(k, [rec, ...clean]);
   };
   if (lvl === 'l1') {
-    record = { id: code, token: `#${code}`, rubroId: norm, clientName: client, clientPhone: phone, service: srv.name, price, depositAmount: dep, depositPaid: !needsDep, day: dayObj.fullLabel || 'Hoy', dateStr, time, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, createdFromShowcase: true };
+    record = { id: code, token: `#${code}`, rubroId: norm, bizName: cfg.bizName, address: cfg.address, clientName: client, clientPhone: phone, service: srv.name, price, depositAmount: dep, depositPaid: !needsDep, day: dayObj.fullLabel || 'Hoy', dateStr, time, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, createdFromShowcase: true };
     mergePush(`tucu_l1_bookings_${norm}`, record); mergePush(`tucu_l1_bookings_demo-${norm}`, record);
   } else if (lvl === 'l2') {
-    record = { id: code, rubroId: norm, client, phone, pax: norm === 'gastronomia' ? 2 : 1, service: srv.name, date: dateStr, time, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
+    record = { id: code, rubroId: norm, bizName: cfg.bizName, address: cfg.address, client, phone, pax: norm === 'gastronomia' ? 2 : 1, service: srv.name, date: dateStr, time, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
     mergePush(`tucu_l2_bookings_${norm}`, record); mergePush('tucu_l2_bookings', record);
   } else {
     const rL3 = mapShowroomRubroToL3(state?.currentRubro);
-    const staffList = readJson(`tucu_l3_staff_${rL3}`, []);
-    const idx = state?.selectedStaff || 0;
+    const staffList = readJson(`tucu_l3_staff_${rL3}`, []), idx = state?.selectedStaff || 0;
     const staffObj = Array.isArray(staffList) && staffList[idx] ? staffList[idx] : { id: `st-${Math.min(3, idx + 1)}`, name: rubro?.staff?.[idx] || 'Especialista' };
     const resList = readJson(`tucu_l3_resources_${rL3}`, []);
     const resObj = (Array.isArray(resList) && resList.find(r => !r.deletedAt && r.active !== false)) || { id: 'res-1', name: 'Espacio Principal' };
-    record = { id: code, rubroId: rL3, staffId: staffObj.id, staffName: staffObj.name, resourceId: resObj.id, resourceName: resObj.name, serviceId: srv.id || 'srv-1', serviceName: srv.name, duration: srv.duration || 30, price, depositAmount: dep, depositPaid: !needsDep, date: dateStr, time, client, phone, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
+    record = { id: code, rubroId: rL3, bizName: cfg.bizName, address: cfg.address, staffId: staffObj.id, staffName: staffObj.name, resourceId: resObj.id, resourceName: resObj.name, serviceId: srv.id || 'srv-1', serviceName: srv.name, duration: srv.duration || 30, price, depositAmount: dep, depositPaid: !needsDep, date: dateStr, time, client, phone, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, createdFromShowcase: true };
     mergePush(`tucu_l3_bookings_${rL3}`, record); mergePush('tucu_l3_bookings', record);
   }
 
   state.lastBookingCode = code;
   state.lastBookingRecord = record;
   state.lastBookingLevel = lvl;
+  state.lastWaUrl = buildStep4WaUrl(record, lvl, rubro);
   return record;
 }
 
+function resolveTemplate(level, needsDep) {
+  const key = `tucu_${level}_wa_templates_v2`, saved = readJson(key, null);
+  const def = needsDep ? TPL_1A_DEF : TPL_1B_DEF;
+  if (!saved) return def;
+  const isLeg = (s) => typeof s === 'string' && !s.includes('\n') && !s.includes('{{direccion}}') && LEGACY_TPL_RX.test(s.trim());
+  if (!saved.customManual && (isLeg(saved.t1a) || isLeg(saved.t1b))) {
+    writeJson(key, { ...saved, t1a: TPL_1A_DEF, t1b: TPL_1B_DEF, migratedV3: true });
+    return def;
+  }
+  return (needsDep ? saved.t1a : saved.t1b) || def;
+}
+
 export function buildStep4WaUrl(record, level, rubro) {
-  const cfg = resolvePayCfg(level, rubro), tpls = readJson(`tucu_${level}_wa_templates_v2`, {});
+  const cfg = resolvePayCfg(level, rubro);
   const needsDep = (Number(record?.depositAmount) || 0) > 0 && !record?.depositPaid;
-  const tpl = needsDep ? (tpls.t1a || TPL_1A_DEF) : (tpls.t1b || TPL_1B_DEF);
+  const tpl = resolveTemplate(level, needsDep);
   const code = String(record?.id || 'TK-DEMO').replace(/^#/, '');
   const price = Math.max(1, Number(record?.price) || 12000), dep = Math.max(0, Number(record?.depositAmount) || 0);
   const map = {
     '{{cliente}}': record?.clientName || record?.client || 'Cliente',
-    '{{codigo}}': code,
-    '{{comercio}}': cfg.bizName,
+    '{{codigo}}': code, '{{comercio}}': record?.bizName || cfg.bizName, '{{direccion}}': record?.address || cfg.address,
     '{{servicio}}': record?.service || record?.serviceName || 'Servicio',
-    '{{fecha}}': formatNaturalDate(record?.dateStr || record?.date),
-    '{{hora}}': record?.time || '16:30',
+    '{{fecha}}': formatNaturalDate(record?.dateStr || record?.date), '{{hora}}': record?.time || '16:30',
     '{{sena}}': '$' + Math.round(dep).toLocaleString('es-AR'),
     '{{porcentaje}}': cfg.depositType === 'fixed' ? `$${Math.round(cfg.depositValue).toLocaleString('es-AR')} fijo` : `${Math.round((dep / price) * 100) || 50}%`,
-    '{{alias}}': cfg.alias,
-    '{{cbu}}': cfg.cbu,
-    '{{link_ticket}}': `https://tucured.ar/t/${code}`
+    '{{alias}}': cfg.alias, '{{cbu}}': cfg.cbu, '{{link_ticket}}': `https://tucured.ar/t/${code}`
   };
   let msg = tpl;
   Object.keys(map).forEach(k => { msg = msg.split(k).join(map[k]); });

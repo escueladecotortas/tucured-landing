@@ -18,7 +18,7 @@ export const LEVEL_NAMES = {
   l3: 'Nivel 3 (Multi-Staff)'
 };
 
-export const WA_FALLBACK_TEXT = '¡Hola Tucu Red! Quiero conocer más sobre los planes y el lanzamiento de $1.000 para mi comercio.';
+export const WA_FALLBACK_TEXT = '¡Hola Tucu Red! Quiero conocer más sobre los planes y la promoción Mes Fundador de $4.999 para mi comercio.';
 
 export const WA_FALLBACK_URL = `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(WA_FALLBACK_TEXT)}`;
 
@@ -28,7 +28,7 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const rubro = RUBRO_NAMES[lead.rubro] || lead.rubro || 'Comercio Local';
   const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2';
 
-  const message = `¡Hola Tucu Red! Quiero activar el plan para *${nombre}* en *${ciudad}* (Rubro: *${rubro}* / Plan: *${level}* - $1.000 Mes 1).`;
+  const message = `¡Hola Tucu Red! Quiero activar el plan para *${nombre}* en *${ciudad}* (Rubro: *${rubro}* / Plan: *${level}* - $4.999 Mes Fundador).`;
   return `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(message)}`;
 }
 

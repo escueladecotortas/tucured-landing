@@ -50,6 +50,11 @@ body { background-color: var(--bg-canvas); color: var(--text-ink); font-family: 
 h1, h2, h3, h4, h5, h6, .font-title { font-family: var(--font-title); letter-spacing: -0.02em; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+* { scrollbar-width: thin; scrollbar-color: var(--border-subtle-hover) var(--bg-surface-subtle); }
+::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-surface-subtle); border-radius: 999px; }
+::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-subtle-hover); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
 
 /* Sidebar & Cabecera Móvil */
 .admin-sidebar {

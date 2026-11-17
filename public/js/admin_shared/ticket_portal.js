@@ -124,8 +124,10 @@ window.TucuTicketPortal = (function () {
     const badgeCls = canon === 'CONFIRMED' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : meta.badge;
     const badgeLbl = canon === 'CONFIRMED' ? 'Reserva Confirmada' : meta.label;
     const biz = b.bizName || localStorage.getItem(`tucu_${lvl}_biz_name`) || localStorage.getItem('tucu_biz_name') || 'Estudio Central TucuRed';
-    const alias = localStorage.getItem(`tucu_${lvl}_alias`) || localStorage.getItem('tucu_l1_alias') || 'tucured.estudio.mp';
-    const cbu = localStorage.getItem(`tucu_${lvl}_cbu`) || localStorage.getItem('tucu_l1_cbu') || '0000003100012345678901';
+    const rKey = String(b.rubroId || '').toLowerCase().trim();
+    const addr = b.address || (rKey && localStorage.getItem(`tucu_${lvl}_address_${rKey}`)) || localStorage.getItem(`tucu_${lvl}_address`) || window.AdminDemoSeed?.getRubroMeta?.(rKey)?.address || '25 de Mayo 480, S. M. de Tucumán';
+    const alias = (rKey && localStorage.getItem(`tucu_${lvl}_alias_${rKey}`)) || localStorage.getItem(`tucu_${lvl}_alias`) || localStorage.getItem('tucu_l1_alias') || 'tucured.estudio.mp';
+    const cbu = (rKey && localStorage.getItem(`tucu_${lvl}_cbu_${rKey}`)) || localStorage.getItem(`tucu_${lvl}_cbu`) || localStorage.getItem('tucu_l1_cbu') || '0000003100012345678901';
     const dateNat = wa()?.formatNaturalDate?.(b.dateStr || b.date) || (b.dateStr || b.date || 'Próximo turno');
     const srv = b.serviceName || b.service || 'Servicio Reservado', client = b.clientName || b.client || 'Cliente';
     const priceNum = Number(b.price) || 0, depNum = Number(b.depositAmount) || 0, balance = Math.max(0, priceNum - (b.depositPaid ? depNum : 0));
@@ -140,6 +142,7 @@ window.TucuTicketPortal = (function () {
       <div class="rounded-2xl bg-stone-50 dark:bg-stone-950/60 border border-[#D5CEC2] dark:border-stone-800 p-3.5 space-y-2 text-xs">
         <div class="flex justify-between gap-2"><span class="text-stone-500">Servicio</span><strong class="text-stone-900 dark:text-stone-100 text-right">${srv}</strong></div>
         <div class="flex justify-between gap-2"><span class="text-stone-500 flex items-center gap-1">${SVG.cal} Fecha y hora</span><strong class="text-stone-900 dark:text-stone-100 capitalize">${dateNat} · ${b.time || '--:--'} hs</strong></div>
+        <div class="flex justify-between gap-2"><span class="text-stone-500">Dirección</span><strong id="portal-ticket-address" class="text-stone-900 dark:text-stone-100 text-right">${addr}</strong></div>
         ${b.staffName ? `<div class="flex justify-between gap-2"><span class="text-stone-500">Especialista</span><strong class="text-stone-900 dark:text-stone-100">${b.staffName}</strong></div>` : ''}
         <div class="flex justify-between gap-2"><span class="text-stone-500">Titular</span><span class="font-semibold text-stone-800 dark:text-stone-200">${client}</span></div>
         <div class="flex justify-between gap-2 pt-1.5 border-t border-stone-200/80 dark:border-stone-800"><span class="text-stone-500">Saldo en local</span><strong class="font-mono text-stone-900 dark:text-stone-100">${eng().fmt(balance)}</strong></div>

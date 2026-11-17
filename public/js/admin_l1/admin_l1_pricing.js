@@ -71,9 +71,13 @@
     if (item) { item.order = parseInt(newOrder, 10) || 1; all.sort((a, b) => (a.order || 0) - (b.order || 0)); saveServices(all); }
   }
 
-  function deleteService(id) {
+  async function deleteService(id) {
     const activeList = getServices(false);
     if (activeList.length <= 1) return showToast('Debe conservar al menos un servicio activo');
+    if (global.AdminShell?.confirmAsync) {
+      const ok = await global.AdminShell.confirmAsync({ title: '¿Archivar servicio?', message: 'El servicio dejará de ofrecerse en el turnero conservando su historial previo.', confirmLabel: 'Sí, archivar' });
+      if (!ok) return;
+    }
     const all = getServices(true), item = all.find(s => s.id === id);
     if (item) { item.deletedAt = new Date().toISOString(); item.isActive = false; saveServices(all, 'Servicio archivado en histórico'); }
   }

@@ -40,7 +40,7 @@ export function renderNavbar(containerId = 'app-navbar') {
             Probar Turnero
           </a>
           <a href="#precios" class="px-5 py-2.5 rounded-xl btn-aura-cta text-sm font-bold flex items-center gap-2">
-            <span>Activar por $1.000*</span>
+            <span>Activar por $4.999*</span>
             <span class="material-symbols-outlined text-sm">arrow_forward</span>
           </a>
         </div>
@@ -65,7 +65,7 @@ export function renderNavbar(containerId = 'app-navbar') {
         <a href="#faq" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Preguntas Frecuentes</a>
         <div class="pt-2">
           <a href="#precios" class="w-full py-3 rounded-xl btn-aura-cta text-sm font-bold flex items-center justify-center gap-2">
-            <span>Activar por $1.000*</span>
+            <span>Activar por $4.999*</span>
             <span class="material-symbols-outlined text-sm">rocket_launch</span>
           </a>
         </div>

@@ -1,8 +1,5 @@
 // Archivo: js/showcase_v11/showcase_core.js
-/**
- * ⚡ TucuRed Showcase v11.1 - Orquestador Central del Escenario 3 Zonas
- * Paginación semanal, conversión 4 pasos, Local-First y Protocolo PEAC (< 150L).
- */
+// Orquestador Central del Escenario 3 Zonas: Cancelación Real vía TucuTicketModal (< 120L)
 
 import { ShowcaseState, preloadShowcaseAssets, getActiveCatalogServices } from './showcase_state.js';
 import { ShowcaseLevels } from './showcase_levels.js';
@@ -11,7 +8,36 @@ import { ShowcaseBenefits } from './showcase_benefits.js';
 import { renderStageRubrosZone } from '../components/stage_rubros_zone.js';
 import { renderStageValueZone } from '../components/stage_value_zone.js';
 import { triggerSensoryFeedback } from '../utils/sound_fx.js';
-import { persistShowcaseBooking } from './showcase_booking_sync.js';
+import { persistShowcaseBooking, buildStep4WaUrl } from './showcase_booking_sync.js';
+
+function openRealTicketModal(askCancel = false) {
+  if (!ShowcaseState.lastBookingCode || !ShowcaseState.lastBookingRecord) {
+    persistShowcaseBooking(ShowcaseState);
+  }
+  const code = ShowcaseState.lastBookingCode;
+  if (window.TucuTicketModal) {
+    window.TucuTicketModal.open(code, ShowcaseState.currentLevel, ShowcaseState.currentRubro, {
+      origin: 'showroom',
+      immediate: true,
+      askCancel: !!askCancel
+    });
+  }
+}
+
+function isShowcasePhoneRestricted(phone, level, rubro) {
+  const digits = String(phone || '').replace(/\D/g, '').replace(/^549?/, '').replace(/^0/, '');
+  if (digits.length < 6) return false;
+  try {
+    const lvl = ['l1', 'l2', 'l3'].includes(level) ? level : 'l1';
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i) || '';
+      if (!k.startsWith(`tucu_${lvl}_contacts_`) || k.includes('_deleted_')) continue;
+      const list = JSON.parse(localStorage.getItem(k) || '[]');
+      if (Array.isArray(list) && list.some(c => c && !c.deletedAt && c.isRestricted && String(c.phoneE164 || c.phone || '').replace(/\D/g, '').endsWith(digits.slice(-7)))) return true;
+    }
+  } catch (_) {}
+  return false;
+}
 
 export const ShowcaseCore = {
   _initialized: false,
@@ -49,19 +75,34 @@ export const ShowcaseCore = {
           if (inputEl && inputEl.value !== cleanVal) inputEl.value = cleanVal;
         }
         ShowcaseState[field] = cleanVal;
+        if (field === 'clientPhone') ShowcaseState.restrictedWarning = '';
         renderStageValueZone('stage-value-container', ShowcaseState);
       },
       selectReason: (reasonIdx) => { ShowcaseState.selectedReason = reasonIdx; ShowcaseState.notify(); },
-      toggleSelfService: (show) => ShowcaseState.setSelfService(show),
-      confirmBooking: () => { triggerSensoryFeedback(); persistShowcaseBooking(ShowcaseState); ShowcaseState.setStep(4); },
+      openTicketForCancel: () => { triggerSensoryFeedback(); openRealTicketModal(true); },
+      toggleSelfService: (show) => { if (show) openRealTicketModal(true); else window.TucuTicketModal?.close(); },
+      confirmBooking: () => {
+        triggerSensoryFeedback();
+        if (isShowcasePhoneRestricted(ShowcaseState.clientPhone, ShowcaseState.currentLevel, ShowcaseState.currentRubro)) {
+          ShowcaseState.restrictedWarning = 'Para coordinar este turno, comunicate directamente con el local.';
+          ShowcaseState.notify();
+          return;
+        }
+        ShowcaseState.restrictedWarning = '';
+        persistShowcaseBooking(ShowcaseState); ShowcaseState.setStep(4);
+      },
+      getLastWaUrl: () => {
+        const r = ShowcaseState.rubros[ShowcaseState.currentRubro] || ShowcaseState.rubros.barberia;
+        return ShowcaseState.lastBookingRecord ? buildStep4WaUrl(ShowcaseState.lastBookingRecord, ShowcaseState.currentLevel, r) : '';
+      },
       addToCalendar: () => {
         try {
           const s = ShowcaseState, r = s.rubros[s.currentRubro] || s.rubros.barberia;
           const activeSrvs = getActiveCatalogServices(s, r);
           const srv = (activeSrvs[s.selectedOption || 0] || activeSrvs[0])?.name || r.options[s.selectedOption || 0] || 'Servicio';
           const day = s.getSelectedDayLabel();
-          const token = s.lastBookingCode ? `#${s.lastBookingCode}` : (s.currentLevel === 'l3' ? '#TK-92C1' : (s.currentLevel === 'l1' ? '#TK-71A0' : '#TK-84B2'));
-          const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TucuRed//Turnero Autonomo//ES\r\nBEGIN:VEVENT\r\nSUMMARY:${srv} - ${r.bizName}\r\nDESCRIPTION:Turno ${token} para ${s.clientFirstName} ${s.clientLastName}. Fecha: ${day} a las ${s.selectedTime} hs.\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+          const token = s.lastBookingCode ? `#${s.lastBookingCode}` : '#TK-DEMO';
+          const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TucuRed//Turnero Autonomo//ES\r\nBEGIN:VEVENT\r\nSUMMARY:${srv} - ${r.bizName}\r\nLOCATION:${r.address || ''}\r\nDESCRIPTION:Turno ${token} para ${s.clientFirstName} ${s.clientLastName}. Fecha: ${day} a las ${s.selectedTime} hs.\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\nEND:VCALENDAR`;
           const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
           const url = URL.createObjectURL(blob), a = document.createElement('a');
           a.href = url; a.setAttribute('download', `turno_${token.replace('#', '')}.ics`);
@@ -69,8 +110,8 @@ export const ShowcaseCore = {
         } catch (_) {}
       },
       submitL1WhatsApp: () => ShowcaseState.setStep(3),
-      cancelTurno: () => { ShowcaseState.setSelfService(false); ShowcaseState.setStep(1); },
-      cancelL2Turno: () => { ShowcaseState.setSelfService(false); ShowcaseState.setStep(1); },
+      cancelTurno: () => { if (ShowcaseState.lastBookingCode) window.TucuTicketModal?.confirmCancel?.(ShowcaseState.lastBookingCode); },
+      cancelL2Turno: () => { if (ShowcaseState.lastBookingCode) window.TucuTicketModal?.confirmCancel?.(ShowcaseState.lastBookingCode); },
       nextStep: () => ShowcaseState.setStep(ShowcaseState.currentStep + 1),
       prevStep: () => ShowcaseState.setStep(ShowcaseState.currentStep - 1)
     };

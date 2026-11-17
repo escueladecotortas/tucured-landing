@@ -44,8 +44,13 @@ window.AdminL3Resources = (function () {
     window.AdminL3Core.renderActiveView();
   }
 
-  function deleteResource(resId) {
-    const state = window.AdminL3Core.state, now = new Date().toISOString();
+  async function deleteResource(resId) {
+    const state = window.AdminL3Core.state;
+    if (window.AdminShell?.confirmAsync) {
+      const ok = await window.AdminShell.confirmAsync({ title: '¿Archivar recurso físico?', message: 'El espacio dejará de estar disponible para nuevas reservas sin borrar el historial.', confirmLabel: 'Sí, archivar' });
+      if (!ok) return;
+    }
+    const now = new Date().toISOString();
     state.resources = (state.resources || []).map(r => r.id === resId ? { ...r, deletedAt: now, active: false } : r);
     window.AdminL3Core.setStorage(`tucu_l3_resources_${state.rubro}`, state.resources);
     window.AdminL3Core.showToast('Recurso archivado en histórico');

@@ -47,7 +47,7 @@ export const ShowcaseBenefits = {
             class="w-full bg-gold-gradient text-[#0f0f10] font-bold text-xs py-3 rounded-xl shadow-[0_4px_20px_rgba(212,175,55,0.2)] hover:opacity-90 transition-opacity flex justify-center items-center gap-2 cursor-pointer"
           >
             <span class="material-symbols-outlined text-base">rocket_launch</span>
-            <span>Activar este Turnero por $1.000</span>
+            <span>Activar este Turnero por $4.999</span>
           </button>
 
           <button 
