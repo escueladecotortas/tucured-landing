@@ -1,7 +1,7 @@
 // Archivo: js/components/stage_rubros_zone.js
 /**
- * 🎨 Tucu Red Web V2 - Zona 1: Barra de Control Glass Fija (3/2) & Segmented Control de Nivel
- * Diferenciación cromática contundente: rubros en Glass translúcido y nivel en pastilla sólida índigo.
+ * 🎨 Tucu Red Web V2 - Zona 1: Barra de Control Glass Fija (3/3) & Segmented Control de Nivel
+ * Diferenciación cromática contundente: 6 rubros en Glass translúcido y nivel en pastilla índigo.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
@@ -45,6 +45,14 @@ export const STAGE_RUBROS = [
     image: '/assets/showcase/hero_salud.webp',
     titleFont: 'font-headline font-bold tracking-tight text-slate-900',
     badgeClass: 'backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-sm'
+  },
+  {
+    id: 'servicios',
+    name: 'Servicios',
+    emoji: '💼',
+    image: '/assets/showcase/hero_salud.webp',
+    titleFont: 'font-headline font-bold tracking-tight text-slate-900',
+    badgeClass: 'backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-sm'
   }
 ];
 
@@ -63,25 +71,21 @@ export function renderStageRubrosZone(containerId, state) {
 
   container.innerHTML = `
     <div class="space-y-3 sm:space-y-4">
-      <!-- Selector de Rubros: Grilla Fija 3/2 en Mobile y Fila Completa en Desktop -->
-      <div class="grid grid-cols-6 gap-2 sm:flex sm:justify-center sm:items-center sm:gap-2.5 max-w-3xl mx-auto px-1">
-        ${STAGE_RUBROS.map((item, idx) => {
+      <!-- Selector de 6 Rubros: Grilla Fija 3x2 en Mobile y Fila Completa en Desktop -->
+      <div class="grid grid-cols-3 gap-2 sm:flex sm:justify-center sm:items-center sm:gap-2.5 max-w-4xl mx-auto px-1">
+        ${STAGE_RUBROS.map(item => {
           const isActive = curRubroId === item.id;
-          let colClasses = 'col-span-2 sm:col-auto sm:flex-initial';
-          if (idx === 3) colClasses = 'col-span-2 col-start-2 sm:col-auto sm:col-start-auto sm:flex-initial';
-          if (idx === 4) colClasses = 'col-span-2 sm:col-auto sm:flex-initial';
-
           return `
             <button
               type="button"
               onclick="window.ShowcaseCore.selectRubro('${item.id}')"
-              class="${colClasses} py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl border text-xs sm:text-sm font-bold flex items-center justify-center cursor-pointer transition-all duration-200 ${
+              class="sm:flex-initial py-2 sm:py-2.5 px-2.5 sm:px-4 rounded-xl border text-xs sm:text-sm font-bold flex items-center justify-center cursor-pointer transition-all duration-200 ${
                 isActive
                   ? 'bg-indigo-50/90 border-indigo-500 text-indigo-900 font-extrabold ring-1 ring-indigo-500/20 shadow-xs'
                   : 'backdrop-blur-md bg-white/70 border-slate-200/80 text-slate-700 shadow-xs hover:border-slate-300 hover:bg-white/90'
               }"
             >
-              <span class="tracking-tight">${item.name}</span>
+              <span class="tracking-tight truncate">${item.name}</span>
             </button>
           `;
         }).join('')}

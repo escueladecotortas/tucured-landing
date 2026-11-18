@@ -13,3 +13,4 @@ temp/
 # Local Netlify folder
 .netlify
 .tmp-cdp-*/
+assets/brand_kit_png/*.pdf

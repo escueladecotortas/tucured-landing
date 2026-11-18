@@ -34,8 +34,8 @@ export function getHeroMarkup() {
           </div>
           <div class="pt-4 grid grid-cols-3 gap-4 max-w-xl border-t border-slate-200/70">
             <div>
-              <p class="font-headline font-extrabold text-2xl text-slate-900">24/7</p>
-              <p class="text-xs text-slate-500 font-medium">Agenda web continua</p>
+              <p class="font-headline font-extrabold text-2xl text-slate-900">3 pasos</p>
+              <p class="text-xs text-slate-500 font-medium">Turnero web sin contraseñas</p>
             </div>
             <div>
               <p class="font-headline font-extrabold text-2xl text-indigo-600">0%</p>

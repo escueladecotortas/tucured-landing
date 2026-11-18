@@ -113,14 +113,14 @@ export const ShowcaseBenefits = {
       <div class="bg-surface-container-low/80 backdrop-blur-xl rounded-2xl p-4 border border-white/5 shadow-lg flex flex-col gap-2.5">
         <h4 class="text-xs sm:text-sm font-bold font-display text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-primary-fixed text-base">groups</span>
-          <span>Multi-Staff & Cron T-2hs</span>
+          <span>Multi-Staff & Confirmación 2hs</span>
         </h4>
         <div class="bg-surface-container-lowest rounded-xl p-3 border border-white/10 space-y-1.5 text-xs text-slate-300">
           <div class="flex items-center justify-between">
-            <span class="text-slate-400 font-mono text-[10px]">RECORDATORIO AUTOMÁTICO</span>
-            <span class="text-indigo-400 font-mono text-[10px]">T-2hs WhatsApp</span>
+            <span class="text-slate-400 font-mono text-[10px]">CONFIRMACIÓN AUTOMÁTICA</span>
+            <span class="text-indigo-400 font-mono text-[10px]">2 hs antes</span>
           </div>
-          <p class="text-[11px] text-slate-300 leading-relaxed">Barredora desatendida que avisa al cliente 2 horas antes de su turno evitando ausencias.</p>
+          <p class="text-[11px] text-slate-300 leading-relaxed">Confirmación y liberación automática 2 horas antes del turno, activable o pausable.</p>
         </div>
       </div>
     `;

@@ -1,15 +1,21 @@
 // Archivo: js/utils/whatsapp_link.js
 /**
  * 📲 Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp con Pre-llenado
- * Formatea URLs hacia la línea maestra (5493814132154) con datos dinámicos o fallback.
+ * Formatea URLs hacia la línea maestra (5493814132154) con los 6 rubros canónicos.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
 export const TUCU_RED_PHONE = '5493814132154';
 
 export const RUBRO_NAMES = {
-  barberia: 'Barbería', resto: 'Gastronomía', estetica: 'Estética & Spa',
-  deportes: 'Deportes / Pádel', salud: 'Salud / Médico'
+  peluqueria: 'Peluquería y Barbería',
+  estetica: 'Estética y Spa',
+  gastronomia: 'Gastronomía',
+  deportes: 'Deportes y Canchas',
+  salud: 'Salud y Consultorios',
+  servicios: 'Servicios Profesionales',
+  barberia: 'Peluquería y Barbería',
+  resto: 'Gastronomía'
 };
 
 export const LEVEL_NAMES = {
@@ -31,4 +37,3 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const message = `¡Hola Tucu Red! Quiero activar el plan para *${nombre}* en *${ciudad}* (Rubro: *${rubro}* / Plan: *${level}* - $4.999 Mes Fundador).`;
   return `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(message)}`;
 }
-

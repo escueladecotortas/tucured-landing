@@ -1,34 +1,38 @@
 // Archivo: js/components/faq_accordion.js
 /**
- * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes
- * Desacoplado del showroom y reubicado previo al Wizard para derribar objeciones.
+ * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes (7 Preguntas Alineadas)
+ * Desacoplado del showroom y reubicado previo al Wizard para responder dudas reales.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
 const FAQS_DATA = [
   {
     q: '¿Cómo funciona la promoción Mes Fundador de $4.999 del primer mes?',
-    a: 'Abonás $4.999 ARS por transferencia directa (Alias oficial tucured, 0% comisión) o mediante nuestro link de pago electrónico en Mercado Pago. Durante 30 días probás el software completo en tu local. A partir del segundo mes, abonás la tarifa regular del nivel que elijas, sin contratos de permanencia ni penalizaciones.'
+    a: 'Abonás $4.999 ARS por transferencia directa al alias oficial tucured (0% comisión) o mediante el enlace oficial de Mercado Pago. Durante 30 días usás el sistema completo en tu local; desde el segundo mes rige el abono regular del nivel elegido ($14.900, $24.900 o $34.900 ARS/mes), sin contratos de permanencia.'
   },
   {
     q: '¿Mis clientes tienen que descargar alguna app o crearse una cuenta?',
-    a: 'No. Tus clientes acceden desde cualquier navegador web (Chrome, Safari, etc.) sin instalar nada ni recordar contraseñas. Reservan en 3 toques y el comprobante con link de autogestión les llega directo a su WhatsApp.'
+    a: 'No. Tus clientes ingresan desde cualquier navegador web del celular, eligen su turno en 3 pasos sin contraseñas y reciben su Ticket Online #TK con dirección del local, botón para agendar en calendario (.ics) y link de autogestión.'
   },
   {
     q: '¿El sistema respeta el corte de siesta y los feriados argentinos?',
-    a: 'Totalmente. Podés configurar horarios continuos o turnos partidos (mañana y tarde con corte de siesta). Además, sincroniza automáticamente el calendario nacional de feriados para saltear días no laborables sin intervención manual.'
+    a: 'Sí. Podés configurar horarios corridos o turnos partidos (Mañana y Tarde con corte de siesta). Además, incluye el calendario nacional de 16 feriados 2026 con interruptor individual por mes para habilitar fechas puntuales como excepción si decidís abrir.'
   },
   {
     q: '¿Cómo cobro las señas de las reservas?',
-    a: 'El software te permite solicitar seña opcional con tu propio Alias CBU/CVU o link de Mercado Pago en la pantalla final y en el mensaje de confirmación. Tus clientes te pagan directo a tu cuenta bancaria; Tucu Red no retiene dinero ni cobra comisiones.'
+    a: 'Configurás tu propio Alias y CBU/CVU desde el panel de administración, definís qué servicios exigen seña (en porcentaje o monto fijo) y habilitás tus medios de pago. Tus clientes transfieren directo a tu cuenta sin intermediarios ni comisiones y pueden adjuntar o informar el comprobante desde su Ticket Online.'
   },
   {
     q: '¿Puedo cambiar de nivel (L1, L2 o L3) más adelante?',
-    a: 'Sí, la migración es inmediata. Podés empezar con Nivel 1 o Nivel 2 y escalar a Nivel 3 Multi-Staff en cualquier momento sin perder historiales de turnos, listas de clientes ni configuraciones previas.'
+    a: 'Sí, la actualización es inmediata. Podés empezar con Nivel 1 o Nivel 2 y escalar a Nivel 3 Multi-Staff cuando tu equipo crezca, conservando turnos, fichas de clientes y configuraciones previas.'
   },
   {
     q: '¿Cuánto demoran en entregarme el turnero configurado?',
-    a: 'Completás el formulario de alta en menos de dos minutos, confirmás por WhatsApp y nuestro equipo técnico te entrega tu turnero 100% configurado y personalizado con tu marca en menos de 24 horas hábiles.'
+    a: 'Completás los 4 pasos de alta guiada, avisás por WhatsApp y nuestro equipo técnico habilita y deja listo tu turnero personalizado con tus servicios y horarios en el día.'
+  },
+  {
+    q: '¿Cómo funcionan los recordatorios y la confirmación automática por WhatsApp?',
+    a: 'Vinculás tu línea mediante código QR directo en el panel y personalizás las plantillas con variables dinámicas para confirmaciones y avisos 24 hs / 2 hs antes. Además, en Nivel 3 contás con Confirmación y Liberación Automática (2 hs antes), activable o pausable en un clic.'
   }
 ];
 
@@ -48,7 +52,7 @@ export function renderFaqAccordion(containerId = 'app-faq') {
           Preguntas Frecuentes
         </h2>
         <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
-          Todo lo que necesitás saber antes de activar tu software. Cero letras chicas.
+          Todo lo que necesitás saber antes de activar tu software. Información clara y transparente.
         </p>
       </div>
 
@@ -76,7 +80,7 @@ export function renderFaqAccordion(containerId = 'app-faq') {
       <div class="mt-8 p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         <div class="flex items-center gap-2.5">
           <span class="material-symbols-outlined text-indigo-600 text-xl">support_agent</span>
-          <span class="text-xs text-indigo-950 font-medium">¿Tenés una duda específica sobre tu comercio?</span>
+          <span class="text-xs text-indigo-950 font-medium">¿Tenés una consulta específica sobre tu comercio?</span>
         </div>
         <a href="#precios" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 underline font-headline">
           Ver planes o activar ahora →
@@ -85,4 +89,3 @@ export function renderFaqAccordion(containerId = 'app-faq') {
     </section>
   `;
 }
-

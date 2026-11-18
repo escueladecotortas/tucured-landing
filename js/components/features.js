@@ -1,45 +1,52 @@
 // Archivo: js/components/features.js
 /**
- * 🛡️ Tucu Red Web V2 - Certezas Reales del Sistema (Aura Light)
- * Reglas comerciales concretas: siesta, feriados argentinos, anti-solapamiento y autogestión.
+ * 🛡️ Tucu Red Web V2 - Certezas Reales del Sistema (Aura Light · Grilla Simétrica 3x2)
+ * 6 certezas operativas alineadas 100% con el motor L1/L2/L3 real.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
 const CERTEZAS = [
   {
     icon: 'schedule',
-    badge: 'Horarios Locales',
+    badge: 'Horarios y Feriados',
     accent: 'from-amber-500/10 to-amber-500/5 text-amber-600 border-amber-200/60',
-    title: 'Respeta tu horario y el corte de siesta',
-    desc: 'Configuración flexible de horarios corridos o partidos. Tus clientes solo ven horarios cuando tu local está realmente abierto.'
+    title: 'Horarios corridos, partidos y feriados 2026',
+    desc: 'Configuración de mañana y tarde con calendario nacional 2026 de 16 feriados y excepción individual editable por mes (Bloqueado o Abierto).'
   },
   {
-    icon: 'event_available',
-    badge: 'Feriados Oficiales',
-    accent: 'from-indigo-500/10 to-indigo-500/5 text-indigo-600 border-indigo-200/60',
-    title: 'Feriados nacionales incorporados',
-    desc: 'Calendario argentino 2026–2027 sincronizado. Saltea feriados y días no laborables automáticamente sin intervención manual.'
+    icon: 'payments',
+    badge: 'Cobro Directo',
+    accent: 'from-emerald-500/10 to-emerald-500/5 text-emerald-600 border-emerald-200/60',
+    title: 'Señas directo a tu alias sin comisiones',
+    desc: 'Configurá seña por servicio (% o monto fijo) directo a tu Alias/CBU, con carga y reporte de comprobante desde el Ticket Online #TK.'
   },
   {
     icon: 'timer',
-    badge: 'Sincronización Continua',
-    accent: 'from-emerald-500/10 to-emerald-500/5 text-emerald-600 border-emerald-200/60',
-    title: 'Horarios perfectamente sincronizados',
-    desc: 'Si un servicio requiere más tiempo, el sistema asegura los bloques contiguos exactos para garantizar una atención puntual y ordenada.'
+    badge: 'Agenda Precisa',
+    accent: 'from-indigo-500/10 to-indigo-500/5 text-indigo-600 border-indigo-200/60',
+    title: 'Turnos sin superposición',
+    desc: 'El motor calcula y reserva los bloques contiguos según la duración real de cada prestación (de 15 a 480 min), asegurando una agenda ordenada.'
   },
   {
     icon: 'event_repeat',
     badge: 'Autogestión Web',
     accent: 'from-rose-500/10 to-rose-500/5 text-rose-600 border-rose-200/60',
     title: 'Autogestión y cancelación ágil',
-    desc: 'Tus clientes pueden consultar o liberar su turno desde el celular con su comprobante #TK, habilitando el lugar al instante para otro cliente.'
+    desc: 'Tu cliente consulta la dirección del local, descarga el evento .ics o libera su turno desde /t/TK-XXXX, y vos podés reabrir turnos desde el panel.'
+  },
+  {
+    icon: 'contacts',
+    badge: 'CRM Unificado',
+    accent: 'from-sky-500/10 to-sky-500/5 text-sky-600 border-sky-200/60',
+    title: 'Clientes y contactos desde tu celular',
+    desc: 'Importá contactos directo desde la agenda de tu smartphone o archivos .vcf/.csv, registrá cumpleaños y gestioná teléfonos restringidos.'
   },
   {
     icon: 'tune',
-    badge: 'Campos por Rubro',
+    badge: 'Adaptado al Rubro',
     accent: 'from-teal-500/10 to-teal-500/5 text-teal-600 border-teal-200/60',
-    title: 'Campos específicos para tu rubro',
-    desc: 'Pide la Obra Social en consultorios médicos, sillones en barberías o cantidad de comensales en gastronomía.'
+    title: 'Datos específicos por rubro',
+    desc: 'Solicita Obra Social en consultorios de salud, permite elegir profesional o primer horario libre y asigna boxes, sillones o canchas.'
   }
 ];
 
@@ -58,13 +65,13 @@ export function renderFeatures(containerId = 'app-features') {
           Un sistema que entiende cómo trabaja tu negocio todos los días
         </h2>
         <p class="text-slate-600 text-base sm:text-lg">
-          Sin configuraciones complejas. Tu turnero opera con la lógica real de tu comercio desde el primer minuto.
+          Tu turnero opera con las reglas reales de tu comercio desde el primer día.
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${CERTEZAS.map((item, idx) => `
-          <div class="bg-gradient-to-br bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-4 ${idx === 3 || idx === 4 ? 'lg:col-span-1' : ''}">
+        ${CERTEZAS.map(item => `
+          <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-4">
             <div class="flex items-center justify-between">
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${item.accent} flex items-center justify-center border shadow-xs">
                 <span class="material-symbols-outlined text-2xl">${item.icon}</span>

@@ -21,11 +21,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 1',
     features: [
-      'Agenda web autónoma 24/7 sin descargas ni contraseñas.',
-      'Seña configurable por servicio directo a tu Alias/CBU (0% comisión).',
+      'Turnero web autónomo en 3 pasos sin descargas ni contraseñas.',
+      'Seña configurable por servicio directo a tu Alias/CBU con carga de comprobante.',
       'Ticket Online #TK con dirección del local, calendario .ics y autogestión.',
       'Horarios partidos y Feriados Nacionales 2026 configurables por mes.',
-      'Recordatorios por WhatsApp y panel de dueño para pausar recepción o cargar citas.'
+      'Gestión de 5 estados con reapertura de turno y recordatorios por WhatsApp.'
     ]
   },
   {
@@ -43,11 +43,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 2',
     features: [
-      'Todo lo de Nivel 1 con carga ágil de turnos presenciales y telefónicos.',
-      'CRM & Contactos con importación directa desde la agenda del celular.',
-      'Ficha completa de clientes con Email y Fecha de Cumpleaños.',
-      'Bloqueo preventivo de reservas y papelera restaurable en 1 clic.',
-      'Historial de precios, cierres por vacaciones y bloqueos de horarios.'
+      'Todo lo de Nivel 1 con turnos de mostrador, selector de Pax y % de ocupación.',
+      'CRM & Contactos con importación directa desde la agenda del celular (.vcf/.csv).',
+      'Ficha completa de clientes con Email, Fecha de Cumpleaños y notas.',
+      'Bloqueo preventivo de teléfonos restringidos en Turnero Web y papelera restaurable.',
+      'Historial de precios, cierres por vacaciones y bloqueos manuales de horarios.'
     ]
   },
   {
@@ -65,11 +65,11 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 3',
     features: [
-      'Todo lo de Nivel 2 con gestión Multi-Staff y agendas en paralelo.',
-      'Horarios partidos (Mañana / Tarde) por profesional sincronizados en vivo.',
+      'Todo lo de Nivel 2 con gestión Multi-Staff y Agenda Dual (Especialista o Recurso).',
+      'Horarios partidos (Mañana / Tarde) por profesional y bloqueos por servicio.',
       'Asignación de sillones, boxes, consultorios o canchas por servicio.',
       'Confirmación y Liberación Automática (2 hs antes) activable o pausable.',
-      'Selección de profesional preferido o primer turno disponible.'
+      'CRM Financiero con historial de citas por cliente y elección de profesional.'
     ]
   }
 ];

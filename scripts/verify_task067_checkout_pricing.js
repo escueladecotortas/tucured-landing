@@ -97,6 +97,7 @@ async function main() {
       document.getElementById('btn-goto-step-2').click();
       document.getElementById('btn-goto-step-3').click();
       document.getElementById('fn-titular').value = 'Leo Test';
+      document.getElementById('fn-email').value = 'leo@barberia.com';
       document.getElementById('fn-phone').value = '3815554321';
       document.getElementById('btn-goto-step-4').click();
       document.getElementById('btn-copy-alias').click();

@@ -7,17 +7,17 @@
 
 const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Autónomo • Agenda Web 24/7',
+    badge: 'Nivel 1: Autónomo • Agenda en 3 Pasos',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
     architecture: 'Turnero Autónomo • Seña Configurable • Ticket Online #TK',
-    microMetrica: 'Agenda web 24/7 • Dirección y .ics en ticket • Feriados 2026 por mes',
+    microMetrica: 'Reserva en 3 pasos • Dirección y .ics en ticket • Feriados 2026 por mes',
     clientFeatures: [
-      { icon: 'touch_app', title: 'Agenda web autónoma sin registros ni apps', desc: 'Reserva ágil desde el celular en pasos simples con horarios reales en vivo.' },
-      { icon: 'payments', title: 'Seña configurable por servicio a tu Alias', desc: 'Podés exigir seña en prestaciones clave o confirmar turnos directos sin seña.' },
-      { icon: 'confirmation_number', title: 'Ticket Online con dirección y calendario (.ics)', desc: 'Incluye dirección del local, código QR y autogestión de cita en 1 clic.' }
+      { icon: 'touch_app', title: 'Agenda web autónoma sin registros ni apps', desc: 'Reserva ágil desde el celular en 3 pasos con horarios reales en vivo.' },
+      { icon: 'payments', title: 'Seña configurable a tu Alias y carga de comprobante', desc: 'Podés exigir seña por servicio y el cliente reporta su comprobante en el Ticket Online.' },
+      { icon: 'confirmation_number', title: 'Ticket Online con dirección y calendario (.ics)', desc: 'Incluye dirección del local, código #TK, gestión de estados y autogestión en 1 clic.' }
     ],
     adminFeatures: [
-      { icon: 'calendar_month', title: 'Panel de dueño y carga manual de citas', desc: 'Pausa o abre recepción al instante, acredita señas y edita duraciones.' },
+      { icon: 'calendar_month', title: 'Panel de dueño y carga manual de citas', desc: 'Pausa o abre recepción al instante, acredita señas y reabre turnos si hace falta.' },
       { icon: 'schedule', title: 'Turno partido y Feriados 2026 por mes', desc: 'Horarios de mañana y tarde con interruptor individual para abrir feriados puntuales.' },
       { icon: 'notifications_active', title: 'Recordatorios WhatsApp y vinculación QR', desc: 'Avisos automáticos 24h / 2h antes con tu propia línea vinculada.' }
     ]
@@ -28,13 +28,13 @@ const LEVEL_MATRIX_V16 = {
     architecture: 'Central Operativa • CRM & Contactos • Bloqueos y Vacaciones',
     microMetrica: 'Importación desde celular • Email y Cumpleaños • Papelera restaurable',
     clientFeatures: [
-      { icon: 'verified', title: 'Todo lo de Nivel 1 con confirmación ágil', desc: 'Ticket Online con dirección del local, bloqueo en vivo y autogestión.' },
-      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y cobro directo', desc: 'Plantillas configurables, validación de seña y avisos automáticos.' }
+      { icon: 'verified', title: 'Todo lo de Nivel 1 con comprobante y autogestión', desc: 'Ticket Online #TK con dirección del local, carga de comprobante y validación en vivo.' },
+      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y cobro directo', desc: 'Plantillas configurables, acreditación de seña, selector de Pax y avisos automáticos.' }
     ],
     adminFeatures: [
       { icon: 'contacts', title: 'CRM & Contactos desde la agenda del celular', desc: 'Importa desde el celular o .vcf/.csv con Email y Fecha de Cumpleaños.' },
-      { icon: 'shield', title: 'Bloqueo preventivo y papelera restaurable', desc: 'Restringe teléfonos cuando sea necesario y restaura fichas archivadas en 1 clic.' },
-      { icon: 'event_busy', title: 'Historial de precios, bloqueos y vacaciones', desc: 'Control de ajustes de tarifas, cierres especiales y slots bloqueados.' }
+      { icon: 'shield', title: 'Bloqueo preventivo directo en Turnero Web', desc: 'Restringe teléfonos en Turnero y Showroom y restaura fichas archivadas en 1 clic.' },
+      { icon: 'event_busy', title: 'Historial de precios, bloqueos y vacaciones', desc: 'Control de ajustes de tarifas, cierres especiales, % ocupación y slots bloqueados.' }
     ]
   },
   l3: {

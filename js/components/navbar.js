@@ -16,7 +16,7 @@ export function renderNavbar(containerId = 'app-navbar') {
         <!-- Identidad Oficial de Marca (SVG Original) -->
         <a href="#" class="flex items-center gap-3 group focus:outline-none">
           <img
-            src="/assets/tucu_red_logo_full.svg"
+            src="/assets/tucu_red_logo.svg"
             alt="TucuRed — Herramientas Digitales para Negocios"
             class="h-10 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform"
           />
