@@ -25,7 +25,7 @@ const CERTEZAS = [
     badge: 'Agenda Precisa',
     accent: 'from-indigo-500/10 to-indigo-500/5 text-indigo-600 border-indigo-200/60',
     title: 'Turnos sin superposición',
-    desc: 'El motor calcula y reserva los bloques contiguos según la duración real de cada prestación (de 15 a 480 min), asegurando una agenda ordenada.'
+    desc: 'El motor calcula y reserva los bloques contiguos según la duración real de cada prestación (desde 15 minutos hasta 8 horas), asegurando una agenda ordenada.'
   },
   {
     icon: 'event_repeat',

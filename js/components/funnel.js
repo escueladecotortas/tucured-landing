@@ -158,7 +158,7 @@ export function renderFunnel(containerId = 'app-funnel') {
     setBadge(b4, 4, true, false); form.classList.add('hidden');
     if (successCard) {
       successCard.classList.remove('hidden');
-      successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload), window.location.origin);
+      successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload));
     }
   }, { signal });
   updateUI();

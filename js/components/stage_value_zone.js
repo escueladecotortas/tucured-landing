@@ -29,7 +29,7 @@ const LEVEL_MATRIX_V16 = {
     microMetrica: 'Importación desde celular • Email y Cumpleaños • Papelera restaurable',
     clientFeatures: [
       { icon: 'verified', title: 'Todo lo de Nivel 1 con comprobante y autogestión', desc: 'Ticket Online #TK con dirección del local, carga de comprobante y validación en vivo.' },
-      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y cobro directo', desc: 'Plantillas configurables, acreditación de seña, selector de Pax y avisos automáticos.' }
+      { icon: 'notifications_active', title: 'Recordatorios WhatsApp y cobro directo', desc: 'Plantillas configurables, acreditación de seña, selector de cantidad de personas o lugares y avisos automáticos.' }
     ],
     adminFeatures: [
       { icon: 'contacts', title: 'CRM & Contactos desde la agenda del celular', desc: 'Importa desde el celular o .vcf/.csv con Email y Fecha de Cumpleaños.' },

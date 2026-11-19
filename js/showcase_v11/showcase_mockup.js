@@ -127,6 +127,7 @@ export const ShowcaseMockup = {
     const stUp = String(rec.status || '').toUpperCase();
     const isCancelled = stUp === 'CANCELLED' || stUp === 'CANCELADO';
     const needsDep = !isCancelled && (Number(rec.depositAmount) || 0) > 0 && !rec.depositPaid;
+    const gcalUrl = window.ShowcaseCore?.getGoogleCalendarUrl ? window.ShowcaseCore.getGoogleCalendarUrl() : '#';
     const statusBadge = isCancelled
       ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">Turno Cancelado</span>`
       : (needsDep
@@ -158,7 +159,8 @@ export const ShowcaseMockup = {
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
           <span>Ver Ticket Online</span>
         </button>
-        <button type="button" onclick="window.ShowcaseCore.addToCalendar()" class="w-full py-2 rounded-xl text-xs font-bold ${rubro.btnClass} shadow-md flex items-center justify-center gap-1.5 cursor-pointer"><span class="material-symbols-outlined text-sm">calendar_add_on</span><span>Agendar en mi Calendario</span></button>
+        <button type="button" onclick="window.ShowcaseCore.addToCalendar()" class="w-full py-2 rounded-xl text-xs font-bold ${rubro.btnClass} shadow-md flex items-center justify-center gap-1.5 cursor-pointer"><span class="material-symbols-outlined text-sm">calendar_add_on</span><span>Guardar en calendario</span></button>
+        <a id="btn-showroom-gcal" href="${gcalUrl}" target="_blank" rel="noopener noreferrer" class="w-full py-1.5 rounded-xl text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"><span class="material-symbols-outlined text-sm">event</span><span>Agregar a Google Calendar</span></a>
         <button type="button" id="btn-showroom-cancel-ticket" onclick="window.ShowcaseCore.openTicketForCancel()" class="w-full py-1.5 rounded-xl text-[11px] font-medium bg-white border border-slate-200 text-slate-700 hover:text-slate-900 flex items-center justify-center gap-1 cursor-pointer"><span class="material-symbols-outlined text-xs">settings</span><span>Cancelar o Reprogramar Turno</span></button>
         <button type="button" onclick="window.ShowcaseCore.selectStep(1)" class="w-full py-1 rounded-xl text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 cursor-pointer flex items-center justify-center gap-1"><span class="material-symbols-outlined text-xs">refresh</span><span>Reiniciar Simulación</span></button>
       </div>

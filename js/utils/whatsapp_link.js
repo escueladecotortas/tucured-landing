@@ -1,7 +1,7 @@
 // Archivo: js/utils/whatsapp_link.js
 /**
  * 📲 Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp con Pre-llenado
- * Formatea URLs hacia la línea maestra (5493814132154) con los 6 rubros canónicos.
+ * Formatea URLs hacia la línea maestra (5493814132154) con todos los datos del Wizard.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
@@ -33,7 +33,16 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const ciudad = lead.ciudad ? lead.ciudad.trim() : 'Tucumán';
   const rubro = RUBRO_NAMES[lead.rubro] || lead.rubro || 'Comercio Local';
   const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2: Central Pro Multi-Box';
+  const horario = lead.horario === 'cortado' ? 'Turno cortado (corte de siesta)' : 'Horario corrido';
+  const titular = (lead.titular || `${lead.nombreTitular || ''} ${lead.apellidoTitular || ''}`).trim();
+  const extras = [
+    `• Horario: ${horario}`,
+    titular ? `• Titular: ${titular}` : '',
+    lead.email ? `• Email: ${lead.email.trim()}` : '',
+    lead.whatsapp ? `• WhatsApp: +54 9 ${lead.whatsapp}` : '',
+    `• Material PDF QR mostrador: ${lead.materialPdf === false ? 'No' : 'Sí'}`
+  ].filter(Boolean).join('\n');
 
-  const message = `¡Hola Tucu Red! Quiero activar el plan para *${nombre}* en *${ciudad}* (Rubro: *${rubro}* / Plan: *${level}* - $4.999 Mes Fundador).`;
+  const message = `¡Hola Tucu Red! Solicito la activación de *${nombre}* en *${ciudad}* y adjunto el comprobante de $4.999 (Mes Fundador).\n• Rubro: ${rubro}\n• Plan: ${level}\n${extras}`;
   return `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(message)}`;
 }

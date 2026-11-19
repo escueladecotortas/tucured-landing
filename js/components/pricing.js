@@ -43,7 +43,7 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Nivel 2',
     features: [
-      'Todo lo de Nivel 1 con turnos de mostrador, selector de Pax y % de ocupación.',
+      'Todo lo de Nivel 1 con turnos de mostrador, selector de cantidad de personas o lugares y % de ocupación.',
       'CRM & Contactos con importación directa desde la agenda del celular (.vcf/.csv).',
       'Ficha completa de clientes con Email, Fecha de Cumpleaños y notas.',
       'Bloqueo preventivo de teléfonos restringidos en Turnero Web y papelera restaurable.',

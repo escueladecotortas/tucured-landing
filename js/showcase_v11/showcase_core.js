@@ -39,6 +39,25 @@ function isShowcasePhoneRestricted(phone, level, rubro) {
   return false;
 }
 
+function buildCalendarEvent() {
+  const s = ShowcaseState, r = s.rubros[s.currentRubro] || s.rubros.barberia;
+  const activeSrvs = getActiveCatalogServices(s, r);
+  const srvObj = activeSrvs[s.selectedOption || 0] || activeSrvs[0];
+  const srv = srvObj?.name || r.options[s.selectedOption || 0] || 'Servicio';
+  const dObj = s.systemCalendar?.diasReales?.[s.selectedDay || 0] || s.systemCalendar?.diasReales?.[0];
+  const token = (s.lastBookingCode || 'TK-DEMO').replace(/^#/, '');
+  return {
+    uid: `${token}-${Date.now()}`,
+    title: `${srv} - ${r.bizName}`,
+    location: r.address || '',
+    description: `Turno #${token} para ${s.clientFirstName} ${s.clientLastName}. ${dObj?.fullLabel || 'Próximo turno'} a las ${s.selectedTime} hs.`,
+    dateStr: dObj?.dateStr || '',
+    timeStr: s.selectedTime || '16:30',
+    durationMin: Number(srvObj?.duration) || 45,
+    token
+  };
+}
+
 export const ShowcaseCore = {
   _initialized: false,
 
@@ -96,19 +115,10 @@ export const ShowcaseCore = {
         return ShowcaseState.lastBookingRecord ? buildStep4WaUrl(ShowcaseState.lastBookingRecord, ShowcaseState.currentLevel, r) : '';
       },
       addToCalendar: () => {
-        try {
-          const s = ShowcaseState, r = s.rubros[s.currentRubro] || s.rubros.barberia;
-          const activeSrvs = getActiveCatalogServices(s, r);
-          const srv = (activeSrvs[s.selectedOption || 0] || activeSrvs[0])?.name || r.options[s.selectedOption || 0] || 'Servicio';
-          const day = s.getSelectedDayLabel();
-          const token = s.lastBookingCode ? `#${s.lastBookingCode}` : '#TK-DEMO';
-          const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//TucuRed//Turnero Autonomo//ES\r\nBEGIN:VEVENT\r\nSUMMARY:${srv} - ${r.bizName}\r\nLOCATION:${r.address || ''}\r\nDESCRIPTION:Turno ${token} para ${s.clientFirstName} ${s.clientLastName}. Fecha: ${day} a las ${s.selectedTime} hs.\r\nSTATUS:CONFIRMED\r\nEND:VEVENT\r\nEND:VCALENDAR`;
-          const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
-          const url = URL.createObjectURL(blob), a = document.createElement('a');
-          a.href = url; a.setAttribute('download', `turno_${token.replace('#', '')}.ics`);
-          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        } catch (_) {}
+        const evt = buildCalendarEvent();
+        return window.TucuCalendar?.downloadIcs?.(evt, `turno_${evt.token}.ics`) || '';
       },
+      getGoogleCalendarUrl: () => window.TucuCalendar?.buildGoogleUrl?.(buildCalendarEvent()) || '#',
       submitL1WhatsApp: () => ShowcaseState.setStep(3),
       cancelTurno: () => { if (ShowcaseState.lastBookingCode) window.TucuTicketModal?.confirmCancel?.(ShowcaseState.lastBookingCode); },
       cancelL2Turno: () => { if (ShowcaseState.lastBookingCode) window.TucuTicketModal?.confirmCancel?.(ShowcaseState.lastBookingCode); },

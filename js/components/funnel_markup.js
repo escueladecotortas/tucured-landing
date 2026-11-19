@@ -148,6 +148,7 @@ export function getFunnelMarkup(draft = {}, selectedRubro = 'estetica', selected
               <input type="checkbox" id="fn-material-pdf" name="material_pdf" ${draft.materialPdf !== false ? 'checked' : ''} class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
               <span class="text-xs font-semibold text-indigo-900 leading-tight">Incluir PDF Imprimible de alta resolución con QR personalizado y logo de tu local para mostrador</span>
             </label>
+            <p id="funnel-terms-notice" class="text-[11px] text-slate-500 text-center sm:text-left">Al continuar aceptás los <a href="/terminos.html" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-semibold">Términos y Condiciones</a> de Tucu Red.</p>
             <p id="funnel-step3-error" class="hidden text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-4 py-2.5" role="alert"></p>
             <div class="pt-2 flex items-center justify-between gap-3">
               <button type="button" id="btn-back-to-2" class="px-5 py-3 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-bold flex items-center gap-1 cursor-pointer">

@@ -32,6 +32,7 @@ export function renderFooter(containerId = 'app-footer') {
           <a href="#cases" class="hover:text-indigo-600 transition-colors">Comercios Reales</a>
           <a href="#showroom" class="hover:text-indigo-600 transition-colors">Showroom en Vivo</a>
           <a href="#funnel" class="hover:text-indigo-600 transition-colors">Sumar mi negocio</a>
+          <a id="footer-terms-link" href="/terminos.html" class="hover:text-indigo-600 transition-colors">Términos y Condiciones</a>
           <a href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 text-emerald-700 transition-colors flex items-center gap-1 font-bold">
             <span class="material-symbols-outlined text-sm">chat</span>
             <span>WhatsApp Directo</span>

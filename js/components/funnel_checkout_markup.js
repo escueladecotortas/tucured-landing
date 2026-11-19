@@ -1,7 +1,7 @@
 // Archivo: js/components/funnel_checkout_markup.js
 /**
- * 💳 Tucu Red Web V2 - Markup del Paso 4 y Tarjeta de Éxito (Alias tucured + Mercado Pago + @tucured.ar)
- * Vías reales de pago sin QR decorativo, resumen de alta y activación $4.999 (Mes Fundador).
+ * 💳 Tucu Red Web V2 - Markup del Paso 4 y Tarjeta Final Limpia del Wizard
+ * Alias responsive en móvil 375px, Mercado Pago oficial y flujo WhatsApp post-pago.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
@@ -50,9 +50,9 @@ export function getCheckoutStepMarkup() {
                 <span class="material-symbols-outlined text-xs">bolt</span> Inmediata
               </span>
             </div>
-            <div class="flex items-center gap-2">
-              <input type="text" id="checkout-alias-input" readonly value="${cfg.aliasCbu}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-mono font-bold text-slate-800 outline-none" />
-              <button type="button" id="btn-copy-alias" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="checkout-alias-input" readonly value="${cfg.aliasCbu}" class="w-full sm:flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-mono font-bold text-slate-800 outline-none" />
+              <button type="button" id="btn-copy-alias" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shrink-0">
                 <span class="material-symbols-outlined text-sm" id="copy-alias-icon">content_copy</span>
                 <span id="copy-alias-text">Copiar Alias</span>
               </button>
@@ -87,21 +87,19 @@ export function getCheckoutStepMarkup() {
   `;
 }
 
-export function getSuccessCardMarkup(payload, waUrl, host) {
-  const turneroLink = `${host}/turnero.html?level=${payload.level}&rubro=${payload.rubro}&slug=${payload.slug}`;
-  const adminLink = `${host}/admin_${payload.level}.html?rubro=${payload.rubro}&slug=${payload.slug}`;
+export function getSuccessCardMarkup(payload, waUrl) {
+  const biz = payload?.nombre || 'tu comercio';
   return `<div class="space-y-5 max-w-lg mx-auto py-4">
     <div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/15 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-xl shadow-emerald-500/10"><span class="material-symbols-outlined text-4xl">check_circle</span></div>
-    <h4 class="font-headline font-extrabold text-2xl text-emerald-950">¡Excelente! El sistema para ${payload.nombre} está registrado.</h4>
-    <p class="text-sm text-emerald-800 leading-relaxed">Verificamos tu transferencia de $4.999 para habilitar tu dominio y turnero oficial en el día.</p>
-    <div class="p-3.5 rounded-2xl bg-white border border-emerald-200 text-left space-y-2 text-xs">
-      <div class="flex justify-between gap-2"><span class="text-slate-500 shrink-0">Turnero Público:</span><a id="success-turnero-link" href="${turneroLink}" target="_blank" class="font-mono text-indigo-600 font-bold underline truncate max-w-[260px]">${turneroLink}</a></div>
-      <div class="flex justify-between gap-2"><span class="text-slate-500 shrink-0">Panel de Control:</span><a id="success-admin-link" href="${adminLink}" target="_blank" class="font-mono text-indigo-600 font-bold underline truncate max-w-[260px]">${adminLink}</a></div>
+    <h4 class="font-headline font-extrabold text-2xl text-emerald-950">¡Excelente! Tu solicitud para ${biz} quedó registrada.</h4>
+    <p class="text-sm text-emerald-900 font-medium leading-relaxed">Verificaremos tu transferencia de $4.999 para habilitar el turnero oficial de ${biz} durante el día.</p>
+    <div class="p-4 rounded-2xl bg-white border border-emerald-200/80 text-left flex items-start gap-3 text-xs sm:text-sm text-slate-700 leading-relaxed shadow-xs">
+      <span class="material-symbols-outlined text-indigo-600 text-xl shrink-0 mt-0.5">mark_chat_unread</span>
+      <p>En breve recibirás un mensaje en tu WhatsApp con el enlace a la ficha rápida de configuración (para cargar tus horarios exactos, servicios y logo) y luego te enviaremos los enlaces oficiales de tu Turnero y Panel de Control.</p>
     </div>
-    <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-headline font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"><span class="material-symbols-outlined text-lg">chat</span><span>Avisar por WhatsApp</span></a>
+    <div class="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a id="success-wa-btn" href="${waUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-headline font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"><span class="material-symbols-outlined text-lg">chat</span><span>Enviar comprobante por WhatsApp</span></a>
       <a id="success-instagram-link" href="https://instagram.com/tucured.ar" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-headline font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"><svg class="w-4 h-4 shrink-0 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg><span>@tucured.ar</span></a>
     </div>
-    <div class="pt-1"><span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">✓ Aprovisionado en base local (Local-First)</span></div>
   </div>`;
 }

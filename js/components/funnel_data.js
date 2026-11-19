@@ -44,7 +44,7 @@ export const FUNNEL_LEVELS = [
     id: 'l2',
     title: 'Nivel 2: Central Pro Multi-Box',
     regularPrice: '$24.900 ARS / mes',
-    desc: 'Todo Nivel 1 + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de Pax y % de ocupación ($24.900/mes desde el 2° mes).',
+    desc: 'Todo Nivel 1 + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de cantidad de personas o lugares y % de ocupación ($24.900/mes desde el 2° mes).',
     badge: 'Nivel 2'
   },
   {
