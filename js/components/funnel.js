@@ -7,7 +7,7 @@
 
 import { getFunnelMarkup, EXPANDED_RUBROS, FUNNEL_LEVELS } from './funnel_markup.js';
 import { getSuccessCardMarkup } from './funnel_checkout_markup.js';
-import { getLeadWhatsAppUrl } from '../utils/whatsapp_link.js';
+import { getLeadWhatsAppUrl, buildActivarUrl } from '../utils/whatsapp_link.js';
 import { TUCURED_CHECKOUT_CONFIG, sanitizeArgentinePhone } from './funnel_data.js';
 
 const RUBRO_ALIASES = { barberia: 'peluqueria', resto: 'gastronomia' };
@@ -158,7 +158,7 @@ export function renderFunnel(containerId = 'app-funnel') {
     }
     sessionStorage.removeItem('tucured_funnel_draft');
     setBadge(b4, 4, true, false); form.classList.add('hidden');
-    if (successCard) { successCard.classList.remove('hidden'); successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload)); }
+    if (successCard) { successCard.classList.remove('hidden'); successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload), buildActivarUrl(payload)); }
   }, { signal });
   updateUI();
 }

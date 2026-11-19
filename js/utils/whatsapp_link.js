@@ -28,6 +28,18 @@ export const WA_FALLBACK_TEXT = '¡Hola Tucu Red! Quiero conocer más sobre los 
 
 export const WA_FALLBACK_URL = `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(WA_FALLBACK_TEXT)}`;
 
+export function buildActivarUrl(lead = {}) {
+  const params = new URLSearchParams();
+  if (lead.nombre) params.set('comercio', lead.nombre.trim());
+  if (lead.rubro) params.set('rubro', lead.rubro);
+  if (lead.level) params.set('plan', lead.level);
+  const titular = (lead.titular || `${lead.nombreTitular || ''} ${lead.apellidoTitular || ''}`).trim();
+  if (titular) params.set('titular', titular);
+  if (lead.ciudad) params.set('localidad', lead.ciudad.trim());
+  const qs = params.toString();
+  return `https://tucured.ar/activar.html${qs ? `?${qs}` : ''}`;
+}
+
 export function getLeadWhatsAppUrl(lead = {}) {
   const nombre = lead.nombre ? lead.nombre.trim() : 'mi negocio';
   const ciudad = lead.ciudad ? lead.ciudad.trim() : 'Tucumán';
@@ -40,7 +52,8 @@ export function getLeadWhatsAppUrl(lead = {}) {
     titular ? `• Titular: ${titular}` : '',
     lead.email ? `• Email: ${lead.email.trim()}` : '',
     lead.whatsapp ? `• WhatsApp: +54 9 ${lead.whatsapp}` : '',
-    `• Material PDF QR mostrador: ${lead.materialPdf === false ? 'No' : 'Sí'}`
+    `• Material PDF QR mostrador: ${lead.materialPdf === false ? 'No' : 'Sí'}`,
+    `• Ficha online: ${buildActivarUrl(lead)}`
   ].filter(Boolean).join('\n');
 
   const message = `¡Hola Tucu Red! Solicito la activación de *${nombre}* en *${ciudad}* y adjunto el comprobante de $4.999 (Mes Fundador).\n• Rubro: ${rubro}\n• Plan: ${level}\n${extras}`;

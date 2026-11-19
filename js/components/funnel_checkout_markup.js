@@ -89,7 +89,7 @@ export function getCheckoutStepMarkup() {
   `;
 }
 
-export function getSuccessCardMarkup(payload, waUrl) {
+export function getSuccessCardMarkup(payload, waUrl, activarUrl = 'https://tucured.ar/activar.html') {
   const biz = payload?.nombre || 'tu comercio';
   return `<div class="space-y-5 max-w-lg mx-auto py-4">
     <div class="w-20 h-20 mx-auto rounded-full bg-emerald-500/15 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-xl shadow-emerald-500/10"><span class="material-symbols-outlined text-4xl">check_circle</span></div>
@@ -97,7 +97,7 @@ export function getSuccessCardMarkup(payload, waUrl) {
     <p class="text-sm text-emerald-900 font-medium leading-relaxed">Verificaremos tu transferencia de $4.999 para habilitar el turnero oficial de ${biz} durante el día.</p>
     <div class="p-4 rounded-2xl bg-white border border-emerald-200/80 text-left flex items-start gap-3 text-xs sm:text-sm text-slate-700 leading-relaxed shadow-xs">
       <span class="material-symbols-outlined text-indigo-600 text-xl shrink-0 mt-0.5">mark_chat_unread</span>
-      <p>En breve recibirás un mensaje en tu WhatsApp con el enlace a la ficha rápida de configuración (para cargar tus horarios exactos, servicios y logo) y luego te enviaremos los enlaces oficiales de tu Turnero y Panel de Control.</p>
+      <p>También recibirás en tu WhatsApp el enlace a la <a id="success-activar-link" href="${activarUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-bold">ficha rápida de configuración</a> (para cargar tus horarios exactos, servicios y logo) o podés completarla ahora mismo; luego te enviaremos los enlaces oficiales de tu Turnero y Panel de Control.</p>
     </div>
     <div class="pt-1 flex flex-col sm:flex-row items-center justify-center gap-3">
       <a id="success-wa-btn" href="${waUrl}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-headline font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"><span class="material-symbols-outlined text-lg">chat</span><span>Enviar comprobante por WhatsApp</span></a>

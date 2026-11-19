@@ -1,0 +1,92 @@
+<!-- Archivo: public/activar.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha Rápida de Configuración — TucuRed</title>
+  <meta name="description" content="Completá los datos operativos de tu comercio para dejar listo tu Turnero Web y Panel de Control TucuRed." />
+  <link rel="icon" type="image/svg+xml" href="/assets/tucu_red_logo.svg" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #FAF7F2; color: #1C1917; }
+    h1, h2, h3, .font-title { font-family: 'Outfit', system-ui, sans-serif; }
+    select.tucu-clean-select { appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+  <header class="sticky top-0 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#D5CEC2]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="/" class="flex items-center gap-2.5 min-w-0">
+        <img src="/assets/tucu_red_logo.svg" alt="TucuRed" class="h-8 sm:h-9 w-auto object-contain shrink-0" />
+        <span class="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-50 text-[#EA580C] border border-orange-200 truncate">
+          Ficha Rápida de Configuración
+        </span>
+      </a>
+      <a href="/" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 border border-[#D5CEC2] text-xs font-bold text-[#1C1917] transition-colors shrink-0">
+        ← Volver a tucured.ar
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 flex-1">
+    <div class="mb-6 space-y-1.5">
+      <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-[#EA580C]">Puesta en Marcha Guiada</span>
+      <h1 class="font-title text-2xl sm:text-3xl font-extrabold text-[#1C1917] tracking-tight">
+        Configurá los datos reales de tu local
+      </h1>
+      <p class="text-xs sm:text-sm text-stone-600 leading-relaxed">
+        Completá estos 5 pasos breves para que nuestro equipo deje listo tu Turnero Web y Panel de Control con tus horarios, servicios y reglas de cobro.
+      </p>
+    </div>
+
+    <div id="activar-form-root"></div>
+    <div id="activar-success-root" class="hidden"></div>
+  </main>
+
+  <footer class="py-5 px-4 text-center text-[11px] text-stone-500 border-t border-[#D5CEC2] bg-white">
+    © 2026 Tucu Red — Tucumán, Argentina · <a href="/terminos.html" class="text-[#EA580C] hover:underline font-semibold">Términos y Condiciones</a>
+  </footer>
+
+  <!-- Definición Estática Oculta para Detección de Netlify Forms en Build -->
+  <form name="ficha-activacion-tucured" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="ficha-activacion-tucured" />
+    <input type="text" name="bot-field" />
+    <input type="text" name="comercio" />
+    <input type="text" name="titular" />
+    <input type="text" name="rubro" />
+    <input type="text" name="localidad" />
+    <input type="text" name="direccion" />
+    <input type="text" name="pin_acceso" />
+    <input type="text" name="logo_url" />
+    <input type="text" name="logo_nota" />
+    <input type="text" name="dias_atencion" />
+    <input type="text" name="modalidad_horario" />
+    <input type="text" name="horario_manana_desde" />
+    <input type="text" name="horario_manana_hasta" />
+    <input type="text" name="horario_tarde_desde" />
+    <input type="text" name="horario_tarde_hasta" />
+    <input type="text" name="intervalo_minutos" />
+    <textarea name="servicios_detalle"></textarea>
+    <input type="text" name="modalidad_sena" />
+    <input type="text" name="valor_sena" />
+    <input type="text" name="alias_pago" />
+    <input type="text" name="cbu_cvu" />
+    <input type="text" name="medios_pago" />
+    <input type="text" name="whatsapp_local" />
+    <input type="text" name="plan" />
+    <input type="text" name="cantidad_espacios" />
+    <input type="text" name="capacidad_turno" />
+    <textarea name="profesionales_detalle"></textarea>
+  </form>
+
+  <script src="/js/activar/activar_data.js"></script>
+  <script src="/js/activar/activar_markup.js"></script>
+  <script src="/js/activar/activar_app.js"></script>
+</body>
+</html>
