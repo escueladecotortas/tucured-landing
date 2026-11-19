@@ -50,3 +50,9 @@
 
 - **[IDEA-016] Evolución Firestore Multi-Tenant L2/L3:** Conectar el esquema canónico de clientes (`tenants/{tenantId}/customers/{id}` con `email`, `birthday`, `isRestricted`, `deletedAt`), turnos y configuración ya estandarizado en `localStorage` hacia colecciones Firestore al iniciar los onboardings reales.
 - **[IDEA-017] Compuerta de Lenguaje Comercial Cero Jerga & Visor Full-Width:** Mantener prohibida toda jerga técnica (`Baileys`, `Cron`, `Daemon`, `Hash Idempotencia`) en UI/manuales/landing, usar confirmación custom + baja lógica (`AdminShell.confirmAsync` + `deletedAt`) y conservar el patrón de 1 sola columna full-width para visores integrados en consolas con sidebar.
+
+### 10. Arquitectura Multi-Dominio, Onboarding & Escalabilidad (Sesión 2026-11-19)
+
+- **[IDEA-018] Experiencia Automática Pura en Demos Comerciales:** Conservar las demos de `tucured.ar` libres de banners o botones de contingencia manual para mostrar siempre el flujo automático principal, sin enlaces simulados ni jerga interna (`Local-First`, `.ics`, `Pax`).
+- **[IDEA-019] Separación Soberana de Dominios (`tucured.ar` vs `tucured.com.ar`):** Destinar `tucured.ar` (Netlify) a vidriera institucional, demos interactivas, Wizard de alta (`/`) y Ficha Rápida de Configuración (`/activar.html`); operar `tucured.com.ar` (NIC Argentina -> Cloudflare -> Túnel HP Mini `192.168.100.27`) para subdominios comodín `*.tucured.com.ar` de clientes reales y `api.tucured.com.ar` para gateway Baileys, con redirección `301` de la raíz hacia `https://tucured.ar`.
+- **[IDEA-020] Escalabilidad Pragmática HP Mini -> VPS Linux:** Validar la operación inicial en el nodo HP Mini a costo fijo `$0` y migrar a un VPS Linux en la nube al alcanzar 4–5 clientes pagos sin modificar los subdominios `*.tucured.com.ar`.
