@@ -1,9 +1,11 @@
 // Archivo: js/components/faq_accordion.js
 /**
- * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes (7 Preguntas Alineadas)
- * Copy claro, positivo y directo sobre abono, feriados actualizables y WhatsApp seguro con respaldo.
- * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
+ * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes + Filtro WhatsApp
+ * Copy claro y directo sin tecnicismos con consulta previa por WhatsApp.
+ * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
+
+import { TUCU_RED_PHONE } from '../utils/whatsapp_link.js';
 
 const FAQS_DATA = [
   {
@@ -12,7 +14,7 @@ const FAQS_DATA = [
   },
   {
     q: '¿Mis clientes tienen que descargar alguna app o crearse una cuenta?',
-    a: 'No. Tus clientes ingresan desde cualquier navegador web del celular, eligen su turno en 3 pasos sin contraseñas y reciben su Ticket Online #TK con dirección del local, botón para agendar en calendario (.ics) y link de autogestión.'
+    a: 'No. Tus clientes ingresan desde cualquier navegador web del celular, eligen su turno en 3 pasos sin contraseñas y reciben su Ticket Online #TK con dirección del local, botón para guardar el turno en el calendario de tu celular (compatible con Android y iPhone) y enlace para reprogramar o cancelar.'
   },
   {
     q: '¿El sistema respeta el corte de siesta y los feriados argentinos?',
@@ -76,16 +78,53 @@ export function renderFaqAccordion(containerId = 'app-faq') {
         `).join('')}
       </div>
 
-      <!-- Micro-banner de Confianza -->
-      <div class="mt-8 p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <!-- Filtro Compacto de Consulta Previa por WhatsApp -->
+      <div class="mt-8 p-5 sm:p-6 rounded-3xl bg-indigo-50/70 border border-indigo-200/70 space-y-3.5">
         <div class="flex items-center gap-2.5">
-          <span class="material-symbols-outlined text-indigo-600 text-xl">support_agent</span>
-          <span class="text-xs text-indigo-950 font-medium">¿Tenés una consulta específica sobre tu comercio?</span>
+          <span class="material-symbols-outlined text-indigo-600 text-xl shrink-0">support_agent</span>
+          <h3 class="font-headline font-bold text-sm sm:text-base text-indigo-950">¿Tenés una consulta puntual sobre tu comercio?</h3>
         </div>
-        <a href="#precios" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 underline font-headline">
-          Ver planes o activar ahora →
-        </a>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <textarea
+            id="faq-wa-query"
+            rows="2"
+            placeholder="Escribí tu duda acá (ej: rubro, cantidad de profesionales o cómo funciona)..."
+            class="flex-1 w-full px-4 py-3 rounded-2xl bg-white border border-indigo-200/80 focus:border-indigo-600 outline-none text-xs sm:text-sm text-slate-800 resize-none font-normal"
+          ></textarea>
+          <button
+            type="button"
+            id="btn-faq-wa-send"
+            class="px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-headline font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer shrink-0"
+          >
+            <span class="material-symbols-outlined text-base">chat</span>
+            <span>Enviar por WhatsApp</span>
+          </button>
+        </div>
+        <p id="faq-wa-error" class="hidden text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2" role="alert">
+          Escribí tu consulta arriba para enviarla por WhatsApp
+        </p>
       </div>
     </section>
   `;
+
+  const queryEl = document.getElementById('faq-wa-query');
+  const sendBtn = document.getElementById('btn-faq-wa-send');
+  const errEl = document.getElementById('faq-wa-error');
+
+  queryEl?.addEventListener('input', () => {
+    errEl?.classList.add('hidden');
+  });
+
+  sendBtn?.addEventListener('click', () => {
+    const text = (queryEl?.value || '').trim();
+    if (!text) {
+      errEl?.classList.remove('hidden');
+      queryEl?.focus();
+      return;
+    }
+    errEl?.classList.add('hidden');
+    const waUrl = `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(`Hola Tucu Red, tengo una consulta sobre mi comercio: ${text}`)}`;
+    sendBtn.dataset.lastWaUrl = waUrl;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  });
 }

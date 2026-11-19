@@ -63,7 +63,7 @@ export function getCheckoutStepMarkup() {
           <div class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="space-y-1">
               <p class="text-xs font-bold text-slate-900">Opción 2: Tarjeta o saldo en Mercado Pago</p>
-              <p class="text-[11px] text-slate-600 leading-relaxed">Se abre la pasarela oficial segura de Mercado Pago en una pestaña nueva; al finalizar, volvé acá para confirmar tu alta.</p>
+              <p class="text-[11px] text-slate-600 leading-relaxed">Abre la app o web oficial de Mercado Pago para abonar al instante; al finalizar, volvé acá para confirmar tu alta.</p>
             </div>
             <a id="btn-mp-direct-pay" href="${cfg.mpPaymentUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-xs transition-colors">
               <span class="material-symbols-outlined text-sm">open_in_new</span>
