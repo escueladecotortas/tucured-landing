@@ -7,7 +7,7 @@
 
 const LEVEL_MATRIX_V16 = {
   l1: {
-    badge: 'Nivel 1: Autónomo • Agenda en 3 Pasos',
+    badge: 'Nivel 1: Turnero Autónomo • Agenda en 3 Pasos',
     themeBadge: 'bg-sky-50 text-sky-700 border-sky-200',
     architecture: 'Turnero Autónomo • Seña Configurable • Ticket Online #TK',
     microMetrica: 'Reserva en 3 pasos • Dirección y .ics en ticket • Feriados 2026 por mes',
@@ -23,7 +23,7 @@ const LEVEL_MATRIX_V16 = {
     ]
   },
   l2: {
-    badge: 'Nivel 2: Central Pro • CRM & Contactos',
+    badge: 'Nivel 2: Central Pro Multi-Box • CRM & Contactos',
     themeBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     architecture: 'Central Operativa • CRM & Contactos • Bloqueos y Vacaciones',
     microMetrica: 'Importación desde celular • Email y Cumpleaños • Papelera restaurable',
@@ -38,7 +38,7 @@ const LEVEL_MATRIX_V16 = {
     ]
   },
   l3: {
-    badge: 'Nivel 3: Multi-Equipo • Staff, Boxes y 2hs',
+    badge: 'Nivel 3: Multi-Staff & Recursos • Staff, Boxes y 2hs',
     themeBadge: 'bg-amber-50 text-amber-800 border-amber-200',
     architecture: 'Multi-Staff • Horarios Partidos (Mañana / Tarde) • Confirmación 2hs',
     microMetrica: 'Sillones y boxes • Agendas en paralelo • Confirmación 2hs activable',

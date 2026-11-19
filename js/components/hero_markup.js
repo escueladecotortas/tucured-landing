@@ -1,7 +1,7 @@
 // Archivo: js/components/hero_markup.js
 /**
  * 🏙️ Tucu Red Web V2 - Hero Markup (Split 60/40 + Mockup Interactivo de Software Web)
- * Software autónomo, reserva en 3 toques, perspectiva 3D y badges operativos.
+ * Software autónomo, reserva en 3 toques, perspectiva 3D y logotipo oficial en mockup.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -73,13 +73,16 @@ export function getHeroMarkup() {
 
               <!-- Pantalla Interactiva de Alta Resolución -->
               <div class="rounded-2xl bg-[#FAFBFD] p-4 sm:p-5 border border-slate-200/80 shadow-inner text-slate-900 space-y-3.5 relative z-20">
-                <!-- Barra Superior de Estado del Software -->
-                <div class="flex items-center justify-between pb-2.5 border-b border-slate-200/80">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600 font-mono">SISTEMA ACTIVO</span>
+                <!-- Barra Superior de Estado e Identidad Oficial -->
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-200/80">
+                  <div class="flex items-center gap-2 shrink-0">
+                    <img src="/assets/tucu_red_logo.svg" alt="TucuRed" id="hero-mockup-brand-logo" class="h-6 sm:h-7 w-auto object-contain shrink-0" />
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                      <span class="hidden sm:inline-flex text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 font-mono">ACTIVO</span>
+                    </span>
                   </div>
-                  <span class="text-[11px] font-extrabold text-indigo-600 font-headline">The Barber Club • Yerba Buena</span>
+                  <span class="text-[11px] font-extrabold text-indigo-600 font-headline truncate text-right">The Barber Club • Yerba Buena</span>
                 </div>
 
                 <!-- Toque 1: Servicio y Profesional Asignado -->

@@ -1,7 +1,7 @@
 // Archivo: js/components/footer.js
 /**
  * 🏛️ Tucu Red Web V2 - Footer Institucional & Créditos
- * Incluye identidad oficial SVG (/assets/tucu_red_logo_full.svg) y pasarela WhatsApp.
+ * Incluye identidad oficial SVG (/assets/tucu_red_logo_full.svg), WhatsApp e Instagram @tucured.ar.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -35,6 +35,10 @@ export function renderFooter(containerId = 'app-footer') {
           <a href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-600 text-emerald-700 transition-colors flex items-center gap-1 font-bold">
             <span class="material-symbols-outlined text-sm">chat</span>
             <span>WhatsApp Directo</span>
+          </a>
+          <a id="footer-instagram-link" href="https://instagram.com/tucured.ar" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 text-slate-700 transition-colors flex items-center gap-1.5 font-bold">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <span>@tucured.ar</span>
           </a>
         </div>
 

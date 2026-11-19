@@ -68,22 +68,22 @@ export const ShowcaseState = {
 
   levels: {
     l1: {
-      id: 'l1', badge: 'Nivel 1 • Autónomo', badgeClass: 'bg-primary/20 text-primary border-primary/30', popularBadge: 'Ideal Emprendedores', iconSymbol: 'bolt',
-      name: 'Turnero Autónomo Express', tagline: 'Reserva en 3 pasos • Seña configurable • Ticket Online con dirección',
+      id: 'l1', badge: 'Nivel 1 • Turnero Autónomo', badgeClass: 'bg-primary/20 text-primary border-primary/30', popularBadge: 'Ideal Emprendedores', iconSymbol: 'bolt',
+      name: 'Turnero Autónomo', tagline: 'Reserva en 3 pasos • Seña configurable • Ticket Online con dirección',
       description: 'Turnero web autónomo con seña configurable por servicio, Ticket Online #TK con dirección y feriados 2026 por mes.',
       adminIcon: 'settings', adminButtonLabel: 'Ver Panel Asistente L1', adminUrl: '/admin_l1.html',
       benefits: ['Agenda web autónoma en 3 pasos con bloqueo de horarios en vivo.', 'Seña configurable por servicio directo a tu Alias/CBU con carga de comprobante.', 'Ticket Online #TK con dirección del local, calendario (.ics) y autogestión.', 'Feriados Nacionales 2026 configurables por mes y horarios partidos.', 'Recordatorios por WhatsApp y panel de dueño para pausar recepción.']
     },
     l2: {
-      id: 'l2', badge: 'Nivel 2 • Central Pro', badgeClass: 'bg-secondary-container/30 text-secondary border-secondary/30', popularBadge: 'CRM & Control Operativo', iconSymbol: 'settings_suggest',
-      name: 'Central Operativa & Agenda Pro', tagline: 'Todo L1 + CRM & Contactos • Bloqueos de horarios y vacaciones',
+      id: 'l2', badge: 'Nivel 2 • Central Pro Multi-Box', badgeClass: 'bg-secondary-container/30 text-secondary border-secondary/30', popularBadge: 'CRM & Control Operativo', iconSymbol: 'settings_suggest',
+      name: 'Central Pro Multi-Box', tagline: 'Todo L1 + CRM & Contactos • Bloqueos de horarios y vacaciones',
       description: 'Agenda inteligente con CRM & Contactos desde el celular, Email, Cumpleaños, bloqueo preventivo e historial de precios.',
       adminIcon: 'monitoring', adminButtonLabel: 'Ver Panel de Citas L2', adminUrl: '/admin_l2.html',
       benefits: ['Todo lo de Nivel 1 con carga ágil de turnos de mostrador, Pax y % ocupación.', 'CRM & Contactos: importación desde agenda del celular y archivos .vcf/.csv.', 'Ficha de clientes con Email, Fecha de Cumpleaños y papelera restaurable.', 'Bloqueo preventivo de reservas web para teléfonos restringidos.', 'Historial de precios, cierres por vacaciones y bloqueos manuales.']
     },
     l3: {
-      id: 'l3', badge: 'Nivel 3 • Multi-Equipo', badgeClass: 'bg-primary-container/30 text-primary-fixed border-primary-container/40', popularBadge: 'Equipos, Consultorios y Complejos', iconSymbol: 'groups',
-      name: 'Multi-Staff & Franquicias', tagline: 'Todo L2 + Multi-Staff • Sillones/Boxes • Confirmación 2hs activable',
+      id: 'l3', badge: 'Nivel 3 • Multi-Staff & Recursos', badgeClass: 'bg-primary-container/30 text-primary-fixed border-primary-container/40', popularBadge: 'Equipos, Consultorios y Complejos', iconSymbol: 'groups',
+      name: 'Multi-Staff & Recursos', tagline: 'Todo L2 + Multi-Staff • Sillones/Boxes • Confirmación 2hs activable',
       description: 'Múltiples profesionales con horarios partidos (Mañana / Tarde), sillones/boxes y Confirmación y Liberación Automática 2 hs antes.',
       adminIcon: 'groups', adminButtonLabel: 'Ver Panel Multi-Staff L3', adminUrl: '/admin_l3.html',
       benefits: ['Agendas independientes por profesional con horarios partidos (Mañana / Tarde).', 'Asignación de sillones, boxes, consultorios o canchas por servicio.', 'Confirmación y Liberación Automática (2 hs antes) activable o pausable.', 'CRM unificado de clientes con Email, Cumpleaños e importación celular.', 'Selección de profesional preferido o primer turno disponible.']
@@ -128,7 +128,7 @@ export const ShowcaseState = {
     },
     servicios: {
       id: 'servicios', name: 'Servicios', label: 'Servicios Profesionales', bizName: 'Estudio Jurídico & Contable Norte', address: 'Laprida 310, S. M. de Tucumán', badgeL1: '💼 ATENCIÓN CON TURNO', subCategory: 'Estudios & Asesoría',
-      accentColor: '#4F46E5', btnClass: 'bg-gradient-to-r from-[#4F46E5] to-[#4338CA] text-white font-bold shadow-lg shadow-[#4F46E5]/20', focusBorder: 'focus:border-[#4F46E5]', heroImage: '/assets/showcase/hero_salud.webp', iconSymbol: 'work',
+      accentColor: '#4F46E5', btnClass: 'bg-gradient-to-r from-[#4F46E5] to-[#4338CA] text-white font-bold shadow-lg shadow-[#4F46E5]/20', focusBorder: 'focus:border-[#4F46E5]', heroImage: '/assets/rubro_servicios.webp', iconSymbol: 'work',
       options: ['Asesoría Inicial 45 min', 'Gestión Impositiva Mensual', 'Auditoría Documental'], days: sysCalendar.diasReales.map(d => d.fullLabel),
       staff: ['Dr. Mariano Paz (Socio)', 'Cra. Elena Gómez (Impuestos)', 'Cualquiera (Disponible)'],
       catalogL3: [{ name: 'Asesoría Inicial 45 min', duration: 45, price: 22000, dur: '45 min • $22.000' }, { name: 'Gestión Impositiva Mensual', duration: 60, price: 26000, dur: '60 min • $26.000' }, { name: 'Auditoría Documental', duration: 60, price: 30000, dur: '60 min • $30.000' }]

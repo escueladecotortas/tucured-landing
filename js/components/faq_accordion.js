@@ -1,14 +1,14 @@
 // Archivo: js/components/faq_accordion.js
 /**
  * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes (7 Preguntas Alineadas)
- * Desacoplado del showroom y reubicado previo al Wizard para responder dudas reales.
+ * Copy claro, positivo y directo sobre abono, feriados actualizables y WhatsApp seguro con respaldo.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
 
 const FAQS_DATA = [
   {
     q: '¿Cómo funciona la promoción Mes Fundador de $4.999 del primer mes?',
-    a: 'Abonás $4.999 ARS por transferencia directa al alias oficial tucured (0% comisión) o mediante el enlace oficial de Mercado Pago. Durante 30 días usás el sistema completo en tu local; desde el segundo mes rige el abono regular del nivel elegido ($14.900, $24.900 o $34.900 ARS/mes), sin contratos de permanencia.'
+    a: 'Abonás $4.999 ARS por transferencia directa al alias oficial tucured o mediante el enlace oficial de Mercado Pago. Durante 30 días usás el sistema completo en tu local; desde el segundo mes rige el abono regular del nivel elegido ($14.900, $24.900 o $34.900 ARS/mes), sin contratos de permanencia.'
   },
   {
     q: '¿Mis clientes tienen que descargar alguna app o crearse una cuenta?',
@@ -16,7 +16,7 @@ const FAQS_DATA = [
   },
   {
     q: '¿El sistema respeta el corte de siesta y los feriados argentinos?',
-    a: 'Sí. Podés configurar horarios corridos o turnos partidos (Mañana y Tarde con corte de siesta). Además, incluye el calendario nacional de 16 feriados 2026 con interruptor individual por mes para habilitar fechas puntuales como excepción si decidís abrir.'
+    a: 'Sí. Podés configurar horarios corridos o turnos partidos (Mañana y Tarde con corte de siesta). Además, el calendario de feriados nacionales se actualiza año tras año automáticamente, manteniendo un interruptor individual por mes para abrir fechas puntuales como excepción si decidís atender.'
   },
   {
     q: '¿Cómo cobro las señas de las reservas?',
@@ -31,8 +31,8 @@ const FAQS_DATA = [
     a: 'Completás los 4 pasos de alta guiada, avisás por WhatsApp y nuestro equipo técnico habilita y deja listo tu turnero personalizado con tus servicios y horarios en el día.'
   },
   {
-    q: '¿Cómo funcionan los recordatorios y la confirmación automática por WhatsApp?',
-    a: 'Vinculás tu línea mediante código QR directo en el panel y personalizás las plantillas con variables dinámicas para confirmaciones y avisos 24 hs / 2 hs antes. Además, en Nivel 3 contás con Confirmación y Liberación Automática (2 hs antes), activable o pausable en un clic.'
+    q: '¿Cómo funcionan los recordatorios por WhatsApp y el aviso manual de respaldo?',
+    a: 'Vinculás tu línea mediante código QR directo en el panel para enviar confirmaciones y recordatorios automáticos 24 hs y 2 hs antes del turno (en Nivel 3 además contás con Confirmación y Liberación Automática 2 hs antes, activable o pausable). Para cuidar tu línea, los rangos seguros de envío transaccional son de 1 a 25 mensajes/día en líneas nuevas y hasta 80 mensajes/día en líneas maduras, sujeto a las pautas de uso responsable en Términos y Condiciones sin responsabilidad de Tucu Red ante bloqueos por uso indebido. Ante cualquier mantenimiento o indisponibilidad del envío automático, el sistema permite enviar el aviso manual en 1 clic sin frenar la atención.'
   }
 ];
 
@@ -46,7 +46,7 @@ export function renderFaqAccordion(containerId = 'app-faq') {
       <div class="text-center max-w-2xl mx-auto mb-12 space-y-3">
         <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-xs font-bold uppercase tracking-widest font-headline">
           <span class="material-symbols-outlined text-sm">help</span>
-          <span>Respuestas Claras & Cero Fricción</span>
+          <span>Respuestas Claras y Directas</span>
         </div>
         <h2 class="font-headline font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
           Preguntas Frecuentes

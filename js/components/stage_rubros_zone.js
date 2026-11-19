@@ -50,16 +50,16 @@ export const STAGE_RUBROS = [
     id: 'servicios',
     name: 'Servicios',
     emoji: '💼',
-    image: '/assets/showcase/hero_salud.webp',
+    image: '/assets/rubro_servicios.webp',
     titleFont: 'font-headline font-bold tracking-tight text-slate-900',
     badgeClass: 'backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-sm'
   }
 ];
 
 export const LEVEL_SEGMENTS = [
-  { id: 'l1', label: 'Autónomo', fullLabel: 'Nivel 1: Autónomo' },
-  { id: 'l2', label: 'Central Pro', fullLabel: 'Nivel 2: Central Pro' },
-  { id: 'l3', label: 'Multi-Equipo', fullLabel: 'Nivel 3: Multi-Equipo' }
+  { id: 'l1', label: 'Autónomo', fullLabel: 'Nivel 1: Turnero Autónomo' },
+  { id: 'l2', label: 'Central Pro', fullLabel: 'Nivel 2: Central Pro Multi-Box' },
+  { id: 'l3', label: 'Multi-Staff', fullLabel: 'Nivel 3: Multi-Staff & Recursos' }
 ];
 
 export function renderStageRubrosZone(containerId, state) {

@@ -114,4 +114,12 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
+/* Eliminación de flecha nativa e inyección de plugin forms en selectores custom */
+select.tucu-clean-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none !important;
+}
+
 

@@ -19,9 +19,9 @@ export const RUBRO_NAMES = {
 };
 
 export const LEVEL_NAMES = {
-  l1: 'Nivel 1 (Turnero Express)',
-  l2: 'Nivel 2 (Central Pro)',
-  l3: 'Nivel 3 (Multi-Staff)'
+  l1: 'Nivel 1: Turnero Autónomo',
+  l2: 'Nivel 2: Central Pro Multi-Box',
+  l3: 'Nivel 3: Multi-Staff & Recursos'
 };
 
 export const WA_FALLBACK_TEXT = '¡Hola Tucu Red! Quiero conocer más sobre los planes y la promoción Mes Fundador de $4.999 para mi comercio.';
@@ -32,7 +32,7 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const nombre = lead.nombre ? lead.nombre.trim() : 'mi negocio';
   const ciudad = lead.ciudad ? lead.ciudad.trim() : 'Tucumán';
   const rubro = RUBRO_NAMES[lead.rubro] || lead.rubro || 'Comercio Local';
-  const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2';
+  const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2: Central Pro Multi-Box';
 
   const message = `¡Hola Tucu Red! Quiero activar el plan para *${nombre}* en *${ciudad}* (Rubro: *${rubro}* / Plan: *${level}* - $4.999 Mes Fundador).`;
   return `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(message)}`;
