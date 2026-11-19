@@ -1,7 +1,7 @@
 // Archivo: js/components/funnel.js
 /**
- * 🧙 Tucu Red Web V2 - Wizard Transaccional de 4 Pasos (Local-First Controller)
- * Flujo de alta comercial, Nombre/Apellido separados, alias tucured, MP y rutas reales.
+ * 🧙 Tucu Red Web V2 - Wizard Transaccional de 4 Pasos (Local-First + Netlify Forms Blindado)
+ * Flujo de alta comercial, Nombre/Apellido separados, alias tucured, MP y POST verificado.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -11,18 +11,19 @@ import { getLeadWhatsAppUrl } from '../utils/whatsapp_link.js';
 import { TUCURED_CHECKOUT_CONFIG, sanitizeArgentinePhone } from './funnel_data.js';
 
 const RUBRO_ALIASES = { barberia: 'peluqueria', resto: 'gastronomia' };
-const normalizeFunnelRubro = (raw) => {
-  const mapped = RUBRO_ALIASES[raw] || raw;
-  return EXPANDED_RUBROS.some(r => r.id === mapped) ? mapped : 'estetica';
-};
+const normalizeFunnelRubro = (raw) => { const m = RUBRO_ALIASES[raw] || raw; return EXPANDED_RUBROS.some(r => r.id === m) ? m : 'estetica'; };
+const buildNetlifyBody = (p) => new URLSearchParams({
+  'form-name': 'contacto-tucured', 'bot-field': '', rubro: p.rubro, plan: p.level, horario: p.horario,
+  nombre: p.nombre, ciudad: p.ciudad, nombre_titular: p.nombreTitular, apellido_titular: p.apellidoTitular,
+  email: p.email, whatsapp: p.whatsapp, material_pdf: p.materialPdf ? 'Sí' : 'No'
+}).toString();
 
 export function renderFunnel(containerId = 'app-funnel') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   if (window._funnelAbort) window._funnelAbort.abort();
-  const abortCtrl = new AbortController();
-  window._funnelAbort = abortCtrl;
+  const abortCtrl = new AbortController(); window._funnelAbort = abortCtrl;
   const { signal } = abortCtrl;
 
   const draft = JSON.parse(sessionStorage.getItem('tucured_funnel_draft') || '{}');
@@ -35,7 +36,7 @@ export function renderFunnel(containerId = 'app-funnel') {
   const [phoneInp, nameInp, firstNameInp, lastNameInp, emailInp, citySel, pdfChk] = ['fn-phone', 'fn-nombre', 'fn-first-name', 'fn-last-name', 'fn-email', 'fn-city', 'fn-material-pdf'].map(id => document.getElementById(id));
   const [s1, s2, s3, s4] = ['funnel-step-1', 'funnel-step-2', 'funnel-step-3', 'funnel-step-4'].map(id => document.getElementById(id));
   const [b1, b2, b3, b4] = ['step-badge-1', 'step-badge-2', 'step-badge-3', 'step-badge-4'].map(id => document.getElementById(id));
-  const [err1, err3] = ['funnel-step1-error', 'funnel-step3-error'].map(id => document.getElementById(id));
+  const [err1, err3, err4] = ['funnel-step1-error', 'funnel-step3-error', 'funnel-step4-error'].map(id => document.getElementById(id));
   const progressLabel = document.getElementById('step-progress-label'), progressBar = document.getElementById('step-progress-bar');
 
   const slugify = (t) => (t || 'comercio').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'comercio';
@@ -53,10 +54,7 @@ export function renderFunnel(containerId = 'app-funnel') {
     sessionStorage.setItem('tucured_funnel_draft', JSON.stringify(payload));
     try {
       localStorage.setItem('local_db_wizard', JSON.stringify(payload));
-      if (isFinal) {
-        const leads = JSON.parse(localStorage.getItem('local_db_leads') || '[]');
-        leads.push(payload); localStorage.setItem('local_db_leads', JSON.stringify(leads));
-      }
+      if (isFinal) { const leads = JSON.parse(localStorage.getItem('local_db_leads') || '[]'); leads.push(payload); localStorage.setItem('local_db_leads', JSON.stringify(leads)); }
     } catch (_) {}
     return payload;
   };
@@ -81,8 +79,7 @@ export function renderFunnel(containerId = 'app-funnel') {
     if (progressLabel) progressLabel.textContent = `Paso ${currentStep} de 4`;
     if (progressBar) progressBar.style.width = `${(currentStep / 4) * 100}%`;
 
-    const lObj = FUNNEL_LEVELS.find(l => l.id === selectedLevel) || FUNNEL_LEVELS[1];
-    const rObj = EXPANDED_RUBROS.find(r => r.id === selectedRubro);
+    const lObj = FUNNEL_LEVELS.find(l => l.id === selectedLevel) || FUNNEL_LEVELS[1], rObj = EXPANDED_RUBROS.find(r => r.id === selectedRubro);
     const [sumLvl, sumName, sumCity, sumRubro] = ['checkout-summary-level', 'checkout-summary-name', 'checkout-summary-city', 'checkout-summary-rubro'].map(id => document.getElementById(id));
     if (sumLvl) sumLvl.textContent = lObj.badge;
     if (sumName) sumName.textContent = nameInp?.value.trim() || 'Tu Comercio';
@@ -106,11 +103,11 @@ export function renderFunnel(containerId = 'app-funnel') {
     if (!lastNameInp?.value.trim()) { showErr(err3, 'Ingresá el apellido del titular.'); lastNameInp?.focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInp?.value.trim() || '')) { showErr(err3, 'Ingresá un correo electrónico válido (ej: contacto@tulocal.com).'); emailInp?.focus(); return; }
     if (sanitizeArgentinePhone(phoneInp?.value).length < 10) { showErr(err3, 'Ingresá un número de WhatsApp válido de 10 dígitos (ej: 3815554321).'); phoneInp?.focus(); return; }
-    showErr(err3, ''); currentStep = 4; updateUI(); container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showErr(err3, ''); showErr(err4, ''); currentStep = 4; updateUI(); container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, { signal });
 
   ['btn-back-to-1', 'btn-back-to-2', 'btn-back-to-3'].forEach((id, i) =>
-    document.getElementById(id)?.addEventListener('click', () => { showErr(err1, ''); showErr(err3, ''); currentStep = i + 1; updateUI(); }, { signal })
+    document.getElementById(id)?.addEventListener('click', () => { showErr(err1, ''); showErr(err3, ''); showErr(err4, ''); currentStep = i + 1; updateUI(); }, { signal })
   );
 
   citySel?.addEventListener('change', (e) => { selectedCity = e.target.value; updateUI(); }, { signal });
@@ -137,29 +134,31 @@ export function renderFunnel(containerId = 'app-funnel') {
   container.querySelectorAll('[data-f-level]').forEach(b => b.addEventListener('click', () => { selectedLevel = b.getAttribute('data-f-level'); updateUI(); }, { signal }));
   container.querySelectorAll('[data-f-schedule]').forEach(b => b.addEventListener('click', () => { selectedSchedule = b.getAttribute('data-f-schedule'); updateUI(); }, { signal }));
 
-  const form = document.getElementById('tucured-funnel-form'), successCard = document.getElementById('funnel-success-card');
-  const restoreFromSuccessIfClosed = () => {
-    if (form?.classList.contains('hidden')) { form.classList.remove('hidden'); successCard?.classList.add('hidden'); currentStep = 1; }
-  };
+  const form = document.getElementById('tucured-funnel-form'), successCard = document.getElementById('funnel-success-card'), submitBtn = document.getElementById('funnel-submit-btn');
+  const restoreFromSuccessIfClosed = () => { if (form?.classList.contains('hidden')) { form.classList.remove('hidden'); successCard?.classList.add('hidden'); currentStep = 1; } };
   window.addEventListener('tucured:rubro-selected', (e) => { if (e.detail?.rubro) { restoreFromSuccessIfClosed(); selectedRubro = normalizeFunnelRubro(e.detail.rubro); updateUI(); } }, { signal });
-  window.addEventListener('tucured:level-selected', (e) => {
-    if (e.detail?.level) { restoreFromSuccessIfClosed(); const raw = String(e.detail.level).toLowerCase(); selectedLevel = raw.startsWith('l') ? raw : `l${raw}`; updateUI(); }
-  }, { signal });
+  window.addEventListener('tucured:level-selected', (e) => { if (e.detail?.level) { restoreFromSuccessIfClosed(); const raw = String(e.detail.level).toLowerCase(); selectedLevel = raw.startsWith('l') ? raw : `l${raw}`; updateUI(); } }, { signal });
 
   form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    e.preventDefault(); showErr(err4, '');
     const payload = persistLocalDB(true);
-    try {
-      if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-        await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(new FormData(form)).toString() });
+    const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+    if (!isLocal) {
+      if (submitBtn) submitBtn.disabled = true;
+      try {
+        const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: buildNetlifyBody(payload) });
+        if (!res.ok) throw new Error(`Netlify Forms HTTP ${res.status}`);
+      } catch (err) {
+        console.error('[TucuRed Funnel] Error Netlify Forms:', err);
+        showErr(err4, 'No pudimos registrar el formulario en el servidor. Verificá tu conexión e intentá nuevamente.');
+        if (submitBtn) submitBtn.disabled = false;
+        return;
       }
-    } catch (_) {}
+      if (submitBtn) submitBtn.disabled = false;
+    }
     sessionStorage.removeItem('tucured_funnel_draft');
     setBadge(b4, 4, true, false); form.classList.add('hidden');
-    if (successCard) {
-      successCard.classList.remove('hidden');
-      successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload));
-    }
+    if (successCard) { successCard.classList.remove('hidden'); successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload)); }
   }, { signal });
   updateUI();
 }

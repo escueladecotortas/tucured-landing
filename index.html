@@ -57,7 +57,9 @@
   <div id="app-footer" class="relative z-10"></div>
 
   <!-- Definición Estática Oculta para Detección de Netlify Forms en Build -->
-  <form name="contacto-tucured" netlify netlify-honeypot="bot-field" hidden>
+  <form name="contacto-tucured" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="contacto-tucured" />
+    <input type="text" name="bot-field" />
     <input type="text" name="rubro" />
     <input type="text" name="plan" />
     <input type="text" name="horario" />
