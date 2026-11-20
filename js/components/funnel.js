@@ -142,6 +142,7 @@ export function renderFunnel(containerId = 'app-funnel') {
   form?.addEventListener('submit', async (e) => {
     e.preventDefault(); showErr(err4, '');
     const payload = persistLocalDB(true);
+    const activarUrl = buildActivarUrl(payload);
     const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
     if (!isLocal) {
       if (submitBtn) submitBtn.disabled = true;
@@ -155,10 +156,22 @@ export function renderFunnel(containerId = 'app-funnel') {
         return;
       }
       if (submitBtn) submitBtn.disabled = false;
+      try {
+        fetch('/api/wa-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            nombre: payload.nombre, ciudad: payload.ciudad, rubro: payload.rubro, level: payload.level,
+            horario: payload.horario, nombreTitular: payload.nombreTitular, apellidoTitular: payload.apellidoTitular,
+            whatsapp: payload.whatsapp, email: payload.email, activarUrl
+          })
+        }).catch(wErr => console.warn('[TucuRed Funnel] BFF wa-welcome:', wErr?.message || wErr));
+      } catch (wErr) { console.warn('[TucuRed Funnel] BFF wa-welcome:', wErr?.message || wErr); }
     }
     sessionStorage.removeItem('tucured_funnel_draft');
     setBadge(b4, 4, true, false); form.classList.add('hidden');
-    if (successCard) { successCard.classList.remove('hidden'); successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload), buildActivarUrl(payload)); }
+    if (successCard) { successCard.classList.remove('hidden'); successCard.innerHTML = getSuccessCardMarkup(payload, getLeadWhatsAppUrl(payload), activarUrl); }
   }, { signal });
   updateUI();
 }
