@@ -133,23 +133,31 @@
       if (err) return showErr(err);
 
       const formData = new FormData();
-      Object.entries(payload).forEach(([k, v]) => formData.append(k, v ?? ''));
+      formData.append('form-name', 'ficha-activacion-tucured');
+      formData.append('bot-field', '');
+      Object.entries(payload).forEach(([k, v]) => {
+        if (k === 'form-name' || k === 'bot-field') return;
+        formData.append(k, v ?? '');
+      });
       const logoFile = L().getLogoFile();
       if (logoFile) formData.append('logo_archivo', logoFile, logoFile.name);
       window.__lastActivarFormData = formData;
 
-      const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+      const isLocal = !window.__forceRemoteActivar && ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
       if (isLocal) {
         console.info('[TucuRed Activar Local FormData]', { ...payload, logo_archivo: logoFile ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB, ${logoFile.type})` : null });
       } else {
         if (submitBtn) submitBtn.disabled = true;
         try {
-          const res = await fetch(window.location.pathname || '/activar.html', { method: 'POST', body: formData });
-          if (!res.ok) throw new Error(`Netlify Forms HTTP ${res.status}`);
+          const res = await fetch('/', { method: 'POST', body: formData });
+          const respText = await res.text();
+          if (!res.ok || !respText.includes('NETLIFY_FORM_ACCEPTED')) {
+            throw new Error(`Netlify no confirmó la recepción (HTTP ${res.status})`);
+          }
         } catch (ex) {
           console.error('[TucuRed Activar] Error Netlify Forms:', ex);
           if (submitBtn) submitBtn.disabled = false;
-          return showErr('No pudimos enviar la ficha al servidor. Verificá tu conexión e intentá nuevamente.');
+          return showErr('No pudimos confirmar el envío en el servidor. Verificá tu conexión e intentá nuevamente.');
         }
         if (submitBtn) submitBtn.disabled = false;
       }

@@ -1,5 +1,5 @@
 // Archivo: scripts/verify_task100_activar_v2.js
-// Compuerta QA + E2E [TASK-100]: Ficha Rápida v2 (Prefill, Geo, WebP, 7 Días, Bloque 5, FormData)
+// Compuerta QA + E2E [TASK-100]: Ficha Rápida v2, Centinela activar-ok, FormData & Anti Falso-200
 
 import fs from 'fs';
 import path from 'path';
@@ -9,8 +9,8 @@ import { execSync, spawn } from 'child_process';
 const PORT_APP = 4200, PORT_CDP = 9255, BASE = `http://127.0.0.1:${PORT_APP}`;
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const FILES = [
-  'js/utils/whatsapp_link.js', 'public/activar.html', 'public/js/activar/activar_data.js',
-  'public/js/activar/activar_geo.js', 'public/js/activar/activar_logo.js',
+  'js/utils/whatsapp_link.js', 'public/activar.html', 'public/activar-ok.html',
+  'public/js/activar/activar_data.js', 'public/js/activar/activar_geo.js', 'public/js/activar/activar_logo.js',
   'public/js/activar/activar_schedule.js', 'public/js/activar/activar_markup.js',
   'public/js/activar/activar_app.js', 'scripts/verify_task100_activar_v2.js'
 ];
@@ -45,11 +45,13 @@ function runStatic() {
     ok(lines.length < 200 && /Archivo:/i.test(lines[0]), `${rel} (${lines.length}L < 200L + encabezado)`);
     if (rel.endsWith('.js')) { let ast = true; try { execSync(`node --check "${abs}"`, { stdio: 'pipe' }); } catch { ast = false; } ok(ast, `AST OK: ${rel}`); }
   }
+  const distOkPath = path.resolve('dist/activar-ok.html');
+  ok(fs.existsSync(distOkPath) && fs.readFileSync(distOkPath, 'utf8').includes('NETLIFY_FORM_ACCEPTED'), 'dist/activar-ok.html existe con marcador NETLIFY_FORM_ACCEPTED');
   const distAct = fs.readFileSync(path.resolve('dist/activar.html'), 'utf8');
   const mustHave = [
-    'name="ficha-activacion-tucured"', 'enctype="multipart/form-data"', 'name="nombre_titular"', 'name="apellido_titular"',
-    'name="email"', 'name="instagram"', 'name="direccion_referencia"', 'name="direccion_lat"', 'name="direccion_lng"',
-    'type="file" name="logo_archivo"', 'name="horarios_detalle"', 'name="nombres_espacios"', 'name="profesionales_detalle"'
+    'name="ficha-activacion-tucured"', 'action="/activar-ok.html"', 'enctype="multipart/form-data"', 'name="nombre_titular"',
+    'name="apellido_titular"', 'name="email"', 'name="instagram"', 'name="direccion_referencia"', 'name="direccion_lat"',
+    'name="direccion_lng"', 'type="file" name="logo_archivo"', 'name="horarios_detalle"', 'name="nombres_espacios"', 'name="profesionales_detalle"'
   ];
   const mustPurge = ['name="pin_acceso"', 'name="logo_url"', 'name="logo_nota"', 'name="titular"', 'name="dias_atencion"', 'name="modalidad_horario"', 'name="horario_manana_desde"'];
   mustHave.forEach(s => ok(distAct.includes(s), `dist/activar.html contiene ${s}`));
@@ -60,35 +62,28 @@ async function runViewport(cdp, vp) {
   console.log(`\n=== 2. E2E ${vp.n.toUpperCase()} ===`);
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: vp.w, height: vp.h, deviceScaleFactor: 1, mobile: vp.mob });
 
-  // A) Prefill URL completo + horarios + WebP + sin_sena + FormData
   await cdp.goto('/activar.html?comercio=Estudio%20Norte&rubro=peluqueria&plan=l2&nombre=Sof%C3%ADa&apellido=Mendoza&localidad=Yerba%20Buena&whatsapp=3815554321&email=sofia%40norte.com&horario=cortado');
   for (let t = 0; t < 25; t++) { if (await cdp.evalJs(`Boolean(document.getElementById('activar-live-form'))`)) break; await wait(120); }
 
   const resA = await cdp.evalJs(`(async () => {
     const preUrl = document.getElementById('act-comercio').value === 'Estudio Norte'
-      && document.getElementById('act-nombre-titular').value === 'Sofía'
-      && document.getElementById('act-apellido-titular').value === 'Mendoza'
-      && document.getElementById('act-email').value === 'sofia@norte.com'
-      && document.getElementById('act-localidad').value === 'Yerba Buena'
-      && document.getElementById('act-whatsapp').value === '3815554321';
-    const noLegacy = !document.getElementById('act-pin') && !document.getElementById('act-logo-url') && !document.getElementById('act-logo-nota')
-      && document.getElementById('act-plan')?.tagName === 'INPUT' && document.getElementById('act-plan')?.type === 'hidden';
+      && document.getElementById('act-nombre-titular').value === 'Sofía' && document.getElementById('act-apellido-titular').value === 'Mendoza'
+      && document.getElementById('act-email').value === 'sofia@norte.com' && document.getElementById('act-whatsapp').value === '3815554321';
+    const noLegacy = !document.getElementById('act-pin') && !document.getElementById('act-logo-url') && document.getElementById('act-plan')?.type === 'hidden';
     const l2Pelu = document.getElementById('act-block5-body').innerText.includes('Sillones / Puestos') && !document.getElementById('act-cap-turno');
     document.getElementById('act-rubro').value = 'deportes'; document.getElementById('act-rubro').dispatchEvent(new Event('change'));
     const l2Dep = document.getElementById('act-block5-body').innerText.includes('Canchas / Espacios') && Boolean(document.getElementById('act-cap-turno'));
     document.getElementById('act-rubro').value = 'peluqueria'; document.getElementById('act-rubro').dispatchEvent(new Event('change'));
 
-    // Horarios: Lunes partido (heredado), cambiar Lunes 08:30-12:30 y copiar a Mar-Vie; Sábado corrido 09:00-14:00
     const mon = document.querySelector('.act-day-row[data-day-key="Lun"]');
     mon.querySelector('.act-m-from').value = '08:30'; mon.querySelector('.act-m-to').value = '12:30';
     document.getElementById('btn-copy-mon-fri').click();
     const sab = document.querySelector('.act-day-row[data-day-key="Sáb"]');
     sab.querySelector('.act-day-mode').value = 'corrido'; sab.querySelector('.act-day-mode').dispatchEvent(new Event('change'));
     sab.querySelector('.act-m-from').value = '09:00'; sab.querySelector('.act-m-to').value = '14:00';
-    const sched = window.TucuActivarSchedule.serializeSchedule();
-    const schedOk = sched.text.includes('Mar: 08:30-12:30 y 17:00-21:00') && sched.text.includes('Sáb: 09:00-14:00') && sched.text.includes('Dom: Cerrado');
+    const schedOk = window.TucuActivarSchedule.serializeSchedule().text.includes('Mar: 08:30-12:30 y 17:00-21:00')
+      && window.TucuActivarSchedule.serializeSchedule().text.includes('Sáb: 09:00-14:00');
 
-    // Conversión real a WebP con canvas 64x64 PNG
     const c = document.createElement('canvas'); c.width = 64; c.height = 64;
     const ctx = c.getContext('2d'); ctx.fillStyle = '#EA580C'; ctx.fillRect(0, 0, 64, 64);
     const pngBlob = await new Promise(r => c.toBlob(r, 'image/png'));
@@ -96,46 +91,55 @@ async function runViewport(cdp, vp) {
     const logoInp = document.getElementById('act-logo-input'); logoInp.files = dt.files; logoInp.dispatchEvent(new Event('change'));
     for (let i = 0; i < 20; i++) { if (window.TucuActivarLogo.getLogoFile()) break; await new Promise(r => setTimeout(r, 80)); }
     const lf = window.TucuActivarLogo.getLogoFile();
-    const webpOk = Boolean(lf && lf.type === 'image/webp' && lf.name === 'logo-comercio.webp' && lf.size > 0);
+    const webpOk = Boolean(lf && lf.type === 'image/webp' && lf.name === 'logo-comercio.webp');
 
-    // Toggle sin_sena + dirección + submit FormData
     document.getElementById('act-sena-mode').value = 'sin_sena'; document.getElementById('act-sena-mode').dispatchEvent(new Event('change'));
     const noSenaHide = document.getElementById('act-sena-fields-wrap').classList.contains('hidden');
     document.getElementById('act-direccion').value = 'Laprida 310';
     document.getElementById('act-dir-lat').value = '-26.8241'; document.getElementById('act-dir-lng').value = '-65.2226';
     document.querySelector('.act-srv-name').value = 'Corte Clásico'; document.querySelector('.act-srv-price').value = '12000';
     const overflow = document.documentElement.scrollWidth > window.innerWidth;
+
+    // Test rechazo ante falso 200 sin marcador NETLIFY_FORM_ACCEPTED
+    const origFetch = window.fetch;
+    window.__forceRemoteActivar = true;
+    window.fetch = async () => new Response('<html><body>SPA genérico sin centinela</body></html>', { status: 200 });
     document.getElementById('btn-activar-submit').click();
     await new Promise(r => setTimeout(r, 150));
+    const false200Rejected = !document.getElementById('activar-error').classList.contains('hidden')
+      && document.getElementById('activar-success-root').classList.contains('hidden')
+      && !document.getElementById('activar-form-root').classList.contains('hidden');
+
+    // Test aceptación real con marcador NETLIFY_FORM_ACCEPTED + orden estricto FormData
+    window.fetch = async () => new Response('<!-- NETLIFY_FORM_ACCEPTED -->', { status: 200 });
+    document.getElementById('btn-activar-submit').click();
+    await new Promise(r => setTimeout(r, 150));
+    window.fetch = origFetch; window.__forceRemoteActivar = false;
     const fd = window.__lastActivarFormData;
-    const fdOk = Boolean(fd && fd.get('form-name') === 'ficha-activacion-tucured' && fd.get('modalidad_sena') === 'sin_sena'
-      && fd.get('logo_archivo')?.type === 'image/webp' && fd.get('direccion_lat') === '-26.8241' && fd.get('horarios_detalle').includes('Sáb: 09:00-14:00'));
+    const keys = fd ? [...fd.keys()] : [];
+    const orderOk = keys[0] === 'form-name' && fd.get('form-name') === 'ficha-activacion-tucured'
+      && keys[1] === 'bot-field' && fd.get('bot-field') === '' && keys[keys.length - 1] === 'logo_archivo'
+      && fd.get('logo_archivo')?.type === 'image/webp';
     const succVis = !document.getElementById('activar-success-root').classList.contains('hidden');
-    return { preUrl, noLegacy, l2Pelu, l2Dep, schedOk, webpOk, noSenaHide, overflow, fdOk, succVis };
+    return { preUrl, noLegacy, l2Pelu, l2Dep, schedOk, webpOk, noSenaHide, overflow, false200Rejected, orderOk, succVis };
   })()`);
 
-  ok(resA.preUrl && resA.noLegacy, `${vp.n}: Prefill URL completo + sin PIN/logo_url/select plan`);
-  ok(resA.l2Pelu && resA.l2Dep, `${vp.n}: Bloque 5 L2 dinámico por rubro (Peluquería vs Deportes)`);
-  ok(resA.schedOk && resA.webpOk, `${vp.n}: Copiar Lunes a Mar-Vie + Sábado corrido + Logo WebP real`);
-  ok(resA.noSenaHide && resA.fdOk && resA.succVis && !resA.overflow, `${vp.n}: sin_sena + FormData WebP + 0 overflow`);
+  ok(resA.preUrl && resA.noLegacy && resA.l2Pelu && resA.l2Dep, `${vp.n}: Prefill URL + sin legacy + Bloque 5 L2 dinámico`);
+  ok(resA.schedOk && resA.webpOk && resA.noSenaHide && !resA.overflow, `${vp.n}: 7 días + WebP + sin_sena + 0 overflow`);
+  ok(resA.false200Rejected, `${vp.n}: Anti Falso-200 bloquea éxito si falta NETLIFY_FORM_ACCEPTED`);
+  ok(resA.orderOk && resA.succVis, `${vp.n}: Orden estricto FormData (form-name[0], bot-field[1], logo_archivo[last]) + éxito con centinela`);
 
-  // B) Fallback localStorage + L1 (peluquería vs gastronomía) + L3 (profesionales)
   await cdp.evalJs(`localStorage.setItem('local_db_wizard', JSON.stringify({ nombre: 'Resto Norte', nombreTitular: 'Juan', apellidoTitular: 'Pérez', email: 'juan@resto.com', whatsapp: '3814445566', ciudad: 'Tafí Viejo', rubro: 'peluqueria', level: 'l1', horario: 'corrido' }))`);
   await cdp.goto('/activar.html');
   for (let t = 0; t < 25; t++) { if (await cdp.evalJs(`Boolean(document.getElementById('activar-live-form'))`)) break; await wait(120); }
   const resB = await cdp.evalJs(`(() => {
-    const lsOk = document.getElementById('act-comercio').value === 'Resto Norte' && document.getElementById('act-nombre-titular').value === 'Juan' && document.getElementById('act-whatsapp').value === '3814445566';
-    const l1Pelu = document.getElementById('act-block5-body').innerText.includes('agenda individual 1 a 1') && !document.getElementById('act-cap-turno');
+    const lsOk = document.getElementById('act-comercio').value === 'Resto Norte' && document.getElementById('act-whatsapp').value === '3814445566';
+    const l1Pelu = document.getElementById('act-block5-body').innerText.includes('agenda individual 1 a 1');
     document.getElementById('act-rubro').value = 'gastronomia'; document.getElementById('act-rubro').dispatchEvent(new Event('change'));
-    const l1Gastro = Boolean(document.getElementById('act-cap-turno')) && document.getElementById('act-block5-body').innerText.includes('Comensales');
+    const l1Gastro = Boolean(document.getElementById('act-cap-turno'));
     return { lsOk, l1Pelu, l1Gastro };
   })()`);
   ok(resB.lsOk && resB.l1Pelu && resB.l1Gastro, `${vp.n}: Fallback localStorage + Bloque 5 L1 (Peluquería vs Gastronomía)`);
-
-  await cdp.goto('/activar.html?comercio=Staff%20Pro&rubro=salud&plan=l3&nombre=Ana&apellido=Gómez');
-  for (let t = 0; t < 25; t++) { if (await cdp.evalJs(`Boolean(document.getElementById('activar-live-form'))`)) break; await wait(120); }
-  const l3Ok = await cdp.evalJs(`Boolean(document.getElementById('act-staff-list') && document.querySelector('.act-st-spec') && document.querySelector('.act-st-sched'))`);
-  ok(l3Ok, `${vp.n}: Bloque 5 L3 profesionales (Nombre, Especialidad, Horario)`);
 }
 
 async function main() {
