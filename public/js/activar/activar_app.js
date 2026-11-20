@@ -1,10 +1,14 @@
 // Archivo: public/js/activar/activar_app.js
-// Controlador Interactivo de Ficha Rápida + Validación + Netlify Forms (< 160L)
+// Orquestador Ficha Rápida v2: Geo, Logo WebP, 7 Días, Bloque 5 Dinámico y FormData (< 180L)
 
 (function () {
   const D = () => window.TucuActivarData;
   const M = () => window.TucuActivarMarkup;
+  const G = () => window.TucuActivarGeo;
+  const L = () => window.TucuActivarLogo;
+  const S = () => window.TucuActivarSchedule;
   const val = (id) => (document.getElementById(id)?.value || '').trim();
+
   const showErr = (msg) => {
     const el = document.getElementById('activar-error');
     if (!el) return;
@@ -25,41 +29,17 @@
   function collectStaff() {
     return [...document.querySelectorAll('.act-staff-row')].map(row => ({
       name: (row.querySelector('.act-st-name')?.value || '').trim(),
-      hours: (row.querySelector('.act-st-hours')?.value || '').trim()
-    })).filter(s => s.name || s.hours);
+      spec: (row.querySelector('.act-st-spec')?.value || '').trim(),
+      sched: (row.querySelector('.act-st-sched')?.value || 'Horario general del local').trim()
+    })).filter(s => s.name || s.spec);
   }
 
-  function syncConditionalBlocks() {
-    const mod = document.querySelector('input[name="modalidad_horario"]:checked')?.value || 'corrido';
-    const isPartido = mod === 'partido';
-    document.getElementById('act-tarde-wrap')?.classList.toggle('hidden', !isPartido);
-    const mTo = document.getElementById('act-m-to');
-    if (mTo && !mTo.dataset.touched) mTo.value = isPartido ? '13:00' : '18:00';
-
-    const senaMode = val('act-sena-mode');
-    document.getElementById('act-sena-val-wrap')?.classList.toggle('hidden', senaMode === 'sin_sena');
-
-    const plan = val('act-plan');
-    document.getElementById('act-l2-box')?.classList.toggle('hidden', plan !== 'l2');
-    document.getElementById('act-l3-box')?.classList.toggle('hidden', plan !== 'l3');
-  }
-
-  function bindDynamicLists() {
-    const srvList = document.getElementById('act-services-list');
+  function bindStaffList() {
     const stList = document.getElementById('act-staff-list');
-    document.getElementById('btn-add-service')?.addEventListener('click', () => {
-      if (!srvList) return;
-      const idx = srvList.querySelectorAll('.act-service-row').length;
-      srvList.insertAdjacentHTML('beforeend', M().renderServiceRow(idx, {}));
-    });
     document.getElementById('btn-add-staff')?.addEventListener('click', () => {
       if (!stList) return;
       const idx = stList.querySelectorAll('.act-staff-row').length;
       stList.insertAdjacentHTML('beforeend', M().renderStaffRow(idx, {}));
-    });
-    srvList?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.btn-del-srv');
-      if (btn && srvList.querySelectorAll('.act-service-row').length > 1) btn.closest('.act-service-row')?.remove();
     });
     stList?.addEventListener('click', (e) => {
       const btn = e.target.closest('.btn-del-staff');
@@ -67,57 +47,79 @@
     });
   }
 
+  function syncSenaVisibility() {
+    const isNoSena = val('act-sena-mode') === 'sin_sena';
+    document.getElementById('act-sena-fields-wrap')?.classList.toggle('hidden', isNoSena);
+  }
+
   function buildValidatedPayload() {
-    const d = D();
-    const comercio = val('act-comercio'), titular = val('act-titular'), direccion = val('act-direccion'), pin = val('act-pin');
-    const days = [...document.querySelectorAll('[data-act-day]:checked')].map(el => el.dataset.actDay);
-    const modH = document.querySelector('input[name="modalidad_horario"]:checked')?.value || 'corrido';
-    const srvs = collectServices();
-    const senaMode = val('act-sena-mode'), senaVal = senaMode === 'sin_sena' ? '0' : val('act-sena-val'), alias = val('act-alias');
+    const d = D(), comercio = val('act-comercio'), nombreTitular = val('act-nombre-titular'), apellidoTitular = val('act-apellido-titular');
+    const email = val('act-email'), rubro = val('act-rubro'), localidad = val('act-localidad');
+    const direccion = val('act-dir-norm') || val('act-direccion'), sched = S().serializeSchedule(), srvs = collectServices();
+    const senaMode = val('act-sena-mode'), isNoSena = senaMode === 'sin_sena';
+    const senaVal = isNoSena ? '' : val('act-sena-val'), alias = isNoSena ? '' : val('act-alias'), cbu = isNoSena ? '' : val('act-cbu');
     const pms = [...document.querySelectorAll('[data-act-pm]:checked')].map(el => el.dataset.actPm);
-    const waInfo = d.formatE164Ar(val('act-whatsapp'));
-    const plan = val('act-plan'), staff = collectStaff();
+    const waInfo = d.formatE164Ar(val('act-whatsapp')), plan = val('act-plan') || 'l2';
+    const spaceCfg = d.RUBRO_SPACE_CONFIG[rubro] || d.RUBRO_SPACE_CONFIG.servicios, staff = collectStaff();
 
     if (!comercio) return { err: 'Ingresá el nombre comercial de tu local.' };
-    if (!titular) return { err: 'Ingresá el nombre del titular o responsable.' };
-    if (!direccion) return { err: 'Ingresá la dirección física exacta del local.' };
-    if (!/^\d{4}$/.test(pin)) return { err: 'El PIN de acceso debe tener exactamente 4 números.' };
-    if (days.length === 0) return { err: 'Seleccioná al menos un día de atención.' };
+    if (!nombreTitular) return { err: 'Ingresá el nombre del titular.' };
+    if (!apellidoTitular) return { err: 'Ingresá el apellido del titular.' };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { err: 'Ingresá un email válido para el local.' };
+    if (!val('act-direccion')) return { err: 'Ingresá la dirección física exacta del local.' };
+    if (!sched.valid) return { err: 'Dejá al menos un día abierto en los horarios del local.' };
     if (srvs.length === 0 || srvs.some(s => !s.name || s.price <= 0)) return { err: 'Completá al menos 1 servicio con nombre y precio mayor a cero.' };
-    if (senaMode !== 'sin_sena' && (!Number(senaVal) || !alias)) return { err: 'Indicá el valor de la seña y tu Alias para recibir transferencias.' };
+    if (!isNoSena && (!Number(senaVal) || !alias)) return { err: 'Indicá el valor de la seña y tu Alias para recibir transferencias.' };
     if (!waInfo.e164) return { err: 'Ingresá un número de WhatsApp válido de 10 dígitos (ej: 3815554321).' };
-    if (plan === 'l2' && (Number(val('act-l2-spaces')) < 1 || Number(val('act-l2-cap')) < 1)) return { err: 'Indicá la cantidad de espacios y capacidad por turno.' };
+    if (plan === 'l2' && Number(val('act-l2-spaces')) < 1) return { err: `Indicá la cantidad de ${spaceCfg.plural}.` };
+    if ((plan === 'l1' || plan === 'l2') && spaceCfg.needsCapacity && Number(val('act-cap-turno')) < 1) return { err: `Indicá ${spaceCfg.capLabel.toLowerCase()}.` };
     if (plan === 'l3' && (staff.length === 0 || staff.some(s => !s.name))) return { err: 'Cargá al menos 1 profesional en el equipo para Nivel 3.' };
 
     return {
       payload: {
-        'form-name': 'ficha-activacion-tucured', 'bot-field': '',
-        comercio, titular, rubro: val('act-rubro'), localidad: val('act-localidad'), direccion, pin_acceso: pin,
-        logo_url: val('act-logo-url'), logo_nota: val('act-logo-nota'),
-        dias_atencion: days.join(', '), modalidad_horario: modH,
-        horario_manana_desde: val('act-m-from'), horario_manana_hasta: val('act-m-to'),
-        horario_tarde_desde: modH === 'partido' ? val('act-t-from') : '', horario_tarde_hasta: modH === 'partido' ? val('act-t-to') : '',
-        intervalo_minutos: val('act-intervalo'),
+        'form-name': 'ficha-activacion-tucured', 'bot-field': '', comercio,
+        nombre_titular: nombreTitular, apellido_titular: apellidoTitular, email, instagram: val('act-instagram'),
+        rubro, localidad, direccion, direccion_referencia: val('act-dir-ref'),
+        direccion_lat: val('act-dir-lat'), direccion_lng: val('act-dir-lng'),
+        horarios_detalle: sched.text, intervalo_minutos: sched.intervalo,
         servicios_detalle: srvs.map(s => `${s.name} | $${s.price} | ${s.duration} min | ${s.sena ? 'Con seña' : 'Sin seña'}`).join('\n'),
-        modalidad_sena: senaMode, valor_sena: senaVal, alias_pago: alias, cbu_cvu: val('act-cbu'),
+        modalidad_sena: senaMode, valor_sena: senaVal, alias_pago: alias, cbu_cvu: cbu,
         medios_pago: pms.join(', '), whatsapp_local: waInfo.e164, plan,
-        cantidad_espacios: plan === 'l2' ? val('act-l2-spaces') : '', capacidad_turno: plan === 'l2' ? val('act-l2-cap') : '',
-        profesionales_detalle: plan === 'l3' ? staff.map(s => `${s.name}${s.hours ? ` (${s.hours})` : ''}`).join('\n') : ''
+        cantidad_espacios: plan === 'l2' ? val('act-l2-spaces') : '',
+        nombres_espacios: plan === 'l2' ? val('act-l2-names') : '',
+        capacidad_turno: (plan === 'l1' || plan === 'l2') && spaceCfg.needsCapacity ? val('act-cap-turno') : '',
+        profesionales_detalle: plan === 'l3' ? staff.map(s => `${s.name}${s.spec ? ` — ${s.spec}` : ''} (${s.sched})`).join('\n') : ''
       }
     };
   }
 
   function init() {
     const root = document.getElementById('activar-form-root'), succRoot = document.getElementById('activar-success-root');
-    if (!root || !D() || !M()) return;
-    const prefill = D().parseQueryPrefill(window.location.search);
+    if (!root || !D() || !M() || !G() || !L() || !S()) return;
+    const prefill = D().resolvePrefillData(window.location.search);
     root.innerHTML = M().renderForm(prefill);
-    syncConditionalBlocks(); bindDynamicLists();
 
-    document.querySelectorAll('input[name="modalidad_horario"]').forEach(r => r.addEventListener('change', syncConditionalBlocks));
-    ['act-sena-mode', 'act-plan'].forEach(id => document.getElementById(id)?.addEventListener('change', syncConditionalBlocks));
-    document.getElementById('act-m-to')?.addEventListener('input', (e) => { e.target.dataset.touched = '1'; });
-    document.getElementById('act-pin')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+    G().attach('act-direccion');
+    L().mount(document.getElementById('act-logo-mount'));
+    S().mount(document.getElementById('act-schedule-mount'), prefill.horario);
+    syncSenaVisibility();
+    bindStaffList();
+
+    const srvList = document.getElementById('act-services-list');
+    document.getElementById('btn-add-service')?.addEventListener('click', () => {
+      if (!srvList) return;
+      srvList.insertAdjacentHTML('beforeend', M().renderServiceRow(srvList.querySelectorAll('.act-service-row').length, {}));
+    });
+    srvList?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-del-srv');
+      if (btn && srvList.querySelectorAll('.act-service-row').length > 1) btn.closest('.act-service-row')?.remove();
+    });
+
+    document.getElementById('act-rubro')?.addEventListener('change', (e) => {
+      const box = document.getElementById('act-block5-body');
+      if (box) { box.innerHTML = M().renderBlock5Body(val('act-plan') || prefill.plan, e.target.value); bindStaffList(); }
+    });
+    document.getElementById('act-sena-mode')?.addEventListener('change', syncSenaVisibility);
     document.getElementById('act-cbu')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 22); });
     document.getElementById('act-whatsapp')?.addEventListener('input', (e) => {
       const info = D().formatE164Ar(e.target.value), badge = document.getElementById('act-wa-e164');
@@ -129,11 +131,20 @@
       e.preventDefault(); showErr('');
       const { err, payload } = buildValidatedPayload();
       if (err) return showErr(err);
+
+      const formData = new FormData();
+      Object.entries(payload).forEach(([k, v]) => formData.append(k, v ?? ''));
+      const logoFile = L().getLogoFile();
+      if (logoFile) formData.append('logo_archivo', logoFile, logoFile.name);
+      window.__lastActivarFormData = formData;
+
       const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
-      if (!isLocal) {
+      if (isLocal) {
+        console.info('[TucuRed Activar Local FormData]', { ...payload, logo_archivo: logoFile ? `${logoFile.name} (${Math.round(logoFile.size / 1024)} KB, ${logoFile.type})` : null });
+      } else {
         if (submitBtn) submitBtn.disabled = true;
         try {
-          const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(payload).toString() });
+          const res = await fetch(window.location.pathname || '/activar.html', { method: 'POST', body: formData });
           if (!res.ok) throw new Error(`Netlify Forms HTTP ${res.status}`);
         } catch (ex) {
           console.error('[TucuRed Activar] Error Netlify Forms:', ex);

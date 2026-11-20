@@ -1,7 +1,7 @@
 // Archivo: js/utils/whatsapp_link.js
 /**
- * 📲 Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp con Pre-llenado
- * Formatea URLs hacia la línea maestra (5493814132154) con todos los datos del Wizard.
+ * 📲 Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp y Ficha Rápida
+ * Formatea URLs hacia la línea maestra (5493814132154) y prefill completo hacia /activar.html.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
 
@@ -30,12 +30,23 @@ export const WA_FALLBACK_URL = `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURI
 
 export function buildActivarUrl(lead = {}) {
   const params = new URLSearchParams();
+  let nombre = (lead.nombreTitular || '').trim();
+  let apellido = (lead.apellidoTitular || '').trim();
+  if (!nombre && lead.titular) {
+    const parts = String(lead.titular).trim().split(/\s+/);
+    nombre = parts.shift() || '';
+    apellido = apellido || parts.join(' ');
+  }
+  const horarioRaw = (lead.schedule || lead.horario || '').trim();
   if (lead.nombre) params.set('comercio', lead.nombre.trim());
   if (lead.rubro) params.set('rubro', lead.rubro);
   if (lead.level) params.set('plan', lead.level);
-  const titular = (lead.titular || `${lead.nombreTitular || ''} ${lead.apellidoTitular || ''}`).trim();
-  if (titular) params.set('titular', titular);
+  if (nombre) params.set('nombre', nombre);
+  if (apellido) params.set('apellido', apellido);
   if (lead.ciudad) params.set('localidad', lead.ciudad.trim());
+  if (lead.whatsapp) params.set('whatsapp', String(lead.whatsapp).replace(/\D/g, ''));
+  if (lead.email) params.set('email', lead.email.trim());
+  if (horarioRaw === 'corrido' || horarioRaw === 'cortado') params.set('horario', horarioRaw);
   const qs = params.toString();
   return `https://tucured.ar/activar.html${qs ? `?${qs}` : ''}`;
 }
@@ -45,7 +56,7 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const ciudad = lead.ciudad ? lead.ciudad.trim() : 'Tucumán';
   const rubro = RUBRO_NAMES[lead.rubro] || lead.rubro || 'Comercio Local';
   const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2: Central Pro Multi-Box';
-  const horario = lead.horario === 'cortado' ? 'Turno cortado (corte de siesta)' : 'Horario corrido';
+  const horario = (lead.schedule || lead.horario) === 'cortado' ? 'Turno cortado (corte de siesta)' : 'Horario corrido';
   const titular = (lead.titular || `${lead.nombreTitular || ''} ${lead.apellidoTitular || ''}`).trim();
   const extras = [
     `• Horario: ${horario}`,

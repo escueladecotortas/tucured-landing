@@ -54,23 +54,22 @@
   </footer>
 
   <!-- Definición Estática Oculta para Detección de Netlify Forms en Build -->
-  <form name="ficha-activacion-tucured" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <form name="ficha-activacion-tucured" method="POST" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data" hidden>
     <input type="hidden" name="form-name" value="ficha-activacion-tucured" />
     <input type="text" name="bot-field" />
     <input type="text" name="comercio" />
-    <input type="text" name="titular" />
+    <input type="text" name="nombre_titular" />
+    <input type="text" name="apellido_titular" />
+    <input type="email" name="email" />
+    <input type="text" name="instagram" />
     <input type="text" name="rubro" />
     <input type="text" name="localidad" />
     <input type="text" name="direccion" />
-    <input type="text" name="pin_acceso" />
-    <input type="text" name="logo_url" />
-    <input type="text" name="logo_nota" />
-    <input type="text" name="dias_atencion" />
-    <input type="text" name="modalidad_horario" />
-    <input type="text" name="horario_manana_desde" />
-    <input type="text" name="horario_manana_hasta" />
-    <input type="text" name="horario_tarde_desde" />
-    <input type="text" name="horario_tarde_hasta" />
+    <input type="text" name="direccion_referencia" />
+    <input type="text" name="direccion_lat" />
+    <input type="text" name="direccion_lng" />
+    <input type="file" name="logo_archivo" />
+    <textarea name="horarios_detalle"></textarea>
     <input type="text" name="intervalo_minutos" />
     <textarea name="servicios_detalle"></textarea>
     <input type="text" name="modalidad_sena" />
@@ -81,11 +80,15 @@
     <input type="text" name="whatsapp_local" />
     <input type="text" name="plan" />
     <input type="text" name="cantidad_espacios" />
+    <input type="text" name="nombres_espacios" />
     <input type="text" name="capacidad_turno" />
     <textarea name="profesionales_detalle"></textarea>
   </form>
 
   <script src="/js/activar/activar_data.js"></script>
+  <script src="/js/activar/activar_geo.js"></script>
+  <script src="/js/activar/activar_logo.js"></script>
+  <script src="/js/activar/activar_schedule.js"></script>
   <script src="/js/activar/activar_markup.js"></script>
   <script src="/js/activar/activar_app.js"></script>
 </body>
