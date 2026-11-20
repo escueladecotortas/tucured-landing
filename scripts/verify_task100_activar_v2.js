@@ -49,7 +49,7 @@ function runStatic() {
   ok(fs.existsSync(distOkPath) && fs.readFileSync(distOkPath, 'utf8').includes('NETLIFY_FORM_ACCEPTED'), 'dist/activar-ok.html existe con marcador NETLIFY_FORM_ACCEPTED');
   const distAct = fs.readFileSync(path.resolve('dist/activar.html'), 'utf8');
   const mustHave = [
-    'name="ficha-activacion-tucured"', 'action="/activar-ok.html"', 'enctype="multipart/form-data"', 'name="nombre_titular"',
+    'name="ficha-activacion-tucured"', 'action="/activar-ok.html"', 'enctype="multipart/form-data"', 'name="name"', 'name="nombre_titular"',
     'name="apellido_titular"', 'name="email"', 'name="instagram"', 'name="direccion_referencia"', 'name="direccion_lat"',
     'name="direccion_lng"', 'type="file" name="logo_archivo"', 'name="horarios_detalle"', 'name="nombres_espacios"', 'name="profesionales_detalle"'
   ];
@@ -117,8 +117,10 @@ async function runViewport(cdp, vp) {
     window.fetch = origFetch; window.__forceRemoteActivar = false;
     const fd = window.__lastActivarFormData;
     const keys = fd ? [...fd.keys()] : [];
+    const senderVal = fd ? String(fd.get('name') || '') : '';
     const orderOk = keys[0] === 'form-name' && fd.get('form-name') === 'ficha-activacion-tucured'
-      && keys[1] === 'bot-field' && fd.get('bot-field') === '' && keys[keys.length - 1] === 'logo_archivo'
+      && keys[1] === 'name' && senderVal.includes('Estudio Norte') && senderVal.includes('Sofía Mendoza')
+      && !fd.has('bot-field') && keys[keys.length - 1] === 'logo_archivo'
       && fd.get('logo_archivo')?.type === 'image/webp';
     const succVis = !document.getElementById('activar-success-root').classList.contains('hidden');
     return { preUrl, noLegacy, l2Pelu, l2Dep, schedOk, webpOk, noSenaHide, overflow, false200Rejected, orderOk, succVis };
@@ -127,7 +129,7 @@ async function runViewport(cdp, vp) {
   ok(resA.preUrl && resA.noLegacy && resA.l2Pelu && resA.l2Dep, `${vp.n}: Prefill URL + sin legacy + Bloque 5 L2 dinámico`);
   ok(resA.schedOk && resA.webpOk && resA.noSenaHide && !resA.overflow, `${vp.n}: 7 días + WebP + sin_sena + 0 overflow`);
   ok(resA.false200Rejected, `${vp.n}: Anti Falso-200 bloquea éxito si falta NETLIFY_FORM_ACCEPTED`);
-  ok(resA.orderOk && resA.succVis, `${vp.n}: Orden estricto FormData (form-name[0], bot-field[1], logo_archivo[last]) + éxito con centinela`);
+  ok(resA.orderOk && resA.succVis, `${vp.n}: Orden estricto FormData (form-name[0], name[1], sin bot-field, logo_archivo[last]) + éxito con centinela`);
 
   await cdp.evalJs(`localStorage.setItem('local_db_wizard', JSON.stringify({ nombre: 'Resto Norte', nombreTitular: 'Juan', apellidoTitular: 'Pérez', email: 'juan@resto.com', whatsapp: '3814445566', ciudad: 'Tafí Viejo', rubro: 'peluqueria', level: 'l1', horario: 'corrido' }))`);
   await cdp.goto('/activar.html');

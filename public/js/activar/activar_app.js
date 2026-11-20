@@ -133,10 +133,11 @@
       if (err) return showErr(err);
 
       const formData = new FormData();
+      const senderName = `${payload.comercio || ''} — ${payload.nombre_titular || ''} ${payload.apellido_titular || ''}`.replace(/\s+/g, ' ').trim();
       formData.append('form-name', 'ficha-activacion-tucured');
-      formData.append('bot-field', '');
+      formData.append('name', senderName);
       Object.entries(payload).forEach(([k, v]) => {
-        if (k === 'form-name' || k === 'bot-field') return;
+        if (k === 'form-name' || k === 'name' || k === 'bot-field') return;
         formData.append(k, v ?? '');
       });
       const logoFile = L().getLogoFile();
