@@ -1,11 +1,13 @@
 // Archivo: netlify/functions/wa-welcome.js
-// BFF Transaccional WhatsApp post-Wizard: Anti-Abuso, Rate-Limit y Despacho Seguro a :5051 (< 175L)
+// BFF Transaccional WhatsApp post-Wizard: Retry 503/Timeout, Rollback Rate-Limit y Logging Seguro (< 195L)
 
 const IP_WINDOW_MS = 10 * 60 * 1000;
 const IP_MAX_HITS = 2;
 const PHONE_WINDOW_MS = 15 * 60 * 1000;
-const FETCH_TIMEOUT_MS = 6000;
-const ALERT_DELAY_MS = 1500;
+const FETCH_TIMEOUT_MS = 4000;
+const RETRY_BACKOFF_MS = 2200;
+const ALERT_DELAY_MS = 1000;
+const FUNCTION_BUDGET_MS = 9000;
 
 const ipHits = new Map();
 const phoneHits = new Map();
@@ -25,6 +27,7 @@ const RUBRO_LABELS = {
   servicios: 'Servicios Profesionales'
 };
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const jsonRes = (statusCode, body) => ({
   statusCode,
   headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -48,9 +51,7 @@ function isAllowedOrigin(headers) {
     if (/^https:\/\/[a-z0-9-]+\.netlify\.app$/i.test(origin)) return true;
     if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true;
     return false;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 function normalizeArPhone(raw) {
@@ -80,30 +81,51 @@ function checkRateLimits(ip, phone) {
   return '';
 }
 
-async function sendGatewayText(baseUrl, apiKey, phone, message) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(`${baseUrl}/api/wa/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
-      body: JSON.stringify({ phone, message }),
-      signal: ctrl.signal
-    });
-    return res.ok;
-  } catch {
+async function sendGatewayText(baseUrl, apiKey, phone, message, target, deadline) {
+  const backoffMs = Math.max(0, Number(process.env.WA_RETRY_BACKOFF_MS ?? RETRY_BACKOFF_MS));
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 500) {
+      console.warn('[WA_WELCOME_GW]', JSON.stringify({ target, attempt, status: 0, reason: 'BUDGET_EXHAUSTED', durationMs: 0 }));
+      return false;
+    }
+    const ctrl = new AbortController();
+    const timeoutMs = Math.min(FETCH_TIMEOUT_MS, Math.max(500, remaining - 200));
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    const t0 = Date.now();
+    let status = 0, reason = '', transient = false;
+    try {
+      const res = await fetch(`${baseUrl}/api/wa/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+        body: JSON.stringify({ phone, message }),
+        signal: ctrl.signal
+      });
+      if (res.ok) return true;
+      status = res.status;
+      transient = status === 503 || status === 504;
+      reason = transient ? 'TRANSIENT_HTTP' : 'NON_RETRYABLE_HTTP';
+    } catch (err) {
+      transient = true;
+      reason = err?.name === 'AbortError' ? 'ABORT_TIMEOUT' : 'NETWORK_ERROR';
+    } finally {
+      clearTimeout(timer);
+    }
+    const durationMs = Date.now() - t0;
+    console.warn('[WA_WELCOME_GW]', JSON.stringify({ target, attempt, status, reason, durationMs }));
+    if (attempt === 1 && transient && deadline - Date.now() > backoffMs + 1800) {
+      if (backoffMs > 0) await sleep(backoffMs);
+      continue;
+    }
     return false;
-  } finally {
-    clearTimeout(timer);
   }
+  return false;
 }
 
-export function __resetRateLimits() {
-  ipHits.clear();
-  phoneHits.clear();
-}
+export function __resetRateLimits() { ipHits.clear(); phoneHits.clear(); }
 
 export async function handler(event) {
+  const deadline = Date.now() + FUNCTION_BUDGET_MS;
   if (event?.httpMethod !== 'POST') return jsonRes(405, { ok: false, reason: 'METHOD_NOT_ALLOWED' });
   if (!isAllowedOrigin(event.headers)) return jsonRes(403, { ok: false, reason: 'FORBIDDEN_ORIGIN' });
 
@@ -143,13 +165,14 @@ export async function handler(event) {
     `Ante cualquier consulta respondé este mismo mensaje. ¡Estamos para ayudarte a dejar tu turnero listo hoy!`
   ].join('\n\n');
 
-  const welcomeSent = await sendGatewayText(baseUrl, apiKey, phone, welcomeMsg);
+  const welcomeSent = await sendGatewayText(baseUrl, apiKey, phone, welcomeMsg, 'welcome', deadline);
+  if (!welcomeSent) phoneHits.delete(phone);
 
   let alertSent = false;
   const leoPhone = String(process.env.LEO_ALERT_PHONE || '').replace(/\D/g, '');
   if (leoPhone && /^\d{12,15}$/.test(leoPhone) && leoPhone !== phone) {
-    const delayMs = Number(process.env.WA_ALERT_DELAY_MS ?? ALERT_DELAY_MS);
-    if (delayMs > 0) await new Promise(r => setTimeout(r, delayMs));
+    const delayMs = Math.max(0, Number(process.env.WA_ALERT_DELAY_MS ?? ALERT_DELAY_MS));
+    if (delayMs > 0 && deadline - Date.now() > delayMs + 1500) await sleep(delayMs);
     const alertMsg = [
       `🚀 *Nuevo Lead Wizard — Tucu Red*`,
       `• Comercio: *${comercio}*`,
@@ -161,7 +184,7 @@ export async function handler(event) {
       email ? `• Email: ${email}` : '',
       `• Chat directo: https://wa.me/${phone}`
     ].filter(Boolean).join('\n');
-    alertSent = await sendGatewayText(baseUrl, apiKey, leoPhone, alertMsg);
+    alertSent = await sendGatewayText(baseUrl, apiKey, leoPhone, alertMsg, 'alert', deadline);
   }
 
   return jsonRes(200, { ok: true, welcomeSent, alertSent });
