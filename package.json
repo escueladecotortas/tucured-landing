@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --port 5174 --host",
     "build": "vite build",
-    "preview": "vite preview --port 5174 --host"
+    "preview": "vite preview --port 5174 --host",
+    "kanban:rotate": "node scripts/kanban_rotate_gate.js --rotate",
+    "kanban:check": "node scripts/kanban_rotate_gate.js --check"
   },
   "devDependencies": {
     "vite": "^5.4.0"
