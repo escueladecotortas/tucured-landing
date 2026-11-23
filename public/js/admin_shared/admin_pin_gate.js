@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_shared/admin_pin_gate.js
-// Compuerta Universal PIN 4 Dígitos (L1/L2/L3 + Showroom Embed) (Nexus OS v11.1 < 150 líneas)
+// Compuerta Universal PIN 4 Dígitos (L1/L2/L3 + Showroom Embed) (Nexus OS v11.1 < 155L)
 
 (function (global) {
   const AUTH_KEY = 'tucu_admin_auth';
@@ -34,17 +34,17 @@
       if (!dot) continue;
       const filled = i < pinBuffer.length;
       dot.className = filled
-        ? 'w-3.5 h-3.5 rounded-full bg-[#800000] dark:bg-red-500 border-2 border-[#800000] dark:border-red-400 scale-110 transition-all shadow-sm'
+        ? 'w-3.5 h-3.5 rounded-full tucu-primary-bg border-2 border-stone-900/20 dark:border-white/30 scale-110 transition-all shadow-sm'
         : 'w-3.5 h-3.5 rounded-full border-2 border-stone-300 dark:border-stone-600 bg-transparent transition-all';
     }
   }
 
   function buildKeypadHtml() {
-    const numBtn = (n) => `<button type="button" data-pin-digit="${n}" onclick="window.AdminPinGate.press('${n}')" class="pin-key-btn h-12 rounded-2xl bg-white dark:bg-[#1C1A19] border border-[#D5CEC2] dark:border-stone-700 text-stone-900 dark:text-stone-100 font-bold text-base hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-95 transition-all shadow-xs cursor-pointer">${n}</button>`;
+    const numBtn = (n) => `<button type="button" data-pin-digit="${n}" onclick="window.AdminPinGate.press('${n}')" class="pin-key-btn h-12 rounded-2xl bg-white dark:bg-[#1C1A19] border border-[#D5CEC2] dark:border-stone-700 text-stone-900 dark:text-stone-100 font-bold text-base hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-95 transition-all shadow-xs cursor-pointer tabular-nums">${n}</button>`;
     return `
       <div class="w-full max-w-[300px] rounded-3xl bg-[#FBFBF9] dark:bg-[#121110] border border-[#D5CEC2] dark:border-stone-800 p-6 shadow-2xl space-y-5 text-center">
         <div class="space-y-1.5">
-          <div class="w-12 h-12 mx-auto rounded-2xl bg-[#800000]/10 dark:bg-red-950/60 text-[#800000] dark:text-red-300 border border-[#800000]/20 dark:border-red-800 flex items-center justify-center">${SVG_LOCK}</div>
+          <div class="w-12 h-12 mx-auto rounded-2xl tucu-primary-soft border flex items-center justify-center">${SVG_LOCK}</div>
           <h2 class="font-title text-base font-extrabold text-stone-900 dark:text-stone-100">Acceso Administrativo</h2>
           <p class="text-[11px] text-stone-500 dark:text-stone-400 leading-snug">Ingresá cualquier PIN de 4 dígitos para desbloquear</p>
         </div>
@@ -150,4 +150,3 @@
     else init();
   }
 })(typeof window !== 'undefined' ? window : global);
-

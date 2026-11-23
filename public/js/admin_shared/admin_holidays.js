@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_shared/admin_holidays.js
-// Módulo Compartido de Feriados Nacionales 2026 por Mes con Toggle Individual (<= 175 líneas)
+// Módulo Único de Feriados Nacionales 2026 por Mes sin Checkbox Maestro (L1/L2/L3 < 180L)
 (function (root) {
   const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const ALIAS_GROUPS = [
@@ -104,7 +104,6 @@
   function isDateBlocked(level, rubro, dateStr) {
     const target = String(dateStr || '').slice(0, 10);
     if (!target) return false;
-    if (level === 'l2' && localStorage.getItem('tucu_l2_block_holidays') === 'false') return false;
     const year = Number(target.slice(0, 4)) || getYear();
     const hit = getCombinedHolidays(level, year).find(h => h.fecha === target);
     return hit ? isItemBlocked(level, rubro, target, hit) : false;
@@ -133,27 +132,40 @@
     const box = document.getElementById(containerId); if (!box) return;
     if (typeof onChangeCb === 'function') renderCbs[containerId] = onChangeCb;
     const year = getYear(), list = getCombinedHolidays(level, year);
-    const globalOff = level === 'l2' && localStorage.getItem('tucu_l2_block_holidays') === 'false';
+    const blockedCount = list.filter(h => isItemBlocked(level, rubro, h.fecha, h)).length;
     const byMonth = new Map();
     list.forEach(h => {
       const mIdx = Math.max(0, Math.min(11, (parseInt(h.fecha.slice(5, 7), 10) || 1) - 1));
       if (!byMonth.has(mIdx)) byMonth.set(mIdx, []);
       byMonth.get(mIdx).push(h);
     });
-    box.innerHTML = Array.from(byMonth.entries()).sort((a, b) => a[0] - b[0]).map(([mIdx, items]) => `
+    const monthsHtml = Array.from(byMonth.entries()).sort((a, b) => a[0] - b[0]).map(([mIdx, items]) => `
       <div data-holiday-month="${MONTHS_ES[mIdx]}" class="p-3 rounded-2xl bg-stone-50 dark:bg-stone-900/70 border border-[#D5CEC2] dark:border-stone-800 space-y-2 shadow-2xs">
         <div class="flex items-center justify-between border-b border-stone-200/70 dark:border-stone-800 pb-1.5">
-          <span class="text-xs font-extrabold uppercase tracking-wider text-red-900 dark:text-red-400">${MONTHS_ES[mIdx]} ${year}</span>
-          <span class="text-[10px] font-mono text-stone-500">${items.length}</span>
+          <span class="text-xs font-extrabold uppercase tracking-wider tucu-primary-text">${MONTHS_ES[mIdx]} ${year}</span>
+          <span class="text-[10px] tabular-nums text-stone-500">${items.length}</span>
         </div>
         <div class="space-y-1.5">${items.map(h => {
-          const blk = !globalOff && isItemBlocked(level, rubro, h.fecha, h);
-          return `<div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white dark:bg-stone-950 border border-stone-200/80 dark:border-stone-800">
-            <div class="min-w-0"><span class="block text-xs font-bold text-stone-800 dark:text-stone-100 truncate">${h.nombre}</span><span class="text-[10px] font-mono text-stone-500">${h.fecha}</span></div>
-            <button type="button" data-holiday-toggle="${h.fecha}" onclick="AdminHolidays.toggleHoliday('${level}','${rubro}','${h.fecha}','${containerId}')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold border shrink-0 cursor-pointer transition-colors ${blk ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800' : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'}">${blk ? 'Bloqueado' : 'Abierto'}</button>
-          </div>`;
+          const blk = isItemBlocked(level, rubro, h.fecha, h);
+          return `<label class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white dark:bg-stone-950 border border-stone-200/80 dark:border-stone-800 cursor-pointer">
+            <div class="flex items-center gap-2 min-w-0">
+              <input type="checkbox" data-holiday-toggle="${h.fecha}" ${blk ? 'checked' : ''} onchange="AdminHolidays.toggleHoliday('${level}','${rubro}','${h.fecha}','${containerId}')" class="w-4 h-4 rounded tucu-accent-input shrink-0 cursor-pointer">
+              <div class="min-w-0"><span class="block text-xs font-bold text-stone-800 dark:text-stone-100 truncate">${h.nombre}</span><span class="text-[10px] tabular-nums text-stone-500">${h.fecha}</span></div>
+            </div>
+            <span class="tucu-badge border shrink-0 ${blk ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800' : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'}">${blk ? 'Bloqueado' : 'Abierto'}</span>
+          </label>`;
         }).join('')}</div>
       </div>`).join('');
+    box.innerHTML = `<div data-holidays-card="${level}" class="admin-card tucu-card space-y-3">
+      <div class="flex flex-wrap items-start justify-between gap-2 pb-2.5 border-b border-stone-100 dark:border-stone-800">
+        <div class="min-w-0">
+          <h3 id="${level}-holidays-label" class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">Feriados Nacionales ${year}</h3>
+          <p class="text-xs text-stone-500 mt-0.5">Feriados bloqueados automáticamente. Destildá los días que abras.</p>
+        </div>
+        <span class="tucu-badge tabular-nums tucu-primary-soft border shrink-0">${blockedCount}/${list.length} bloqueados</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">${monthsHtml}</div>
+    </div>`;
   }
 
   function renderLabel(elOrId, prefix = 'Feriados Nacionales') {
@@ -162,5 +174,5 @@
   }
   const isHoliday = (dateStr) => getCachedHolidays(Number(String(dateStr || '').slice(0, 4)) || getYear()).some(h => h.fecha === String(dateStr || '').slice(0, 10));
 
-  root.AdminHolidays = { getCurrentYear: getYear, loadHolidays, getCachedHolidays, renderLabel, isHoliday, buildFallback, isDateBlocked, toggleHoliday, renderMonthlyList };
+  root.AdminHolidays = { getCurrentYear: getYear, loadHolidays, getCachedHolidays, renderLabel, isHoliday, buildFallback, isDateBlocked, toggleHoliday, renderMonthlyList, renderCard: renderMonthlyList };
 })(window);

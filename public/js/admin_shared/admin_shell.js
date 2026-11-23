@@ -109,7 +109,7 @@ window.AdminShell = (function () {
     if (!el) return;
     const styles = { connected: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800', offline: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800', demo: 'bg-stone-100 text-stone-600 border-[#D5CEC2] dark:bg-stone-800/70 dark:text-stone-300 dark:border-stone-700' };
     const dotColor = state === 'connected' ? 'bg-emerald-500' : (state === 'offline' ? 'bg-amber-500' : 'bg-stone-400');
-    el.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[state] || styles.demo}`;
+    el.className = `tucu-badge border ${styles[state] || styles.demo}`;
     el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span><span>${text}</span>`;
   }
 
@@ -126,7 +126,7 @@ window.AdminShell = (function () {
 
   function syncReceptionPill(isOpen) {
     const el = document.getElementById('mobile-turnero-pill'); if (!el) return;
-    el.className = isOpen ? 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 cursor-pointer transition-colors' : 'text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 cursor-pointer transition-colors';
+    el.className = isOpen ? 'tucu-badge bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 cursor-pointer transition-colors' : 'tucu-badge bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 cursor-pointer transition-colors';
     el.textContent = isOpen ? 'Turnero Abierto' : 'Turnero Pausado';
   }
   function toggleReception(storageKey = 'tucu_turnero_open') {

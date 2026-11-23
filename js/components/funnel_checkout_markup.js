@@ -1,6 +1,6 @@
 // Archivo: js/components/funnel_checkout_markup.js
 /**
- * 💳 Tucu Red Web V2 - Markup del Paso 4 y Tarjeta Final Limpia del Wizard
+ * Tucu Red Web V2 - Markup del Paso 4 y Tarjeta Final Limpia del Wizard
  * Alias responsive en móvil 375px, Mercado Pago oficial y flujo WhatsApp post-pago.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
@@ -16,7 +16,7 @@ export function getCheckoutStepMarkup() {
           <span class="material-symbols-outlined text-indigo-600">payments</span>
           <span>Paso 4: Activación y Cierre Transaccional</span>
         </h3>
-        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold font-mono border border-emerald-200">
+        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold tabular-nums border border-emerald-200">
           MES FUNDADOR $4.999 ARS
         </span>
       </div>
@@ -27,13 +27,13 @@ export function getCheckoutStepMarkup() {
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-indigo-900 uppercase font-headline">Resumen de Activación</span>
-              <span id="checkout-summary-level" class="text-xs font-bold text-indigo-700 font-mono px-2 py-0.5 rounded-full bg-white border border-indigo-200">Nivel 2</span>
+              <span id="checkout-summary-level" class="text-xs font-bold text-indigo-700 tabular-nums px-2 py-0.5 rounded-full bg-white border border-indigo-200">Gestión</span>
             </div>
             <div class="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-indigo-200/60">
               <div><span class="text-slate-500 block text-[11px]">Comercio:</span><strong id="checkout-summary-name" class="text-slate-900 font-bold">Tu Comercio</strong></div>
               <div><span class="text-slate-500 block text-[11px]">Localidad:</span><strong id="checkout-summary-city" class="text-slate-900 font-bold">San Miguel de Tucumán</strong></div>
               <div><span class="text-slate-500 block text-[11px]">Rubro:</span><strong id="checkout-summary-rubro" class="text-slate-900 font-bold">Estética y Spa</strong></div>
-              <div><span class="text-slate-500 block text-[11px]">Total Mes Fundador:</span><strong class="text-emerald-700 font-black text-sm font-mono">${cfg.pricePromo}</strong></div>
+              <div><span class="text-slate-500 block text-[11px]">Total Mes Fundador:</span><strong class="text-emerald-700 font-black text-sm tabular-nums">${cfg.pricePromo}</strong></div>
             </div>
           </div>
           <p class="text-[11px] text-indigo-900/80 bg-white/80 rounded-xl p-3 border border-indigo-200/60 leading-relaxed">
@@ -51,7 +51,7 @@ export function getCheckoutStepMarkup() {
               </span>
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
-              <input type="text" id="checkout-alias-input" readonly value="${cfg.aliasCbu}" class="w-full sm:flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-mono font-bold text-slate-800 outline-none" />
+              <input type="text" id="checkout-alias-input" readonly value="${cfg.aliasCbu}" class="w-full sm:flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm tabular-nums font-bold text-slate-800 outline-none" />
               <button type="button" id="btn-copy-alias" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shrink-0">
                 <span class="material-symbols-outlined text-sm" id="copy-alias-icon">content_copy</span>
                 <span id="copy-alias-text">Copiar Alias</span>

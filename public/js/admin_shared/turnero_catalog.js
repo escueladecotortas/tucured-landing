@@ -1,15 +1,25 @@
 // Archivo: public/js/admin_shared/turnero_catalog.js
-// Catálogo en vivo, seeds por rubro, ordenamiento, dirección y persistencia para Turnero Autónomo (< 160 líneas)
+// Catálogo en vivo, seeds, alias demo, saneamiento anti-nombres legacy y persistencia (< 165L)
 
 window.TucuTurneroCatalog = (function () {
   const RUBRO_META = {
-    peluqueria: { label: 'Peluquería & Barbería', biz: 'Peluquería & Barbería Central', address: '25 de Mayo 480, S. M. de Tucumán', l3: 'barberia', defaultDesc: 'Atención profesional en salón con productos incluidos.' },
-    estetica: { label: 'Estética & Bienestar', biz: 'Aura Estética & Spa', address: 'Av. Aconquija 1320, Yerba Buena', l3: 'peluqueria_estetica', defaultDesc: 'Sesión personalizada en gabinete equipado.' },
-    gastronomia: { label: 'Gastronomía & Restó', biz: 'Bistró & Parrilla El Encuentro', address: 'Crisóstomo Álvarez 615, S. M. de Tucumán', l3: 'gastronomia', defaultDesc: 'Reserva garantizada de mesa o experiencia gastronómica.' },
-    salud: { label: 'Salud & Consultorios', biz: 'Consultorios Médicos San Martín', address: 'San Martín 845, S. M. de Tucumán', l3: 'salud_consultorio', requireInsurance: true, defaultDesc: 'Atención médica programada sin demoras en sala.' },
-    servicios: { label: 'Servicios & Consultorios', biz: 'Estudio Jurídico & Contable Norte', address: 'Laprida 310, S. M. de Tucumán', l3: 'servicios', defaultDesc: 'Asesoramiento profesional o turno de servicio técnico.' },
-    deportes: { label: 'Deportes & Clubes', biz: 'Complejo Deportivo & Pádel Norte', address: 'Av. Perón 1850, Yerba Buena', l3: 'deportes_clubes', defaultDesc: 'Reserva de cancha o clase programada con profesor.' }
+    peluqueria: { label: 'Peluquería & Barbería', biz: 'Brava Barbería', alias: 'brava.barberia.mp', address: '25 de Mayo 480, S. M. de Tucumán', l3: 'barberia', defaultDesc: 'Atención profesional en salón con productos incluidos.' },
+    estetica: { label: 'Estética & Bienestar', biz: 'Siena Estética', alias: 'siena.estetica.mp', address: 'Av. Aconquija 1320, Yerba Buena', l3: 'peluqueria_estetica', defaultDesc: 'Sesión personalizada en gabinete equipado.' },
+    gastronomia: { label: 'Gastronomía & Restó', biz: 'Brama Café & Bistró', alias: 'brama.cafe.mp', address: 'Crisóstomo Álvarez 615, S. M. de Tucumán', l3: 'gastronomia', defaultDesc: 'Mesa reservada o experiencia gastronómica confirmada.' },
+    salud: { label: 'Salud & Consultorios', biz: 'Alba Centro Médico', alias: 'alba.medico.mp', address: 'San Martín 845, S. M. de Tucumán', l3: 'salud_consultorio', requireInsurance: true, defaultDesc: 'Atención médica programada sin demoras en sala.' },
+    servicios: { label: 'Servicios & Consultorios', biz: 'Vértice Estudio', alias: 'vertice.estudio.mp', address: 'Laprida 310, S. M. de Tucumán', l3: 'servicios', defaultDesc: 'Asesoramiento profesional o atención técnica programada.' },
+    deportes: { label: 'Deportes & Clubes', biz: 'Norte Pádel Club', alias: 'norte.padel.mp', address: 'Av. Perón 1850, Yerba Buena', l3: 'deportes_clubes', defaultDesc: 'Reserva de cancha o clase programada con profesor.' }
   };
+
+  const LEGACY_DEMO_NAMES = new Set([
+    'peluqueria & barberia central', 'peluqueria central', 'barberia central', 'aura estetica & spa',
+    'siena estetica & spa', 'lumina unas & estetica', 'bistro & parrilla el encuentro', 'la casona resto',
+    'complejo deportivo & padel norte', 'deportes club', 'consultorios medicos san martin',
+    'centro medico especialidades', 'estudio juridico & contable norte', 'tucured central',
+    'estudio multi-staff tucured', 'estudio central tucured', 'the barber club'
+  ]);
+  const foldTxt = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const isLegacyDemoName = (raw) => Boolean(raw && LEGACY_DEMO_NAMES.has(foldTxt(raw)));
 
   const SEEDS = {
     peluqueria: [
@@ -93,7 +103,7 @@ window.TucuTurneroCatalog = (function () {
   function getStaffAndResources({ level = 'l1', rubro = '' } = {}) {
     const norm = normalizeRubro(rubro), meta = RUBRO_META[norm] || RUBRO_META.peluqueria;
     if (level === 'l1') return { staff: [], resources: [] };
-    if (level === 'l2') return { staff: [{ id: 'st-central', name: 'Atención Central / Primer Turno Libre' }], resources: [{ id: 'res-central', name: 'Puesto Principal' }] };
+    if (level === 'l2') return { staff: [{ id: 'st-central', name: 'Atención Central / Primer Horario Libre' }], resources: [{ id: 'res-central', name: 'Puesto Principal' }] };
     const st = readJson(`tucu_l3_staff_${meta.l3}`), rs = readJson(`tucu_l3_resources_${meta.l3}`);
     const staff = Array.isArray(st) && st.length ? st.filter(x => !x.deletedAt && x.active !== false) : [{ id: 'st-1', name: 'Especialista Titular', role: meta.label }, { id: 'st-2', name: 'Primer Profesional Disponible', role: 'Asignación automática' }];
     const resources = Array.isArray(rs) && rs.length ? rs.filter(x => !x.deletedAt && x.active !== false) : [{ id: 'res-1', name: 'Espacio / Box Principal' }];
@@ -104,8 +114,9 @@ window.TucuTurneroCatalog = (function () {
     const norm = normalizeRubro(rubro), meta = RUBRO_META[norm] || RUBRO_META.peluqueria;
     const lvl = ['l1', 'l2', 'l3'].includes(level) ? level : 'l1';
     const activeR = localStorage.getItem(`tucu_${lvl}_rubro`) || '';
-    const sameR = !activeR || (lvl === 'l3' ? activeR === meta.l3 : activeR === norm);
-    const bizName = localStorage.getItem(`tucu_${lvl}_biz_name_${norm}`) || (sameR ? localStorage.getItem(`tucu_${lvl}_biz_name`) : '') || meta.biz;
+    const sameR = Boolean(activeR && (lvl === 'l3' ? activeR === meta.l3 : activeR === norm));
+    const cleanBiz = (k) => { const v = localStorage.getItem(k) || ''; if (!v) return ''; if (isLegacyDemoName(v)) { try { localStorage.setItem(k, meta.biz); } catch (_) {} return meta.biz; } return v; };
+    const bizName = cleanBiz(`tucu_${lvl}_biz_name_${norm}`) || (lvl === 'l3' ? cleanBiz(`tucu_l3_biz_name_${meta.l3}`) : '') || (sameR ? cleanBiz(`tucu_${lvl}_biz_name`) : '') || meta.biz;
     const address = localStorage.getItem(`tucu_${lvl}_address_${norm}`) || (sameR ? localStorage.getItem(`tucu_${lvl}_address`) : '') || meta.address;
     return { normRubro: norm, meta, bizName, address };
   }
@@ -113,24 +124,22 @@ window.TucuTurneroCatalog = (function () {
   function saveBooking({ level = 'l1', slug = 'demo-peluqueria', rubro = 'peluqueria', service, staff, resource, date, selectedDate, time, selectedTime, clientName, clientPhone, coverage = '' }) {
     const eng = window.AdminBookingEngine, isCustom = Boolean(slug && !slug.startsWith('demo-') && slug !== 'mi-comercio');
     const norm = normalizeRubro(rubro || (!isCustom ? slug : '')), meta = RUBRO_META[norm] || RUBRO_META.peluqueria;
-    const info = resolveBizInfo({ level, rubro: norm });
+    const info = resolveBizInfo({ level, rubro: norm }), cov = norm === 'salud' ? String(coverage || '').trim() : '';
     const bkDate = date || selectedDate || window.AdminShell?.localTodayStr?.() || new Date().toISOString().slice(0, 10);
-    const bkTime = time || selectedTime || '10:00';
-    const code = 'TK-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-    const price = Number(service?.price || 10000);
-    const dep = eng ? eng.calcDeposit(price, level, service?.requireDeposit !== false) : Math.round(price * 0.5);
+    const bkTime = time || selectedTime || '10:00', code = 'TK-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const price = Number(service?.price || 10000), dep = eng ? eng.calcDeposit(price, level, service?.requireDeposit !== false) : Math.round(price * 0.5);
     const needsDep = dep > 0, targetSlug = isCustom ? slug : `demo-${norm}`;
     const originTurneroUrl = `/turnero.html?level=${encodeURIComponent(level)}&slug=${encodeURIComponent(slug || targetSlug)}&rubro=${encodeURIComponent(norm)}`;
     const pushKey = (k, rec) => { const p = readJson(k) || []; localStorage.setItem(k, JSON.stringify([rec, ...p.filter(x => x.id !== rec.id)])); };
     let record;
     if (level === 'l1') {
-      record = { id: code, token: `#${code}`, rubroId: norm, bizName: info.bizName, address: info.address, clientName, clientPhone, service: service.name, duration: service.duration, price, depositAmount: dep, depositPaid: !needsDep, day: bkDate, dateStr: bkDate, time: bkTime, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, originTurneroUrl, createdFromTurnero: true };
+      record = { id: code, token: `#${code}`, rubroId: norm, bizName: info.bizName, address: info.address, clientName, clientPhone, coverage: cov, service: service.name, duration: service.duration, price, depositAmount: dep, depositPaid: !needsDep, day: bkDate, dateStr: bkDate, time: bkTime, status: needsDep ? 'pendiente' : 'confirmado', prevStatus: null, originTurneroUrl, createdFromTurnero: true };
       pushKey(`tucu_l1_bookings_${norm}`, record); pushKey(`tucu_l1_bookings_${targetSlug}`, record);
     } else if (level === 'l2') {
-      record = { id: code, rubroId: norm, bizName: info.bizName, address: info.address, client: clientName, phone: clientPhone, pax: norm === 'gastronomia' ? '2' : '1', service: service.name, duration: service.duration, date: bkDate, time: bkTime, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, originTurneroUrl, createdAt: new Date().toISOString(), createdFromTurnero: true };
+      record = { id: code, rubroId: norm, bizName: info.bizName, address: info.address, client: clientName, phone: clientPhone, coverage: cov, pax: norm === 'gastronomia' ? '2' : '1', service: service.name, duration: service.duration, date: bkDate, time: bkTime, price, depositAmount: dep, depositPaid: !needsDep, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, originTurneroUrl, createdAt: new Date().toISOString(), createdFromTurnero: true };
       pushKey(`tucu_l2_bookings_${norm}`, record); pushKey('tucu_l2_bookings', record);
     } else {
-      record = { id: code, rubroId: meta.l3, bizName: info.bizName, address: info.address, staffId: staff?.id || 'st-1', staffName: staff?.name || 'Especialista', resourceId: resource?.id || 'res-1', resourceName: resource?.name || 'Box Principal', serviceId: service.id, serviceName: service.name, duration: service.duration, price, depositAmount: dep, depositPaid: !needsDep, date: bkDate, time: bkTime, client: clientName, phone: clientPhone, coverage, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, originTurneroUrl, createdFromTurnero: true };
+      record = { id: code, rubroId: meta.l3, bizName: info.bizName, address: info.address, staffId: staff?.id || 'st-1', staffName: staff?.name || 'Especialista', resourceId: resource?.id || 'res-1', resourceName: resource?.name || 'Box Principal', serviceId: service.id, serviceName: service.name, duration: service.duration, price, depositAmount: dep, depositPaid: !needsDep, date: bkDate, time: bkTime, client: clientName, phone: clientPhone, coverage: cov, status: needsDep ? 'PENDING_DEPOSIT' : 'CONFIRMED', prevStatus: null, originTurneroUrl, createdFromTurnero: true };
       pushKey(`tucu_l3_bookings_${meta.l3}`, record); pushKey('tucu_l3_bookings', record);
     }
     return { code, record, ticketUrl: `/t/${code}`, portalUrl: `/t/${code}`, originTurneroUrl };
@@ -143,5 +152,5 @@ window.TucuTurneroCatalog = (function () {
     return `/admin_l1.html?slug=${encodeURIComponent(slug || `demo-${norm}`)}&rubro=${encodeURIComponent(norm)}`;
   }
 
-  return { RUBRO_META, SEEDS, normalizeRubro, getActiveServices, getStaffAndResources, resolveBizInfo, saveBooking, buildAdminReturnUrl };
+  return { RUBRO_META, SEEDS, isLegacyDemoName, normalizeRubro, getActiveServices, getStaffAndResources, resolveBizInfo, saveBooking, buildAdminReturnUrl };
 })();

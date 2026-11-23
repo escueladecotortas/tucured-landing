@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_l2/admin_l2_core.js
-// Core L2: Warm Studio Tokens, Recepción Web Desktop/Mobile, Temas & Navegación (<= 120L)
+// Core L2 (Admin · Gestión): Paleta Heredada, Recepción Web, Temas & Navegación (<= 120L)
 
 (function (global) {
   const views = ['calendar', 'services', 'crm', 'config', 'manual'];
@@ -30,7 +30,7 @@
     if (!toast) return;
     if (msgEl) msgEl.textContent = msg;
     if (iconEl) iconEl.innerHTML = type === 'success' ? SVG_OK : SVG_ERR;
-    toast.className = `fixed bottom-20 md:bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl text-xs font-semibold transition-all duration-300 pointer-events-auto ${type === 'success' ? 'bg-white dark:bg-stone-900 border-[#D5CEC2] dark:border-stone-800 text-red-900 dark:text-red-400' : 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800 text-rose-600'}`;
+    toast.className = `fixed bottom-20 md:bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl text-xs font-semibold transition-all duration-300 pointer-events-auto ${type === 'success' ? 'bg-white dark:bg-stone-900 border-[#D5CEC2] dark:border-stone-800 tucu-primary-text' : 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800 text-rose-600'}`;
     setTimeout(() => { toast.className = 'fixed bottom-20 md:bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 text-xs font-medium text-stone-800'; }, 2800);
   }
 
@@ -42,8 +42,8 @@
       const dBtn = document.getElementById('main-view-btn-' + v), mBtn = document.getElementById('mobile-nav-btn-' + v);
       const isActive = v === target;
       if (sec) sec.classList.toggle('hidden', !isActive);
-      if (dBtn) dBtn.className = isActive ? 'admin-nav-item active' : 'admin-nav-item';
-      if (mBtn) mBtn.className = isActive ? 'mobile-nav-tab flex flex-col items-center gap-1 text-red-900 dark:text-red-400 text-[10px] font-bold cursor-pointer' : 'mobile-nav-tab flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 text-[10px] font-medium cursor-pointer';
+      if (dBtn) dBtn.className = isActive ? 'admin-nav-item tucu-sidebar-item is-active' : 'admin-nav-item tucu-sidebar-item';
+      if (mBtn) mBtn.className = isActive ? 'mobile-nav-tab flex flex-col items-center gap-1 tucu-primary-text text-[10px] font-bold cursor-pointer' : 'mobile-nav-tab flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 text-[10px] font-medium cursor-pointer';
     });
   }
 
@@ -54,10 +54,10 @@
     const badge = document.getElementById('turneroStatusBadgeL2'), dot = document.getElementById('turneroStatusDotL2'), txt = document.getElementById('turneroStatusTextL2');
     global.AdminShell?.syncReceptionPill?.(isActive);
     if (!btn || !txt) return;
-    btn.style.backgroundColor = isActive ? 'var(--color-primary, #800000)' : '#8C8478';
+    btn.style.backgroundColor = isActive ? 'var(--tucu-primary)' : '#8C8478';
     if (knob) knob.className = `w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`;
     if (dot) dot.className = `w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-stone-500'}`;
-    if (badge) badge.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'}`;
+    if (badge) badge.className = `tucu-badge border ${isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'}`;
     txt.textContent = isActive ? 'Recepción Abierta' : 'En Pausa';
   }
 
@@ -79,15 +79,22 @@
     const slugHint = qSlug.startsWith('demo-') && qSlug !== 'demo-central' ? qSlug : '';
     const rubro = seedMod ? seedMod.resolveRubro(qRubro || slugHint || prevRubro || 'estetica') : 'estetica';
     const meta = seedMod?.getRubroMeta(rubro);
-    const biz = localStorage.getItem(`tucu_l2_biz_name_${rubro}`) || meta?.bizName || 'TucuRed Central';
+    const biz = localStorage.getItem(`tucu_l2_biz_name_${rubro}`) || meta?.bizName || 'Siena Estética';
     const addr = localStorage.getItem(`tucu_l2_address_${rubro}`) || meta?.address || 'Av. Aconquija 1320, Yerba Buena';
     const actFlag = localStorage.getItem(`tucu_l2_turnero_active_${rubro}`);
+    const planTitle = global.AdminFeatures?.getPlanMeta?.('l2')?.title || 'Admin · Gestión';
+    global.AdminThemeSync?.apply?.(rubro, 'l2');
     try {
       localStorage.setItem('tucu_l2_rubro', rubro); localStorage.setItem('tucu_l2_biz_name', biz); localStorage.setItem('tucu_l2_address', addr);
       if (actFlag !== null) localStorage.setItem('tucu_turnero_open', actFlag);
     } catch (_) {}
     const setT = (id, v) => { const el = document.getElementById(id); if (el && v) el.textContent = v; };
-    if (meta) { setT('l2-brand-initials', meta.initials); setT('l2-brand-title', biz); setT('l2-brand-subtitle', meta.subtitle); document.title = `${biz} — Panel L2`; }
+    document.querySelectorAll('[data-admin-brand-initials]').forEach((el) => { el.textContent = meta?.initials || 'SE'; });
+    global.AdminThemeSync?.syncAdminBrandLogo?.(rubro);
+    setT('l2-brand-title', biz);
+    setT('l2-brand-subtitle', planTitle);
+    setT('l2-mobile-title', planTitle);
+    document.title = `${biz} — ${planTitle}`;
     renderTurneroSwitch();
   }
 

@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_shared/admin_contacts_manager.js
-// Gestor Unificado de Clientes L2/L3: Bloqueo, Restauración, Email, Cumpleaños & E.164 (<= 175 líneas)
+// Gestor Unificado de Clientes L2/L3: Bloqueo, Restauración, Email, Cumpleaños & E.164 (<= 175L)
 
 (function (global) {
   const parser = () => global.AdminContactsParser;
@@ -38,7 +38,7 @@
       : filtered.map(c => {
         const restBadge = c.isRestricted ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800">Restringido</span>' : '';
         const emailChip = c.email ? `<span class="text-[10px] px-2 py-0.5 rounded-lg bg-white dark:bg-stone-800 border border-[#D5CEC2] dark:border-stone-700 text-stone-600 dark:text-stone-300">${c.email}</span>` : '';
-        const bdayChip = c.birthday ? `<span class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-mono">Cumple: ${c.birthday}</span>` : '';
+        const bdayChip = c.birthday ? `<span class="text-[10px] px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 tabular-nums">Cumple: ${c.birthday}</span>` : '';
         const actions = c.deletedAt
           ? `<button type="button" data-ct-restore="${c.id}" onclick="AdminContactsManager.restoreContact('${lvl}','${c.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold cursor-pointer">Restaurar</button>`
           : `<button type="button" data-ct-edit="${c.id}" onclick="AdminContactsManager.openForm('${lvl}','${c.id}')" class="px-2.5 py-1 rounded-lg admin-glass-btn text-[11px] font-semibold">Editar</button>
@@ -46,7 +46,7 @@
              <button type="button" data-ct-del="${c.id}" onclick="AdminContactsManager.deleteContact('${lvl}','${c.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[11px] font-semibold cursor-pointer">Archivar</button>`;
         return `<div class="p-3 rounded-xl bg-stone-50 dark:bg-stone-900/70 border border-[#D5CEC2] dark:border-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
           <div class="min-w-0 space-y-1"><div class="flex items-center gap-2 flex-wrap"><strong class="text-stone-900 dark:text-stone-100">${c.name}</strong>${restBadge}${c.source ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-stone-800 border border-[#D5CEC2] dark:border-stone-700 text-stone-500">${c.source}</span>` : ''}</div>
-            <p class="font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">${c.displayPhone || c.phone}</p>
+            <p class="tabular-nums text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">${c.displayPhone || c.phone}</p>
             ${(emailChip || bdayChip) ? `<div class="flex items-center gap-1.5 flex-wrap">${emailChip}${bdayChip}</div>` : ''}
             ${c.notes ? `<p class="text-[11px] text-stone-500 truncate">${c.notes}</p>` : ''}</div>
           <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">${actions}</div></div>`;
@@ -126,7 +126,7 @@
     const pickerOk = parser()?.isDevicePickerSupported?.();
     box.innerHTML = `<div class="space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
-        <div><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">Clientes y Contactos <span id="contacts-count-${lvl}" class="ml-1.5 text-[11px] font-mono text-stone-500">0 clientes</span></h4><p class="text-[11px] text-stone-500">Gestioná tu base de clientes, datos de contacto y promociones.</p></div>
+        <div><h4 class="text-sm font-bold text-stone-900 dark:text-stone-100 font-title">Clientes y Contactos <span id="contacts-count-${lvl}" class="ml-1.5 text-[11px] tabular-nums text-stone-500">0 clientes</span></h4><p class="text-[11px] text-stone-500">Gestioná tu base de clientes, datos de contacto y promociones.</p></div>
         <div class="flex flex-wrap gap-2">
           <button type="button" id="btn-contacts-device-${lvl}" onclick="AdminContactsManager.importFromDevice('${lvl}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${pickerOk ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'admin-glass-btn text-stone-600'}">Importar desde Contactos del Celular</button>
           <label class="px-3 py-1.5 rounded-xl admin-glass-btn text-xs font-semibold cursor-pointer"><span>Subir .vcf / .csv</span><input type="file" id="inp-contacts-file-${lvl}" accept=".vcf,.csv,text/vcard,text/csv" class="hidden"></label>
@@ -135,7 +135,7 @@
       </div>
       <div id="contacts-form-wrap-${lvl}" class="hidden p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 space-y-2.5 text-xs">
         <input type="hidden" id="ct-id-${lvl}">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Nombre y Apellido</label><input type="text" id="ct-name-${lvl}" placeholder="Ej. Sofía Núñez" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 outline-none"></div><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Teléfono / WhatsApp</label><input type="tel" id="ct-phone-${lvl}" placeholder="Ej. 3815551234" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 font-mono outline-none"></div></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Nombre y Apellido</label><input type="text" id="ct-name-${lvl}" placeholder="Ej. Sofía Núñez" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 outline-none"></div><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Teléfono / WhatsApp</label><input type="tel" id="ct-phone-${lvl}" placeholder="Ej. 3815551234" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 tabular-nums outline-none"></div></div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Correo Electrónico</label><input type="email" id="ct-email-${lvl}" placeholder="cliente@correo.com" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 outline-none"></div><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Cumpleaños</label><input type="date" id="ct-birthday-${lvl}" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 outline-none"></div><div><label class="block text-[10px] font-bold uppercase text-stone-500 mb-1">Notas</label><input type="text" id="ct-notes-${lvl}" placeholder="Preferencias o referencia" class="w-full bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 rounded-xl px-3 py-1.5 outline-none"></div></div>
         <div class="flex justify-end gap-2"><button type="button" onclick="AdminContactsManager.closeForm('${lvl}')" class="px-3 py-1.5 rounded-xl admin-glass-btn font-semibold">Cancelar</button><button type="button" id="btn-ct-save-${lvl}" onclick="AdminContactsManager.saveContact('${lvl}')" class="px-4 py-1.5 rounded-xl admin-glass-primary font-bold">Guardar Contacto</button></div>
       </div>

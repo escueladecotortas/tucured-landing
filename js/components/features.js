@@ -1,6 +1,6 @@
 // Archivo: js/components/features.js
 /**
- * 🛡️ Tucu Red Web V2 - Certezas Reales del Sistema (Aura Light · Grilla Simétrica 3x2)
+ * Tucu Red Web V2 - Certezas Reales del Sistema (Aura Light · Grilla Simétrica 3x2)
  * 6 certezas operativas alineadas 100% con el motor L1/L2/L3 real.
  * Restricción estricta: < 200 líneas (< 180L).
  */
@@ -18,7 +18,7 @@ const CERTEZAS = [
     badge: 'Cobro Directo',
     accent: 'from-emerald-500/10 to-emerald-500/5 text-emerald-600 border-emerald-200/60',
     title: 'Señas directo a tu alias sin comisiones',
-    desc: 'Configurá seña por servicio (% o monto fijo) directo a tu Alias/CBU, con carga y reporte de comprobante desde el Ticket Online #TK.'
+    desc: 'Configurá seña por servicio (% o monto fijo) directo a tu Alias/CBU, con carga y reporte de comprobante desde el comprobante online #TK.'
   },
   {
     icon: 'timer',
@@ -76,7 +76,7 @@ export function renderFeatures(containerId = 'app-features') {
               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${item.accent} flex items-center justify-center border shadow-xs">
                 <span class="material-symbols-outlined text-2xl">${item.icon}</span>
               </div>
-              <span class="text-[10px] font-extrabold font-mono tracking-wider uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60">
+              <span class="text-[10px] font-extrabold tabular-nums tracking-wider uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60">
                 ${item.badge}
               </span>
             </div>

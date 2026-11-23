@@ -30,7 +30,7 @@
     document.getElementById('btn-wizard-finish')?.addEventListener('click', () => {
       closeQrWizard();
       const b = document.getElementById('wa-node-status-badge');
-      if (b) { b.textContent = 'ONLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'; }
+      if (b) { b.textContent = 'ONLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] tabular-nums font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'; }
       global.adminL2Core?.showToast('Sesión de WhatsApp vinculada correctamente');
     });
 
@@ -40,7 +40,7 @@
     document.getElementById('btn-confirm-logout')?.addEventListener('click', () => {
       mLogout?.classList.add('hidden'); mLogout?.classList.remove('flex');
       const b = document.getElementById('wa-node-status-badge');
-      if (b) { b.textContent = 'OFFLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300'; }
+      if (b) { b.textContent = 'OFFLINE'; b.className = 'px-2.5 py-1 rounded-full text-[10px] tabular-nums font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300'; }
       global.adminL2Core?.showToast('Sesión desvinculada');
     });
   }

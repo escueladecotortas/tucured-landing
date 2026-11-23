@@ -1,6 +1,6 @@
 // Archivo: js/utils/whatsapp_link.js
 /**
- * 📲 Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp y Ficha Rápida
+ * Tucu Red Web V2 - Generador Oficial de Enlaces de WhatsApp y Ficha Rápida
  * Formatea URLs hacia la línea maestra (5493814132154) y prefill completo hacia /activar.html.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
@@ -19,9 +19,9 @@ export const RUBRO_NAMES = {
 };
 
 export const LEVEL_NAMES = {
-  l1: 'Nivel 1: Turnero Autónomo',
-  l2: 'Nivel 2: Central Pro Multi-Box',
-  l3: 'Nivel 3: Multi-Staff & Recursos'
+  l1: 'Plan Esencial',
+  l2: 'Plan Gestión',
+  l3: 'Plan Equipos'
 };
 
 export const WA_FALLBACK_TEXT = '¡Hola Tucu Red! Quiero conocer más sobre los planes y la promoción Mes Fundador de $4.999 para mi comercio.';
@@ -55,7 +55,7 @@ export function getLeadWhatsAppUrl(lead = {}) {
   const nombre = lead.nombre ? lead.nombre.trim() : 'mi negocio';
   const ciudad = lead.ciudad ? lead.ciudad.trim() : 'Tucumán';
   const rubro = RUBRO_NAMES[lead.rubro] || lead.rubro || 'Comercio Local';
-  const level = LEVEL_NAMES[lead.level] || lead.level || 'Nivel 2: Central Pro Multi-Box';
+  const level = LEVEL_NAMES[lead.level] || lead.level || 'Plan Gestión';
   const horario = (lead.schedule || lead.horario) === 'cortado' ? 'Turno cortado (corte de siesta)' : 'Horario corrido';
   const titular = (lead.titular || `${lead.nombreTitular || ''} ${lead.apellidoTitular || ''}`).trim();
   const extras = [

@@ -2,7 +2,7 @@
 // Calendario L2: 5 Estados, Selector Servicio Manual, Filtros Temporales & Fecha Local (< 178L)
 
 (function (global) {
-  let rangeEnabled = false, statusFilter = 'ALL', timeFilter = 'hoy';
+  let rangeEnabled = false, statusFilter = 'ALL', timeFilter = 'hoy', drawerCtrl = null;
   const eng = () => global.AdminBookingEngine;
   const norm = (s) => (global.AdminShell ? global.AdminShell.normStr(s) : String(s || '').toLowerCase());
   const localToday = (off = 0) => {
@@ -54,19 +54,20 @@
 
   function renderCalendar() {
     const container = document.getElementById('calendar-bookings-container'); if (!container) return;
+    drawerCtrl?.syncBadge?.();
     const bookings = getBookings(), q = norm(document.getElementById('cal-search-input')?.value.trim());
     const periodList = bookings.filter(b => !b.deletedAt && matchTimeWindow(b));
     const filtered = periodList.filter(b => (statusFilter === 'ALL' || eng().normalizeKey(b.status) === statusFilter) && (!q || norm(b.client || b.name).includes(q) || norm(b.phone).includes(q) || norm(b.id).includes(q) || norm(b.service).includes(q)));
     const lbl = document.getElementById('booking-list-date-label');
-    if (lbl) lbl.textContent = rangeEnabled ? 'Rango Personalizado' : ({ hoy: 'Hoy', semana: 'Esta Semana', mes: 'Este Mes', todos: 'Vista General', date: document.getElementById('cal-filter-date')?.value || 'Fecha' }[timeFilter] || 'Hoy');
+    if (lbl) lbl.textContent = rangeEnabled ? 'Rango Personalizado' : ({ hoy: 'Hoy', semana: 'Esta Semana', mes: 'Este Mes', todos: 'Todos', date: document.getElementById('cal-filter-date')?.value || 'Fecha' }[timeFilter] || 'Hoy');
 
     if (filtered.length === 0) container.innerHTML = '<div class="p-8 text-center text-xs text-stone-500 dark:text-stone-400">No hay turnos registrados para este filtro.</div>';
     else container.innerHTML = filtered.map(b => {
       const meta = eng().getMeta(b.status), muted = meta.key === 'CANCELLED' || meta.key === 'COMPLETED' || meta.key === 'NO_SHOW';
       return `<div class="p-4 flex items-center justify-between flex-wrap gap-3 hover:bg-stone-50/80 dark:hover:bg-stone-900/60 transition-colors ${muted ? 'opacity-75' : ''}">
         <div class="flex items-start gap-3.5 min-w-0">
-          <div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-900 dark:text-red-300 border border-red-200/80 dark:border-red-900 flex items-center justify-center font-mono font-bold text-xs shrink-0 shadow-xs">${b.time || '--:--'}</div>
-          <div class="min-w-0 space-y-1"><p class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</p><p class="text-xs font-medium text-stone-600 dark:text-stone-300">${b.service || 'Turno Reservado'}</p><div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(b)}${eng().renderUndoLabel(b.status, b.prevStatus, b)}</div>${eng().renderCollapsibleDetail(b)}</div>
+          <div class="w-12 h-12 rounded-xl tucu-primary-soft border flex items-center justify-center tabular-nums font-bold text-xs shrink-0 shadow-xs">${b.time || '--:--'}</div>
+          <div class="min-w-0 space-y-1"><p class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${b.client || b.name}</p><p class="text-xs font-medium text-stone-600 dark:text-stone-300">${b.service || 'Turno Reservado'}</p><div class="flex items-center gap-2 flex-wrap"><span class="tucu-badge ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(b)}${eng().renderUndoLabel(b.status, b.prevStatus, b)}</div>${eng().renderCollapsibleDetail(b)}</div>
         </div>
         <div class="flex items-center flex-wrap gap-2">${eng().renderActionButtons(b.id, b.status, 'adminL2Calendar', b.prevStatus)}</div>
       </div>`;
@@ -142,19 +143,25 @@
   function init() {
     const fromEl = document.getElementById('cal-filter-from'), toEl = document.getElementById('cal-filter-to');
     if (fromEl && !fromEl.value) fromEl.value = localToday(-7); if (toEl && !toEl.value) toEl.value = localToday(7);
-    document.getElementById('cal-btn-range-toggle')?.addEventListener('click', (e) => { rangeEnabled = !rangeEnabled; e.currentTarget.classList.toggle('is-active', rangeEnabled); document.getElementById('cal-range-panel')?.classList.toggle('hidden', !rangeEnabled); renderCalendar(); });
+    const syncTimeChips = (active) => {
+      document.querySelectorAll('[data-l2tfilter]').forEach(x => x.classList.toggle('is-active', !rangeEnabled && x.dataset.l2tfilter === active));
+      document.getElementById('cal-btn-range-toggle')?.classList.toggle('is-active', rangeEnabled || timeFilter === 'date');
+    };
+    document.getElementById('cal-btn-range-toggle')?.addEventListener('click', () => {
+      rangeEnabled = !rangeEnabled;
+      document.getElementById('cal-range-panel')?.classList.toggle('hidden', !rangeEnabled);
+      syncTimeChips(timeFilter); renderCalendar();
+    });
     document.querySelectorAll('[data-l2tfilter]').forEach(b => b.addEventListener('click', () => {
-      rangeEnabled = false; document.getElementById('cal-range-panel')?.classList.add('hidden'); document.getElementById('cal-btn-range-toggle')?.classList.remove('is-active');
+      rangeEnabled = false; document.getElementById('cal-range-panel')?.classList.add('hidden');
       if (document.getElementById('cal-filter-date')) document.getElementById('cal-filter-date').value = '';
-      document.querySelectorAll('[data-l2tfilter]').forEach(x => { x.className = 'admin-glass-pill px-2.5 py-1 rounded-xl text-[11px] font-semibold'; });
-      b.className = 'admin-glass-pill is-active px-2.5 py-1 rounded-xl text-[11px] font-bold';
-      timeFilter = b.dataset.l2tfilter || 'hoy'; renderCalendar();
+      timeFilter = b.dataset.l2tfilter || 'hoy'; syncTimeChips(timeFilter); renderCalendar();
     }));
-    document.getElementById('cal-filter-date')?.addEventListener('change', (e) => { rangeEnabled = false; timeFilter = e.target.value ? 'date' : 'todos'; renderCalendar(); });
+    document.getElementById('cal-filter-date')?.addEventListener('change', (e) => { rangeEnabled = false; timeFilter = e.target.value ? 'date' : 'todos'; syncTimeChips(timeFilter); renderCalendar(); });
     document.querySelectorAll('[data-l2filter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-l2filter]').forEach(x => { x.className = 'admin-glass-pill px-2.5 py-1 rounded-full font-semibold'; });
-      b.className = 'admin-glass-pill is-active px-2.5 py-1 rounded-full font-bold';
-      statusFilter = b.dataset.l2filter || 'ALL'; renderCalendar();
+      statusFilter = b.dataset.l2filter || 'ALL';
+      document.querySelectorAll('[data-l2filter]').forEach(x => x.classList.toggle('is-active', x.dataset.l2filter === statusFilter));
+      renderCalendar();
     }));
     document.getElementById('l2-mbk-srv')?.addEventListener('change', onManualServiceChange);
     document.getElementById('manual-book-paid')?.addEventListener('change', (e) => document.getElementById('manual-book-method')?.classList.toggle('hidden', !e.target.checked));
@@ -163,6 +170,7 @@
     document.getElementById('btn-open-new-booking-modal')?.addEventListener('click', openManualBookingModal);
     document.getElementById('btn-close-manual-modal')?.addEventListener('click', closeManualBookingModal);
     document.getElementById('btn-save-manual-booking')?.addEventListener('click', saveManualBooking);
+    drawerCtrl = global.AdminThemeSync?.bindFilterDrawer?.('btn-toggle-filters', 'admin-filters-drawer', () => (statusFilter !== 'ALL' ? 1 : 0) + (rangeEnabled || timeFilter !== 'hoy' ? 1 : 0));
     renderCalendar();
   }
 

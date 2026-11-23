@@ -2,7 +2,7 @@
 // Agenda L1: Reversión Explícita, Curado Temporal, Filtro de Servicios Activos (< 180 líneas)
 
 (function (global) {
-  let bookings = [], filterTime = 'hoy', filterStatus = 'todos', searchQuery = '';
+  let bookings = [], filterTime = 'hoy', filterStatus = 'todos', searchQuery = '', drawerCtrl = null;
   const SLOTS = ['08:00', '09:00', '10:00', '11:30', '13:00', '15:00', '16:30', '18:00', '19:30', '21:00'];
   const eng = () => global.AdminBookingEngine;
   const fmt = (n) => (eng() ? eng().fmt(n) : '$' + Number(n || 0).toLocaleString('es-AR'));
@@ -78,7 +78,7 @@
     const k = eng() ? eng().computeKpis(periodList) : { activeCount: 0, creditedDeposits: 0, potentialDeposits: 0, doneCount: 0, noShowCount: 0 };
     const total = periodList.length, evalTotal = Math.max(1, k.doneCount + k.noShowCount + k.confirmedCount);
     const rate = total > 0 ? Math.round(((k.doneCount + k.confirmedCount) / evalTotal) * 100) : 0;
-    const labels = { hoy: 'Hoy', semana: 'Semana', mes: 'Este Mes', rango: 'Rango' };
+    const labels = { hoy: 'Hoy', semana: 'Semana', mes: 'Este Mes', todos: 'Todos', rango: 'Rango' };
     const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     const setW = (id, w) => { const el = document.getElementById(id); if (el) el.style.width = `${w}%`; };
     setT('kpi-date-badge', labels[filterTime] || 'Hoy');
@@ -92,19 +92,20 @@
 
   function renderAgenda() {
     document.getElementById('filter-range-panel')?.classList.toggle('hidden', filterTime !== 'rango');
+    drawerCtrl?.syncBadge?.();
     updateKpis(bookings.filter(b => !b.deletedAt && matchTimeWindow(b)));
     const box = document.getElementById('bookingsListContainer'); if (!box) return;
     const list = getFilteredBookings();
-    if (!list.length) { box.innerHTML = `<div class="admin-card p-8 text-center text-xs text-stone-500">No hay turnos para este filtro en la agenda.</div>`; return; }
+    if (!list.length) { box.innerHTML = `<div class="admin-card tucu-card p-8 text-center text-xs text-stone-500">No hay turnos para este filtro en la agenda.</div>`; return; }
     box.innerHTML = list.map(bk => {
       const meta = eng().getMeta(bk.status), muted = meta.key === 'COMPLETED' || meta.key === 'CANCELLED' || meta.key === 'NO_SHOW';
-      return `<article class="admin-card flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 ${muted ? 'opacity-80' : ''}">
+      return `<article class="admin-card tucu-card flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 ${muted ? 'opacity-80' : ''}">
         <div class="flex items-start gap-3.5 min-w-0">
-          <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex items-center justify-center shrink-0"><span class="text-sm font-extrabold text-[#800000] dark:text-red-300 font-mono">${bk.time}</span></div>
+          <div class="w-14 h-14 rounded-2xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 flex items-center justify-center shrink-0"><span class="text-sm font-extrabold tucu-primary-text tabular-nums">${bk.time}</span></div>
           <div class="min-w-0 space-y-1">
             <h4 class="text-sm font-bold text-stone-900 dark:text-stone-100 truncate">${bk.clientName}</h4>
             <p class="text-xs font-medium text-stone-600 dark:text-stone-300">${bk.service}</p>
-            <div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(bk)}${eng().renderUndoLabel(bk.status, bk.prevStatus, bk)}</div>
+            <div class="flex items-center gap-2 flex-wrap"><span class="tucu-badge ${meta.badge}">${meta.label}</span>${eng().renderInlineDepositBadge(bk)}${eng().renderUndoLabel(bk.status, bk.prevStatus, bk)}</div>
             ${eng().renderCollapsibleDetail(bk)}
           </div>
         </div>
@@ -133,7 +134,7 @@
     const srvs = rawSrvs.filter(s => (global.AdminShell ? global.AdminShell.isServiceAvailable(s) : s.isActive !== false && !s.deletedAt));
     const root = document.getElementById('dynamicModalRoot'); if (!root) return;
     const methods = eng().getEnabledMethods('l1'), today = isoDay(0);
-    root.innerHTML = `<div id="newBookingModal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4"><div class="w-full max-w-md rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#181B22] p-5 space-y-4 shadow-2xl"><div class="flex items-center justify-between"><h3 class="text-base font-bold text-stone-900 dark:text-stone-100 font-title">Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-stone-400 hover:text-stone-600 cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><form id="formNewBooking" onsubmit="adminL1Agenda.saveManualBooking(event)" class="space-y-3 text-xs"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${srvs.map(s => `<option value="${s.name}" data-price="${s.priceNumeric}" data-req="${s.requireDeposit !== false}">${s.name} (${fmt(s.priceNumeric)} · Seña ${fmt(s.depositAmount)})</option>`).join('') || '<option value="">Sin servicios activos</option>'}</select></div><div class="grid grid-cols-2 gap-2"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Fecha</label><input type="date" id="nb-date" required min="${today}" value="${today}" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></select></div></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div class="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 space-y-2"><label class="flex items-center gap-2 font-semibold cursor-pointer"><input type="checkbox" id="nb-dep-paid" checked class="w-4 h-4 accent-[#800000]"><span>¿Seña cobrada al agendar?</span></label><select id="nb-method" class="w-full p-2 rounded-lg bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('')}</select></div><div class="flex gap-2 pt-1"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full admin-glass-btn font-bold">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full admin-glass-primary font-bold">Guardar Turno</button></div></form></div></div>`;
+    root.innerHTML = `<div id="newBookingModal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4"><div class="w-full max-w-md rounded-2xl border border-[#D5CEC2] dark:border-stone-800 bg-white dark:bg-[#181B22] p-5 space-y-4 shadow-2xl"><div class="flex items-center justify-between"><h3 class="text-base font-bold text-stone-900 dark:text-stone-100 font-title">Nueva Cita Manual</h3><button onclick="adminL1Agenda.closeModal()" class="text-stone-400 hover:text-stone-600 cursor-pointer"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><form id="formNewBooking" onsubmit="adminL1Agenda.saveManualBooking(event)" class="space-y-3 text-xs"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Servicio</label><select id="nb-srv" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${srvs.map(s => `<option value="${s.name}" data-price="${s.priceNumeric}" data-req="${s.requireDeposit !== false}">${s.name} (${fmt(s.priceNumeric)} · Seña ${fmt(s.depositAmount)})</option>`).join('') || '<option value="">Sin servicios activos</option>'}</select></div><div class="grid grid-cols-2 gap-2"><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Fecha</label><input type="date" id="nb-date" required min="${today}" value="${today}" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Horario</label><select id="nb-time" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></select></div></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Nombre del Cliente</label><input type="text" id="nb-name" required placeholder="Ej: Santiago Moreno" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div><label class="block text-[10px] uppercase text-stone-400 mb-1">Teléfono / WhatsApp</label><input type="tel" id="nb-phone" required placeholder="Ej: 3815551234" class="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none"></div><div class="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-[#D5CEC2] dark:border-stone-800 space-y-2"><label class="flex items-center gap-2 font-semibold cursor-pointer"><input type="checkbox" id="nb-dep-paid" checked class="w-4 h-4 tucu-accent-input"><span>¿Seña cobrada al agendar?</span></label><select id="nb-method" class="w-full p-2 rounded-lg bg-white dark:bg-stone-950 border border-[#D5CEC2] dark:border-stone-800 outline-none">${methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('')}</select></div><div class="flex gap-2 pt-1"><button type="button" onclick="adminL1Agenda.closeModal()" class="w-1/2 py-2.5 rounded-full admin-glass-btn font-bold">Cancelar</button><button type="submit" class="w-1/2 py-2.5 rounded-full admin-glass-primary font-bold">Guardar Turno</button></div></form></div></div>`;
     global.AdminShell?.bindDateTimeGuards({ dateId: 'nb-date', timeId: 'nb-time', slots: SLOTS });
     document.getElementById('nb-dep-paid')?.addEventListener('change', (ev) => { document.getElementById('nb-method')?.classList.toggle('hidden', !ev.target.checked); });
   }
@@ -161,16 +162,17 @@
     fFrom?.addEventListener('change', renderAgenda); fTo?.addEventListener('change', renderAgenda);
     loadBookings(currentSlug());
     document.querySelectorAll('[data-tfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-tfilter]').forEach(x => { x.className = 'admin-glass-pill px-3 py-1.5 rounded-lg font-semibold'; });
-      b.className = 'admin-glass-pill is-active px-3 py-1.5 rounded-lg font-bold';
-      filterTime = b.getAttribute('data-tfilter'); renderAgenda();
+      filterTime = b.getAttribute('data-tfilter') || 'hoy';
+      document.querySelectorAll('[data-tfilter]').forEach(x => x.classList.toggle('is-active', x.getAttribute('data-tfilter') === filterTime));
+      renderAgenda();
     }));
     document.querySelectorAll('[data-sfilter]').forEach(b => b.addEventListener('click', () => {
-      document.querySelectorAll('[data-sfilter]').forEach(x => { x.className = 'admin-glass-pill px-2.5 py-1 rounded-full font-semibold'; });
-      b.className = 'admin-glass-pill is-active px-2.5 py-1 rounded-full font-bold';
-      filterStatus = b.getAttribute('data-sfilter'); renderAgenda();
+      filterStatus = b.getAttribute('data-sfilter') || 'todos';
+      document.querySelectorAll('[data-sfilter]').forEach(x => x.classList.toggle('is-active', x.getAttribute('data-sfilter') === filterStatus));
+      renderAgenda();
     }));
     document.getElementById('inputSearchBooking')?.addEventListener('input', (e) => { searchQuery = e.target.value.trim(); renderAgenda(); });
+    drawerCtrl = global.AdminThemeSync?.bindFilterDrawer?.('btn-toggle-filters', 'admin-filters-drawer', () => (filterStatus !== 'todos' ? 1 : 0) + (filterTime !== 'hoy' ? 1 : 0));
   }
 
   global.adminL1Agenda = { init, loadBookings, renderAgenda, setStatus, undoStatus, creditDeposit, resetDemoBookings, openNewBookingModal, closeModal, saveManualBooking };

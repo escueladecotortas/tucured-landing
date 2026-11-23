@@ -1,6 +1,6 @@
 // Archivo: js/components/funnel.js
 /**
- * 🧙 Tucu Red Web V2 - Wizard Transaccional de 4 Pasos (Local-First + Netlify Forms Blindado)
+ * Tucu Red Web V2 - Wizard Transaccional de 4 Pasos (Local-First + Netlify Forms Blindado)
  * Flujo de alta comercial, Nombre/Apellido separados, alias tucured, MP y POST verificado.
  * Restricción estricta: < 200 líneas (< 180L).
  */
@@ -61,7 +61,7 @@ export function renderFunnel(containerId = 'app-funnel') {
 
   const setBadge = (b, num, isDone, isActive) => {
     if (!b) return;
-    b.textContent = isDone ? '✓' : String(num);
+    b.innerHTML = isDone ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : String(num);
     b.className = `w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${isDone ? 'funnel-step-completed' : (isActive ? 'funnel-step-active' : 'bg-slate-200 text-slate-600')}`;
   };
 
@@ -114,7 +114,7 @@ export function renderFunnel(containerId = 'app-funnel') {
   phoneInp?.addEventListener('input', (e) => {
     const clean = sanitizeArgentinePhone(e.target.value); e.target.value = clean; showErr(err3, '');
     const hint = document.getElementById('phone-valid-hint');
-    if (hint) hint.className = `absolute right-3.5 top-3.5 text-xs font-mono ${clean.length === 10 ? 'text-emerald-600 font-bold' : 'text-slate-400'}`;
+    if (hint) hint.className = `absolute right-3.5 top-3.5 text-xs tabular-nums ${clean.length === 10 ? 'text-emerald-600 font-bold' : 'text-slate-400'}`;
     persistLocalDB(false);
   }, { signal });
 

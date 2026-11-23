@@ -1,6 +1,6 @@
 // Archivo: js/components/funnel_data.js
 /**
- * 🗺️ Tucu Red Web V2 - Constantes y Datos Canónicos del Wizard (SSOT v16.0)
+ * Tucu Red Web V2 - Constantes y Datos Canónicos del Wizard (SSOT v16.0)
  * 15 localidades de Tucumán (San Miguel primero + 14 alfabéticas), 6 rubros reales y niveles unificados.
  * Restricción estricta: < 200 líneas (< 180L).
  */
@@ -35,24 +35,24 @@ export const EXPANDED_RUBROS = [
 export const FUNNEL_LEVELS = [
   {
     id: 'l1',
-    title: 'Nivel 1: Turnero Autónomo',
+    title: 'Plan Esencial',
     regularPrice: '$14.900 ARS / mes',
-    desc: 'Agenda web en 3 pasos sin contraseñas, seña configurable a tu Alias/CBU con comprobante, Ticket Online #TK con dirección y .ics, horarios partidos y feriados nacionales ($14.900/mes desde el 2° mes).',
-    badge: 'Nivel 1'
+    desc: 'Agenda web en 2 pasos sin contraseñas, seña configurable a tu Alias/CBU con comprobante online #TK con dirección y calendario, horarios partidos y feriados nacionales ($14.900/mes desde el 2° mes).',
+    badge: 'Esencial'
   },
   {
     id: 'l2',
-    title: 'Nivel 2: Central Pro Multi-Box',
+    title: 'Plan Gestión',
     regularPrice: '$24.900 ARS / mes',
-    desc: 'Todo Nivel 1 + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de cantidad de personas o lugares y % de ocupación ($24.900/mes desde el 2° mes).',
-    badge: 'Nivel 2'
+    desc: 'Todo Plan Esencial + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de cantidad de personas o lugares y % de ocupación ($24.900/mes desde el 2° mes).',
+    badge: 'Gestión'
   },
   {
     id: 'l3',
-    title: 'Nivel 3: Multi-Staff & Recursos',
+    title: 'Plan Equipos',
     regularPrice: '$34.900 ARS / mes',
-    desc: 'Todo Nivel 2 + agendas por profesional con horarios partidos (Mañana/Tarde), asignación de sillones/boxes/canchas, sobreturno dual y Confirmación Automática 2 hs antes ($34.900/mes desde el 2° mes).',
-    badge: 'Nivel 3'
+    desc: 'Todo Plan Gestión + agendas por profesional con horarios partidos (Mañana/Tarde), asignación de sillones/boxes/canchas, sobreturno dual y Confirmación Automática 2 hs antes ($34.900/mes desde el 2° mes).',
+    badge: 'Equipos'
   }
 ];
 

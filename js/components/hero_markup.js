@@ -1,7 +1,7 @@
 // Archivo: js/components/hero_markup.js
 /**
- * 🏙️ Tucu Red Web V2 - Hero Markup (Split 60/40 + Mockup Interactivo de Software Web)
- * Software autónomo, reserva en 3 toques, perspectiva 3D y logotipo oficial en mockup.
+ * Tucu Red Web V2 - Hero Markup (Split 60/40 + Mockup Interactivo de Software Web)
+ * Software web, reserva en 2 toques, perspectiva 3D y logotipo oficial en mockup.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -66,7 +66,7 @@ export function getHeroMarkup() {
                   <span class="material-symbols-outlined text-base">event_available</span>
                 </div>
                 <div class="leading-tight">
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-indigo-300 font-mono">FERIADOS ARGENTINOS</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-indigo-300 tabular-nums">FERIADOS ARGENTINOS</p>
                   <p class="text-xs font-bold text-white whitespace-nowrap">Calendario Nacional de Feriados Integrado</p>
                 </div>
               </div>
@@ -79,7 +79,7 @@ export function getHeroMarkup() {
                     <img src="/assets/tucu_red_logo.svg" alt="TucuRed" id="hero-mockup-brand-logo" class="h-6 sm:h-7 w-auto object-contain shrink-0" />
                     <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80">
                       <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                      <span class="hidden sm:inline-flex text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 font-mono">ACTIVO</span>
+                      <span class="hidden sm:inline-flex text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 tabular-nums">ACTIVO</span>
                     </span>
                   </div>
                   <span class="text-[11px] font-extrabold text-indigo-600 font-headline truncate text-right">The Barber Club • Yerba Buena</span>
@@ -96,20 +96,20 @@ export function getHeroMarkup() {
                       <p class="text-[11px] text-slate-500 font-medium">Barbero: <span class="font-bold text-slate-700">Mateo (Barbero Senior)</span></p>
                     </div>
                   </div>
-                  <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-extrabold font-mono">$12.000</span>
+                  <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-extrabold tabular-nums">$12.000</span>
                 </div>
 
                 <!-- Toque 2: Selector de Horarios con Bloqueo en Tiempo Real -->
                 <div class="space-y-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 font-mono">HORARIOS DISPONIBLES EN VIVO</span>
-                    <span class="text-[10px] font-bold text-emerald-600 font-mono">HOY 3 SLOTS</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 tabular-nums">HORARIOS DISPONIBLES EN VIVO</span>
+                    <span class="text-[10px] font-bold text-emerald-600 tabular-nums">HOY 3 SLOTS</span>
                   </div>
                   <div class="grid grid-cols-4 gap-2">
-                    <div class="py-2 px-1 text-center rounded-lg bg-slate-100 text-slate-400 text-xs font-mono font-medium line-through cursor-not-allowed">16:30</div>
-                    <div class="py-2 px-1 text-center rounded-lg bg-slate-100 text-slate-400 text-xs font-mono font-medium line-through cursor-not-allowed">17:00</div>
-                    <div class="py-2 px-1 text-center rounded-lg terminal-slot-chip terminal-slot-active text-xs font-mono font-extrabold border">17:30</div>
-                    <div class="py-2 px-1 text-center rounded-lg terminal-slot-chip bg-white border border-slate-200 text-slate-700 text-xs font-mono font-bold hover:border-indigo-300">18:15</div>
+                    <div class="py-2 px-1 text-center rounded-lg bg-slate-100 text-slate-400 text-xs tabular-nums font-medium line-through cursor-not-allowed">16:30</div>
+                    <div class="py-2 px-1 text-center rounded-lg bg-slate-100 text-slate-400 text-xs tabular-nums font-medium line-through cursor-not-allowed">17:00</div>
+                    <div class="py-2 px-1 text-center rounded-lg terminal-slot-chip terminal-slot-active text-xs tabular-nums font-extrabold border">17:30</div>
+                    <div class="py-2 px-1 text-center rounded-lg terminal-slot-chip bg-white border border-slate-200 text-slate-700 text-xs tabular-nums font-bold hover:border-indigo-300">18:15</div>
                   </div>
                 </div>
 
@@ -129,7 +129,7 @@ export function getHeroMarkup() {
                   <span class="material-symbols-outlined text-base">notifications_active</span>
                 </div>
                 <div class="leading-tight">
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-700 font-mono">AUTOGESTIÓN WEB</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-emerald-700 tabular-nums">AUTOGESTIÓN WEB</p>
                   <p class="text-xs font-extrabold text-slate-800 whitespace-nowrap">Gestiona cancelaciones y te avisa al instante</p>
                 </div>
               </div>

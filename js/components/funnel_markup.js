@@ -1,6 +1,6 @@
 // Archivo: js/components/funnel_markup.js
 /**
- * 🧙 Tucu Red Web V2 - Markup del Wizard Transaccional en 4 Pasos (SSOT v16.0)
+ * Tucu Red Web V2 - Markup del Wizard Transaccional en 4 Pasos (SSOT v16.0)
  * Selector limpio de 15 localidades, 6 rubros, Nombre/Apellido separados y checkout $4.999 ARS.
  * Restricción estricta: < 200 líneas (< 180L).
  */
@@ -24,7 +24,7 @@ export function getFunnelMarkup(draft = {}, selectedRubro = 'estetica', selected
           </div>
           <div class="shrink-0 flex items-center gap-4 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200/70">
             <div class="space-y-1">
-              <span id="step-progress-label" class="text-xs font-extrabold font-mono text-indigo-600 uppercase tracking-wider block">Paso 1 de 4</span>
+              <span id="step-progress-label" class="text-xs font-extrabold tabular-nums text-indigo-600 uppercase tracking-wider block">Paso 1 de 4</span>
               <div class="w-32 sm:w-40 h-2 bg-slate-200 rounded-full overflow-hidden">
                 <div id="step-progress-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300 w-1/4"></div>
               </div>
@@ -112,7 +112,7 @@ export function getFunnelMarkup(draft = {}, selectedRubro = 'estetica', selected
                   <button type="button" data-f-level="${l.id}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-white text-left transition-all flex flex-col justify-between gap-1.5 cursor-pointer ${selectedLevel === l.id ? 'funnel-option-active' : ''}">
                     <div class="flex items-center justify-between gap-2"><span class="font-headline font-bold text-sm text-slate-900">${l.title}</span><span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-extrabold shrink-0">${l.badge}</span></div>
                     <p class="text-xs text-slate-500 leading-relaxed">${l.desc}</p>
-                    <span class="text-[11px] font-bold text-emerald-700 font-mono pt-1">Mes Fundador $4.999 • Luego ${l.regularPrice}</span>
+                    <span class="text-[11px] font-bold text-emerald-700 tabular-nums pt-1">Mes Fundador $4.999 • Luego ${l.regularPrice}</span>
                   </button>
                 `).join('')}
               </div>
@@ -141,7 +141,7 @@ export function getFunnelMarkup(draft = {}, selectedRubro = 'estetica', selected
               <input type="email" id="fn-email" name="email" value="${draft.email || ''}" required placeholder="Correo electrónico del local" class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white outline-none text-sm font-medium" />
               <div class="relative">
                 <input type="tel" id="fn-phone" name="whatsapp" value="${draft.whatsapp || ''}" required placeholder="WhatsApp de contacto (ej: 381 555-4321)" class="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:bg-white outline-none text-sm font-medium" />
-                <span id="phone-valid-hint" class="absolute right-3.5 top-3.5 text-xs text-slate-400 font-mono">AR +54 9</span>
+                <span id="phone-valid-hint" class="absolute right-3.5 top-3.5 text-xs text-slate-400 tabular-nums">AR +54 9</span>
               </div>
             </div>
             <label class="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200/80 flex items-center gap-3 cursor-pointer">

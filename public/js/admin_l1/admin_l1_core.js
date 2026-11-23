@@ -1,10 +1,10 @@
 // Archivo: public/js/admin_l1/admin_l1_core.js
-// Core del Admin Shell: Warm Studio Tokens, KPIs, Temas & Navegación (Nexus OS v11.1 - < 150 líneas)
+// Core L1 (Admin · Esencial): Paleta Heredada, KPIs, Temas & Navegación (< 155 líneas)
 
 (function (global) {
   const DEFAULT_CONFIG = {
     slug: 'demo-peluqueria',
-    bizName: 'Peluquería & Barbería Central',
+    bizName: 'Brava Barbería',
     address: '25 de Mayo 480, S. M. de Tucumán',
     subtitle: 'Cortes Clásicos, Fades y Cuidado de Barba',
     logoUrl: '',
@@ -47,6 +47,8 @@
     const meta = seedMod ? seedMod.getRubroMeta(rubro) : DEFAULT_CONFIG;
     const slug = (qSlug && (!qRubro || !isDemo(qSlug)) ? qSlug : (qRubro ? meta.slug : localStorage.getItem('tucu_l1_slug')) || meta.slug).trim();
     localStorage.setItem('tucu_l1_rubro', rubro); localStorage.setItem('tucu_l1_slug', slug);
+    global.AdminThemeSync?.apply?.(rubro, 'l1');
+
     let assets = null;
     if (slug && !slug.startsWith('demo')) {
       for (const u of [`/api/portal/${slug}/config`, `/nexus_archives/tucu-red/clients/${slug}/client-assets.json`]) {
@@ -58,11 +60,15 @@
       const addr = assets.address || meta.address || DEFAULT_CONFIG.address;
       const rawLogo = assets.logoUrl || assets.logo_url || assets.semantic_photos?.logo || '';
       const logo = rawLogo.startsWith('./') ? `/nexus_archives/tucu-red/clients/${slug}/${rawLogo.slice(2)}` : (rawLogo || '');
-      document.documentElement.style.setProperty('--brand-accent', assets.accentColor || assets.brand_accent || '#800000');
+      const customAccent = assets.accentColor || assets.brand_accent;
+      if (customAccent) {
+        document.documentElement.style.setProperty('--tucu-primary', customAccent);
+        document.documentElement.style.setProperty('--color-primary', customAccent);
+        document.documentElement.style.setProperty('--brand-accent', customAccent);
+      }
       localStorage.setItem('tucu_l1_biz_name', name); localStorage.setItem('tucu_l1_address', addr); localStorage.setItem('tucu_l1_subtitle', sub); localStorage.setItem('tucu_l1_logo', logo);
       if (Array.isArray(assets.services) && assets.services.length > 0 && global.adminL1Pricing?.syncFromBrand) global.adminL1Pricing.syncFromBrand(assets.services);
     } else {
-      document.documentElement.style.setProperty('--brand-accent', '#800000');
       localStorage.setItem('tucu_l1_biz_name', localStorage.getItem(`tucu_l1_biz_name_${rubro}`) || meta.bizName || DEFAULT_CONFIG.bizName);
       localStorage.setItem('tucu_l1_address', localStorage.getItem(`tucu_l1_address_${rubro}`) || meta.address || DEFAULT_CONFIG.address);
       localStorage.setItem('tucu_l1_subtitle', meta.subtitle || DEFAULT_CONFIG.subtitle);
@@ -76,24 +82,18 @@
 
   function renderBrandIdentity() {
     const cfg = getConfig(), seedMod = global.AdminDemoSeed;
-    const meta = seedMod ? seedMod.getRubroMeta(localStorage.getItem('tucu_l1_rubro') || cfg.slug) : null;
+    const rubro = localStorage.getItem('tucu_l1_rubro') || cfg.slug;
+    const meta = seedMod ? seedMod.getRubroMeta(rubro) : null;
     const isDemo = !cfg.slug || cfg.slug.startsWith('demo-') || cfg.slug === 'mi-comercio';
-    const initials = isDemo && meta?.initials ? meta.initials : (cfg.bizName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'PB');
-    const tEl = document.getElementById('brand-title'), sEl = document.getElementById('brand-subtitle');
-    const initEl = document.getElementById('brand-initials'), img = document.getElementById('brand-logo-img');
-    const pinTitle = document.getElementById('pin-brand-title'), pinName = document.getElementById('pin-brand-name'), pinInit = document.getElementById('pin-brand-initials');
-
+    const initials = isDemo && meta?.initials ? meta.initials : (cfg.bizName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'BB');
+    const planTitle = global.AdminFeatures?.getPlanMeta?.('l1')?.title || 'Admin · Esencial';
+    const tEl = document.getElementById('brand-title'), sEl = document.getElementById('brand-subtitle'), mobEl = document.getElementById('l1-mobile-title');
     if (tEl) tEl.textContent = cfg.bizName;
-    if (sEl) sEl.textContent = cfg.subtitle;
-    if (initEl) initEl.textContent = initials;
-    if (pinInit) pinInit.textContent = initials;
-    if (pinName) pinName.textContent = cfg.bizName;
-    if (pinTitle) pinTitle.textContent = `${cfg.bizName} — Panel`;
-    if (img) {
-      if (cfg.logoUrl && !isDemo) { img.src = cfg.logoUrl; img.classList.remove('hidden'); }
-      else { img.classList.add('hidden'); }
-    }
-    document.title = `${cfg.bizName} — Panel de Gestión`;
+    if (sEl) sEl.textContent = planTitle;
+    if (mobEl) mobEl.textContent = planTitle;
+    document.querySelectorAll('[data-admin-brand-initials]').forEach((el) => { el.textContent = initials; });
+    global.AdminThemeSync?.syncAdminBrandLogo?.(rubro, !isDemo ? cfg.logoUrl : '');
+    document.title = `${cfg.bizName} — ${planTitle}`;
   }
 
   function toggleTurneroActive() {
@@ -113,10 +113,10 @@
     const badge = document.getElementById('turneroStatusBadge'), dot = document.getElementById('turneroStatusDot'), txt = document.getElementById('turneroStatusText');
     global.AdminShell?.syncReceptionPill?.(isActive);
     if (!btn || !txt) return;
-    btn.style.backgroundColor = isActive ? 'var(--color-primary, #800000)' : '#8C8478';
+    btn.style.backgroundColor = isActive ? 'var(--tucu-primary)' : '#8C8478';
     if (knob) knob.className = `w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`;
     if (dot) dot.className = `w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-stone-500'}`;
-    if (badge) badge.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'}`;
+    if (badge) badge.className = `tucu-badge border ${isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700'}`;
     txt.textContent = isActive ? 'Recepción Abierta' : 'En Pausa';
   }
 
@@ -125,8 +125,8 @@
       document.getElementById(`view-section-${v}`)?.classList.toggle('hidden', v !== target);
       const bDesk = document.getElementById(`main-view-btn-${v}`), bMob = document.getElementById(`mob-nav-${v}`);
       const act = v === target;
-      if (bDesk) bDesk.className = act ? 'admin-nav-item active' : 'admin-nav-item';
-      if (bMob) bMob.style.color = act ? 'var(--color-primary, #800000)' : '#8C8478';
+      if (bDesk) bDesk.className = act ? 'admin-nav-item tucu-sidebar-item is-active' : 'admin-nav-item tucu-sidebar-item';
+      if (bMob) bMob.style.color = act ? 'var(--tucu-primary)' : '#8C8478';
     });
   }
 

@@ -1,6 +1,6 @@
 // Archivo: js/components/navbar.js
 /**
- * 🧭 Tucu Red Web V2 - Header Glassmorphic Sticky & Navegación Principal
+ * Tucu Red Web V2 - Header Glassmorphic Sticky & Navegación Principal
  * Incluye logo oficial SVG, menú desktop y botones de conversión directos.
  * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
  */
@@ -59,7 +59,7 @@ export function renderNavbar(containerId = 'app-navbar') {
       <!-- Menú Desplegable Mobile -->
       <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-slate-900/5 bg-white/95 backdrop-blur-xl px-6 py-5 space-y-3 shadow-xl">
         <a href="#soluciones" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Soluciones</a>
-        <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">⚡ Simulador Interactivo en Vivo</a>
+        <a href="#showroom" class="block py-2 text-sm font-bold text-indigo-600">Simulador Interactivo en Vivo</a>
         <a href="#certezas" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Qué Incluye</a>
         <a href="#precios" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Planes y Precios</a>
         <a href="#faq" class="block py-2 text-sm font-bold text-slate-800 hover:text-indigo-600">Preguntas Frecuentes</a>

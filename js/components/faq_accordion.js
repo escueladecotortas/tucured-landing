@@ -1,6 +1,6 @@
 // Archivo: js/components/faq_accordion.js
 /**
- * ❓ Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes + Filtro WhatsApp
+ * Tucu Red Web V2 - Acordeón Minimalista de Preguntas Frecuentes + Filtro WhatsApp
  * Copy claro y directo sin tecnicismos con consulta previa por WhatsApp.
  * Restricción estricta: < 200 líneas (< 180L) y Protocolo PEAC.
  */
@@ -10,11 +10,11 @@ import { TUCU_RED_PHONE } from '../utils/whatsapp_link.js';
 const FAQS_DATA = [
   {
     q: '¿Cómo funciona la promoción Mes Fundador de $4.999 del primer mes?',
-    a: 'Abonás $4.999 ARS por transferencia directa al alias oficial tucured o mediante el enlace oficial de Mercado Pago. Durante 30 días usás el sistema completo en tu local; desde el segundo mes rige el abono regular del nivel elegido ($14.900, $24.900 o $34.900 ARS/mes), sin contratos de permanencia.'
+    a: 'Abonás $4.999 ARS por transferencia directa al alias oficial tucured o mediante el enlace oficial de Mercado Pago. Durante 30 días usás el sistema completo en tu local; desde el segundo mes rige el abono regular del plan elegido ($14.900, $24.900 o $34.900 ARS/mes), sin contratos de permanencia.'
   },
   {
     q: '¿Mis clientes tienen que descargar alguna app o crearse una cuenta?',
-    a: 'No. Tus clientes ingresan desde cualquier navegador web del celular, eligen su turno en 3 pasos sin contraseñas y reciben su Ticket Online #TK con dirección del local, botón para guardar el turno en el calendario de tu celular (compatible con Android y iPhone) y enlace para reprogramar o cancelar.'
+    a: 'No. Tus clientes ingresan desde cualquier navegador web del celular, eligen su turno en 2 pasos sin contraseñas y reciben su comprobante online #TK con dirección del local, botón para guardar el turno en el calendario de tu celular (compatible con Android y iPhone) y enlace para reprogramar o cancelar.'
   },
   {
     q: '¿El sistema respeta el corte de siesta y los feriados argentinos?',
@@ -22,11 +22,11 @@ const FAQS_DATA = [
   },
   {
     q: '¿Cómo cobro las señas de las reservas?',
-    a: 'Configurás tu propio Alias y CBU/CVU desde el panel de administración, definís qué servicios exigen seña (en porcentaje o monto fijo) y habilitás tus medios de pago. Tus clientes transfieren directo a tu cuenta sin intermediarios ni comisiones y pueden adjuntar o informar el comprobante desde su Ticket Online.'
+    a: 'Configurás tu propio Alias y CBU/CVU desde el panel de administración, definís qué servicios exigen seña (en porcentaje o monto fijo) y habilitás tus medios de pago. Tus clientes transfieren directo a tu cuenta sin intermediarios ni comisiones y pueden adjuntar o informar el comprobante desde su comprobante online.'
   },
   {
-    q: '¿Puedo cambiar de nivel (L1, L2 o L3) más adelante?',
-    a: 'Sí, la actualización es inmediata. Podés empezar con Nivel 1 o Nivel 2 y escalar a Nivel 3 Multi-Staff cuando tu equipo crezca, conservando turnos, fichas de clientes y configuraciones previas.'
+    q: '¿Puedo cambiar de plan (Esencial, Gestión o Equipos) más adelante?',
+    a: 'Sí, la actualización es inmediata. Podés empezar con Esencial o Gestión y escalar a Equipos cuando tu equipo crezca, conservando turnos, fichas de clientes y configuraciones previas.'
   },
   {
     q: '¿Cuánto demoran en entregarme el turnero configurado?',
@@ -34,7 +34,7 @@ const FAQS_DATA = [
   },
   {
     q: '¿Cómo funcionan los recordatorios por WhatsApp y el aviso manual de respaldo?',
-    a: 'Vinculás tu línea mediante código QR directo en el panel para enviar confirmaciones y recordatorios automáticos 24 hs y 2 hs antes del turno (en Nivel 3 además contás con Confirmación y Liberación Automática 2 hs antes, activable o pausable). Para cuidar tu línea, los rangos seguros de envío transaccional son de 1 a 25 mensajes/día en líneas nuevas y hasta 80 mensajes/día en líneas maduras, sujeto a las pautas de uso responsable en Términos y Condiciones sin responsabilidad de Tucu Red ante bloqueos por uso indebido. Ante cualquier mantenimiento o indisponibilidad del envío automático, el sistema permite enviar el aviso manual en 1 clic sin frenar la atención.'
+    a: 'Vinculás tu línea mediante código QR directo en el panel para enviar confirmaciones y recordatorios automáticos 24 hs y 2 hs antes del turno (en Equipos además contás con Confirmación y Liberación Automática 2 hs antes, activable o pausable). Para cuidar tu línea, los rangos seguros de envío transaccional son de 1 a 25 mensajes/día en líneas nuevas y hasta 80 mensajes/día en líneas maduras, sujeto a las pautas de uso responsable en Términos y Condiciones sin responsabilidad de Tucu Red ante bloqueos por uso indebido. Ante cualquier mantenimiento o indisponibilidad del envío automático, el sistema permite enviar el aviso manual en 1 clic sin frenar la atención.'
   }
 ];
 
@@ -64,7 +64,7 @@ export function renderFaqAccordion(containerId = 'app-faq') {
           <details class="group bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-indigo-300 transition-all p-5 open:shadow-md open:border-indigo-500/40">
             <summary class="flex items-center justify-between gap-4 font-headline font-bold text-base sm:text-lg text-slate-900 cursor-pointer list-none select-none">
               <span class="flex items-center gap-3">
-                <span class="text-xs font-mono font-bold text-indigo-600 w-5">0${idx + 1}</span>
+                <span class="text-xs tabular-nums font-bold text-indigo-600 w-5">0${idx + 1}</span>
                 <span>${item.q}</span>
               </span>
               <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 group-open:text-indigo-600 transition-transform shrink-0">

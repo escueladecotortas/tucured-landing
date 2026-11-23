@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_shared/admin_demo_seed.js
-// Mini-Base Multi-Rubro Local-First para Consolas Admin L1, L2 y L3 (< 165 líneas)
+// Mini-Base Multi-Rubro Local-First homologada con nombres demo definitivos (< 165L)
 
 window.AdminDemoSeed = (function () {
   const isoDay = (offset = 0) => {
@@ -11,8 +11,8 @@ window.AdminDemoSeed = (function () {
 
   const RUBROS_SEED = {
     peluqueria: {
-      id: 'peluqueria', l3: 'barberia', slug: 'demo-peluqueria', initials: 'PB',
-      bizName: 'Peluquería & Barbería Central', subtitle: 'Cortes Clásicos, Fades y Cuidado de Barba', address: '25 de Mayo 480, S. M. de Tucumán',
+      id: 'peluqueria', l3: 'barberia', slug: 'demo-peluqueria', initials: 'BB',
+      bizName: 'Brava Barbería', subtitle: 'Cortes Clásicos, Fades y Cuidado de Barba', address: '25 de Mayo 480, S. M. de Tucumán',
       services: [
         { name: 'Corte Clásico', price: 8000, dur: 30, desc: 'Corte tradicional a tijera y terminación prolija.' },
         { name: 'Corte Degradé / Fade', price: 10000, dur: 45, desc: 'Degradado preciso con terminación a navaja.' },
@@ -20,8 +20,8 @@ window.AdminDemoSeed = (function () {
       ]
     },
     estetica: {
-      id: 'estetica', l3: 'peluqueria_estetica', slug: 'demo-estetica', initials: 'AE',
-      bizName: 'Aura Estética & Spa', subtitle: 'Cuidado Facial, Corporal y Mirada', address: 'Av. Aconquija 1320, Yerba Buena',
+      id: 'estetica', l3: 'peluqueria_estetica', slug: 'demo-estetica', initials: 'SE',
+      bizName: 'Siena Estética', subtitle: 'Cuidado Facial, Corporal y Mirada', address: 'Av. Aconquija 1320, Yerba Buena',
       services: [
         { name: 'Limpieza Facial Profunda', price: 18000, dur: 60, desc: 'Higiene facial, exfoliación e hidratación.' },
         { name: 'Esculpido de Cejas & Pestañas', price: 14000, dur: 45, desc: 'Diseño de cejas, laminado y lifting.' },
@@ -29,8 +29,8 @@ window.AdminDemoSeed = (function () {
       ]
     },
     gastronomia: {
-      id: 'gastronomia', l3: 'gastronomia', slug: 'demo-gastronomia', initials: 'BE',
-      bizName: 'Bistró & Parrilla El Encuentro', subtitle: 'Reservas de Mesas, Salón y Experiencias', address: 'Crisóstomo Álvarez 615, S. M. de Tucumán',
+      id: 'gastronomia', l3: 'gastronomia', slug: 'demo-gastronomia', initials: 'BC',
+      bizName: 'Brama Café & Bistró', subtitle: 'Reservas de Mesas, Salón y Experiencias', address: 'Crisóstomo Álvarez 615, S. M. de Tucumán',
       services: [
         { name: 'Reserva Mesa 2 Personas', price: 10000, dur: 90, desc: 'Mesa reservada en sector salón o galería.' },
         { name: 'Mesa Salón Principal (4 pers.)', price: 16000, dur: 120, desc: 'Ubicación preferencial para almuerzo o cena.' },
@@ -38,8 +38,8 @@ window.AdminDemoSeed = (function () {
       ]
     },
     salud: {
-      id: 'salud', l3: 'salud_consultorio', slug: 'demo-salud', initials: 'CM',
-      bizName: 'Consultorios Médicos San Martín', subtitle: 'Atención Médica, Odontología y Rehabilitación', address: 'San Martín 845, S. M. de Tucumán',
+      id: 'salud', l3: 'salud_consultorio', slug: 'demo-salud', initials: 'AC',
+      bizName: 'Alba Centro Médico', subtitle: 'Atención Médica, Odontología y Rehabilitación', address: 'San Martín 845, S. M. de Tucumán',
       services: [
         { name: 'Consulta Clínica General', price: 20000, dur: 30, desc: 'Evaluación integral y seguimiento clínico.' },
         { name: 'Control Odontológico', price: 18000, dur: 30, desc: 'Diagnóstico bucal y limpieza preventiva.' },
@@ -47,8 +47,8 @@ window.AdminDemoSeed = (function () {
       ]
     },
     servicios: {
-      id: 'servicios', l3: 'servicios', slug: 'demo-servicios', initials: 'EN',
-      bizName: 'Estudio Jurídico & Contable Norte', subtitle: 'Asesoría Legal, Impositiva y Auditoría', address: 'Laprida 310, S. M. de Tucumán',
+      id: 'servicios', l3: 'servicios', slug: 'demo-servicios', initials: 'VE',
+      bizName: 'Vértice Estudio', subtitle: 'Asesoría Legal, Impositiva y Auditoría', address: 'Laprida 310, S. M. de Tucumán',
       services: [
         { name: 'Asesoría Inicial 45 min', price: 22000, dur: 45, desc: 'Diagnóstico profesional y plan de acción.' },
         { name: 'Gestión Impositiva Mensual', price: 26000, dur: 60, desc: 'Revisión fiscal, vencimientos y balances.' },
@@ -56,8 +56,8 @@ window.AdminDemoSeed = (function () {
       ]
     },
     deportes: {
-      id: 'deportes', l3: 'deportes_clubes', slug: 'demo-deportes', initials: 'CD',
-      bizName: 'Complejo Deportivo & Pádel Norte', subtitle: 'Canchas cristal, fútbol sintético y clases grupales', address: 'Av. Perón 1850, Yerba Buena',
+      id: 'deportes', l3: 'deportes_clubes', slug: 'demo-deportes', initials: 'NP',
+      bizName: 'Norte Pádel Club', subtitle: 'Canchas cristal, fútbol sintético y clases grupales', address: 'Av. Perón 1850, Yerba Buena',
       services: [
         { name: 'Alquiler Cancha Pádel Cristal', price: 24000, dur: 90, desc: 'Turno reglamentario con iluminación LED incluida.' },
         { name: 'Cancha Fútbol 5 Sintético', price: 32000, dur: 60, desc: 'Césped profesional con vestuarios y pecheras.' },

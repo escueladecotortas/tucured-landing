@@ -1,7 +1,7 @@
 // Archivo: js/components/pricing.js
 /**
- * 🏷️ Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes (SSOT v16.0)
- * 3 Niveles con identidad técnica diferenciada, gancho $4.999 ARS (Mes Fundador) y conexión a #funnel.
+ * Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes (SSOT v16.0)
+ * 3 Niveles (Esencial, Gestión y Equipos), gancho $4.999 ARS (Mes Fundador) y conexión a #funnel.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -9,8 +9,8 @@ export const PRICING_PLANS = [
   {
     id: 'l1',
     levelNumber: 1,
-    title: 'Nivel 1',
-    subtitle: 'Turnero Autónomo',
+    title: 'Plan 1',
+    subtitle: 'Esencial',
     badge: 'Agenda Independiente',
     themeClass: 'border-sky-300/80 shadow-sky-100 hover:border-sky-500',
     accentText: 'text-sky-700',
@@ -19,11 +19,11 @@ export const PRICING_PLANS = [
     hookPeriod: 'Mes Fundador - Primer Mes',
     regularPrice: '$14.900 ARS / mes',
     commission: '0% comisiones',
-    ctaText: 'Elegir Nivel 1',
+    ctaText: 'Elegir Plan Esencial',
     features: [
-      'Turnero web autónomo en 3 pasos sin descargas ni contraseñas.',
+      'Turnero web en 2 pasos sin descargas ni contraseñas.',
       'Seña configurable por servicio directo a tu Alias/CBU con carga de comprobante.',
-      'Ticket Online #TK con dirección del local, calendario .ics y autogestión.',
+      'Comprobante online #TK con dirección del local, calendario .ics y autogestión.',
       'Horarios partidos y Feriados Nacionales 2026 configurables por mes.',
       'Gestión de 5 estados con reapertura de turno y recordatorios por WhatsApp.'
     ]
@@ -31,8 +31,8 @@ export const PRICING_PLANS = [
   {
     id: 'l2',
     levelNumber: 2,
-    title: 'Nivel 2',
-    subtitle: 'Central Pro Multi-Box',
+    title: 'Plan 2',
+    subtitle: 'Gestión',
     badge: 'CRM & Gestión Operativa',
     themeClass: 'border-indigo-400 shadow-indigo-100/50 hover:border-indigo-600',
     accentText: 'text-indigo-700',
@@ -41,9 +41,9 @@ export const PRICING_PLANS = [
     hookPeriod: 'Mes Fundador - Primer Mes',
     regularPrice: '$24.900 ARS / mes',
     commission: '0% comisiones',
-    ctaText: 'Elegir Nivel 2',
+    ctaText: 'Elegir Plan Gestión',
     features: [
-      'Todo lo de Nivel 1 con turnos de mostrador, selector de cantidad de personas o lugares y % de ocupación.',
+      'Todo lo de Esencial con turnos de mostrador, selector de cantidad de personas o lugares y % de ocupación.',
       'CRM & Contactos con importación directa desde la agenda del celular (.vcf/.csv).',
       'Ficha completa de clientes con Email, Fecha de Cumpleaños y notas.',
       'Bloqueo preventivo de teléfonos restringidos en Turnero Web y papelera restaurable.',
@@ -53,8 +53,8 @@ export const PRICING_PLANS = [
   {
     id: 'l3',
     levelNumber: 3,
-    title: 'Nivel 3',
-    subtitle: 'Multi-Staff & Recursos',
+    title: 'Plan 3',
+    subtitle: 'Equipos',
     badge: 'Equipos, Canchas y Clínicas',
     themeClass: 'border-amber-400 shadow-amber-100/50 hover:border-amber-600',
     accentText: 'text-amber-800',
@@ -63,9 +63,9 @@ export const PRICING_PLANS = [
     hookPeriod: 'Mes Fundador - Primer Mes',
     regularPrice: '$34.900 ARS / mes',
     commission: '0% comisiones',
-    ctaText: 'Elegir Nivel 3',
+    ctaText: 'Elegir Plan Equipos',
     features: [
-      'Todo lo de Nivel 2 con gestión Multi-Staff y Agenda Dual (Especialista o Recurso).',
+      'Todo lo de Gestión con gestión por profesional y Agenda Dual (Especialista o Recurso).',
       'Horarios partidos (Mañana / Tarde) por profesional y bloqueos por servicio.',
       'Asignación de sillones, boxes, consultorios o canchas por servicio.',
       'Confirmación y Liberación Automática (2 hs antes) activable o pausable.',

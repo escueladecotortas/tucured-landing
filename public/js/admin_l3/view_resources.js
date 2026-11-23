@@ -9,11 +9,11 @@ window.AdminL3Resources = (function () {
       const assignedBookings = dayBookings.filter(b => b.date === state.selectedDate && b.resourceId === r.id && b.status !== 'CANCELLED');
       const code = (r.icon && /^[A-Za-z0-9]{1,3}$/.test(r.icon)) ? r.icon : r.name.slice(0, 2).toUpperCase();
       return `
-        <div class="admin-card flex flex-col justify-between space-y-3 hover:border-red-900/40 transition-all">
+        <div class="admin-card flex flex-col justify-between space-y-3 transition-all">
           <div class="flex items-start justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 flex items-center justify-center text-sm font-black text-red-900 dark:text-red-300 shadow-xs">${code}</div>
-              <div><h4 class="font-bold text-sm text-stone-900 dark:text-stone-100">${r.name}</h4><p class="text-xs text-red-900 dark:text-red-400 font-medium">${r.type || 'Recurso Físico'}</p><p class="text-[10px] text-stone-500 font-mono">Espacio Operativo</p></div>
+              <div class="w-12 h-12 rounded-2xl tucu-primary-soft border flex items-center justify-center text-sm font-black shadow-xs">${code}</div>
+              <div><h4 class="font-bold text-sm text-stone-900 dark:text-stone-100">${r.name}</h4><p class="text-xs tucu-primary-text font-medium">${r.type || 'Recurso Físico'}</p><p class="text-[10px] text-stone-500 tabular-nums">Espacio Operativo</p></div>
             </div>
             <button onclick="AdminL3Resources.toggleActive('${r.id}')" class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${r.active !== false ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-stone-100 text-stone-500 border-stone-200'}">
               <span class="w-1.5 h-1.5 rounded-full ${r.active !== false ? 'bg-emerald-600' : 'bg-stone-400'}"></span><span>${r.active !== false ? 'ACTIVO' : 'PAUSA'}</span>
@@ -30,7 +30,7 @@ window.AdminL3Resources = (function () {
     container.innerHTML = `
       <div class="space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#D5CEC2] dark:border-stone-800">
-          <div><h2 class="text-base font-bold text-stone-900 dark:text-stone-100 font-title flex items-center gap-2">${svg('space')}<span>Modelado de ${p.labels?.resourcePlural || 'Recursos Físicos'}</span><span class="text-xs px-2 py-0.5 rounded-full bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-mono">${resourceList.length} registrados</span></h2><p class="text-xs text-stone-500">Gestión de espacios físicos (canchas, consultorios, boxes y sillones).</p></div>
+          <div><h2 class="text-base font-bold text-stone-900 dark:text-stone-100 font-title flex items-center gap-2">${svg('space')}<span>Modelado de ${p.labels?.resourcePlural || 'Recursos Físicos'}</span><span class="text-xs px-2 py-0.5 rounded-full bg-stone-200/70 dark:bg-stone-800 text-stone-600 dark:text-stone-400 tabular-nums">${resourceList.length} registrados</span></h2><p class="text-xs text-stone-500">Gestión de espacios físicos (canchas, consultorios, boxes y sillones).</p></div>
           <button onclick="AdminL3Resources.openEditModal()" class="py-2 px-4 rounded-xl admin-glass-primary font-bold text-xs flex items-center gap-1.5">${svg('plus')}<span>Nuevo ${p.labels?.resourceSingular || 'Recurso'}</span></button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>

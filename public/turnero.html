@@ -3,38 +3,62 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>Reservar Turno — TucuRed Turnero Autónomo</title>
+  <title>Reservar — Tucu Red</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-  <script>(function(){if((localStorage.getItem('tucu_theme')||'light')==='dark')document.documentElement.classList.add('dark');})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Bricolage+Grotesque:wght@600;700&family=Cormorant+Garamond:wght@500;600;700&family=Instrument+Serif&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('tucu-embed');</script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{brand:{accent:'#800000'}}}}};</script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['"Plus Jakarta Sans"', '-apple-system', 'sans-serif'] } } } };</script>
   <link rel="stylesheet" href="/css/admin_unified.css">
+  <style>
+    :root {
+      --tucu-primary: #B45309; --tucu-primary-hover: #92400E; --tucu-primary-text: #FFFFFF;
+      --tucu-soft-bg: #FFFBEB; --tucu-soft-text: #92400E; --tucu-soft-border: #FCD34D;
+      --tucu-accent: #B45309; --tucu-accent-light: #FCD34D; --tucu-panel-bg: #F1EBE3;
+      --tucu-display-font: 'Instrument Serif', Georgia, serif; --tucu-display-tracking: 0em;
+    }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background-color: #FAF8F5; color: #1C1917; }
+    .font-display-editorial, .font-serif-editorial { font-family: var(--tucu-display-font, 'Instrument Serif', Georgia, serif); letter-spacing: var(--tucu-display-tracking, 0em); }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .tucu-btn-primary { background-color: var(--tucu-primary); color: var(--tucu-primary-text); transition: background-color 0.18s ease, transform 0.12s ease; }
+    .tucu-btn-primary:hover { background-color: var(--tucu-primary-hover); }
+    .tucu-primary-text { color: var(--tucu-soft-text); }
+    .tucu-soft-active { background-color: var(--tucu-soft-bg); border-color: var(--tucu-soft-border); color: var(--tucu-soft-text); }
+    .tucu-slot-active { background-color: var(--tucu-primary); border-color: var(--tucu-primary); color: var(--tucu-primary-text); }
+    .cover-cta-btn { background-color: var(--cover-cta-bg, var(--tucu-primary)); color: var(--cover-cta-text, #FFFFFF); }
+    .cover-cta-btn:hover { background-color: var(--cover-cta-hover, var(--tucu-primary-hover)); }
+    #turnero-cover-stage { transition: opacity 0.2s ease, transform 0.2s ease; }
+    #turnero-cover-stage.is-leaving { opacity: 0; transform: scale(1.015); }
+    html.tucu-embed, html.tucu-embed body { margin: 0; padding: 0; }
+    html.tucu-embed #turnero-booking-stage main { padding: 0.5rem; }
+    html.tucu-embed #turnero-steps-root { border-radius: 1rem; padding: 1rem; box-shadow: none; }
+    html.tucu-embed #turnero-footer { padding-top: 0.375rem; padding-bottom: 0.5rem; }
+    @media (prefers-reduced-motion: reduce) { #turnero-cover-stage { transition: none; } }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-[#EAE4DA] dark:bg-[#121110] text-stone-900 dark:text-stone-100">
-  <header class="w-full border-b border-[#D5CEC2] dark:border-stone-800 bg-[#FBFBF9]/90 dark:bg-[#1C1A19]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between gap-2">
-    <div class="flex items-center gap-2.5 min-w-0">
-      <span class="w-8 h-8 rounded-xl bg-[#800000] text-white flex items-center justify-center shadow-xs shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      </span>
-      <div class="min-w-0"><h1 id="turnero-biz-name" class="font-title text-sm font-extrabold leading-tight truncate">TucuRed</h1><p id="turnero-rubro-label" class="text-[10px] text-stone-500 truncate">Turnero Web Autónomo</p></div>
+<body class="min-h-screen bg-[#FAF8F5] text-stone-900 antialiased">
+  <div id="turnero-layout" class="w-full min-h-[100dvh] lg:h-screen lg:overflow-hidden lg:grid lg:grid-cols-2">
+    <aside id="turnero-cover-stage" class="w-full min-h-[100dvh] lg:block lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden"></aside>
+
+    <div id="turnero-booking-stage" style="background-color: var(--tucu-panel-bg, #F1EBE3)" class="hidden lg:flex flex-col justify-between w-full min-h-[100dvh] lg:h-screen lg:overflow-y-auto text-stone-900">
+      <main class="flex-1 flex items-start lg:items-center justify-center p-3.5 sm:p-5 lg:py-4 lg:px-8">
+        <div id="turnero-steps-root" class="w-full max-w-xl my-auto bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 shadow-[0_12px_40px_-15px_rgba(24,24,27,0.08)] p-4 sm:p-6">
+          <section id="turnero-root" class="w-full">
+            <div class="py-10 text-center text-xs text-stone-500">Cargando catálogo de servicios...</div>
+          </section>
+        </div>
+      </main>
+
+      <footer id="turnero-footer" class="text-center py-2.5 px-4 text-xs text-stone-600 flex items-center justify-center">
+        <a id="turnero-brand-link" href="https://tucured.ar" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2.5 px-3 py-1 rounded-full hover:bg-white/60 transition-colors text-stone-600 hover:text-stone-900">
+          <img id="turnero-brand-logo" src="/assets/tucu_red_logo.svg" alt="Tucu Red" class="h-5 w-auto shrink-0">
+          <span id="turnero-brand-divider" class="h-3.5 w-px bg-stone-300 shrink-0" aria-hidden="true"></span>
+          <span id="turnero-brand-tagline" class="font-sans text-xs font-medium tracking-wide leading-none">Conectamos tu negocio</span>
+        </a>
+      </footer>
     </div>
-    <a id="btn-back-admin" href="/admin_l1.html" class="px-3 py-1.5 rounded-xl admin-glass-btn text-xs font-semibold flex items-center gap-1.5 shrink-0">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-      <span>Panel Admin</span>
-    </a>
-  </header>
-
-  <main class="flex-1 flex items-center justify-center p-4 sm:p-6">
-    <section id="turnero-root" class="admin-card w-full max-w-md shadow-xl">
-      <div class="py-10 text-center text-xs text-stone-500">Cargando catálogo de servicios...</div>
-    </section>
-  </main>
-
-  <footer class="text-center py-3 px-4 text-[11px] text-stone-500 dark:text-stone-400">
-    TucuRed · Turnero Web 24/7 · Confirmación instantánea
-  </footer>
+  </div>
 
   <script src="/js/admin_shared/admin_holidays.js"></script>
   <script src="/js/admin_shared/admin_shell.js"></script>
@@ -45,6 +69,12 @@
   <script src="/js/admin_shared/turnero_catalog.js"></script>
   <script src="/js/admin_shared/calendar_links.js"></script>
   <script src="/js/admin_shared/ticket_modal.js"></script>
+  <script src="/js/admin_shared/turnero_cover_data.js"></script>
+  <script src="/js/admin_shared/turnero_cover_ui.js"></script>
+  <script src="/js/admin_shared/turnero_ticket_lookup.js"></script>
+  <script src="/js/admin_shared/turnero_modals_v2.js"></script>
+  <script src="/js/admin_shared/turnero_steps_ui.js"></script>
+  <script src="/js/admin_shared/turnero_ticket_inline.js"></script>
   <script src="/js/admin_shared/turnero_app.js"></script>
 </body>
 </html>

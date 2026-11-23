@@ -1,9 +1,5 @@
 // Archivo: js/main.js
-/**
- * ⚡ Tucu Red Web V2 - Orquestador Principal de Módulos (Aura Light + Escenario 3 Zonas)
- * Monta la interfaz desacoplada y enlaza el motor interactivo unificado.
- * Restricción estricta: < 200 líneas (< 150L) y Protocolo PEAC.
- */
+// Orquestador principal de landing Tucu Red con Showroom V2 (< 55L)
 
 import { renderNavbar } from './components/navbar.js';
 import { renderHero } from './components/hero.js';
@@ -13,9 +9,12 @@ import { renderPricing } from './components/pricing.js';
 import { renderFaqAccordion } from './components/faq_accordion.js';
 import { renderFunnel } from './components/funnel.js';
 import { renderFooter } from './components/footer.js';
-import { ShowcaseCore } from './showcase_v11/showcase_core.js';
+import { ShowcaseController } from './showcase_v11/showcase_controller.js';
 import { initHeroAnamorphic } from './components/hero-anamorphic.js';
-import { initShowroom } from './components/showroom.js';
+
+function initShowroom() {
+  return ShowcaseController.init();
+}
 
 function bootApplication() {
   renderNavbar('app-navbar');
@@ -27,11 +26,8 @@ function bootApplication() {
   renderFunnel('app-funnel');
   renderFooter('app-footer');
 
-  // Inicializar el motor interactivo del Escenario 3 Zonas
-  ShowcaseCore.init();
-  const showroomManager = initShowroom('showroom');
+  const showroomManager = initShowroom();
 
-  // Handler global para activación directa desde el Escenario hacia el Wizard
   window.activateFromShowroom = (rubro, level) => {
     window.dispatchEvent(new CustomEvent('tucured:rubro-selected', { detail: { rubro } }));
     window.dispatchEvent(new CustomEvent('tucured:level-selected', { detail: { level } }));
