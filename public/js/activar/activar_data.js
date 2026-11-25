@@ -1,5 +1,5 @@
 // Archivo: public/js/activar/activar_data.js
-// Constantes Canónicas, Diccionario de Espacios por Rubro, Prefill Dual y WhatsApp (< 150L)
+// Constantes Canónicas, Planes Oficiales (Esencial/Gestión/Equipos), Prefill Dual, Servicios y WhatsApp (< 170L)
 
 window.TucuActivarData = (function () {
   const TUCU_RED_PHONE = '5493814132154';
@@ -31,10 +31,17 @@ window.TucuActivarData = (function () {
   const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'Débito/Crédito'];
 
   const LEVELS = [
-    { id: 'l1', label: 'Nivel 1 — Turnero Autónomo' },
-    { id: 'l2', label: 'Nivel 2 — Central Pro Multi-Box' },
-    { id: 'l3', label: 'Nivel 3 — Multi-Staff & Recursos' }
+    { id: 'l1', label: 'Plan Esencial' },
+    { id: 'l2', label: 'Plan Gestión' },
+    { id: 'l3', label: 'Plan Equipos' }
   ];
+
+  const TONE_LABELS = {
+    cercano: 'Cercano & Barrial',
+    boutique: 'Boutique & Elegante',
+    agil: 'Directo & Ágil',
+    profesional: 'Profesional & Clínico'
+  };
 
   function normalizeRubro(raw) {
     const s = String(raw || '').toLowerCase().trim();
@@ -49,8 +56,8 @@ window.TucuActivarData = (function () {
 
   function normalizeLevel(raw) {
     const s = String(raw || '').toLowerCase().trim();
-    if (s === '1' || s === 'l1') return 'l1';
-    if (s === '3' || s === 'l3') return 'l3';
+    if (s === '1' || s === 'l1' || s.includes('esencial')) return 'l1';
+    if (s === '3' || s === 'l3' || s.includes('equipo')) return 'l3';
     return 'l2';
   }
 
@@ -85,6 +92,13 @@ window.TucuActivarData = (function () {
     catch { return {}; }
   }
 
+  function formatCoverLabel(coverId, fallbackName) {
+    if (fallbackName) return fallbackName;
+    if (!coverId) return '';
+    if (coverId === 'custom') return 'Foto propia WebP';
+    return String(coverId).split('-').slice(1, -1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || coverId;
+  }
+
   function resolvePrefillData(search = (typeof window !== 'undefined' ? window.location.search : '')) {
     const p = new URLSearchParams(search || '');
     const w = readStoredWizard();
@@ -98,28 +112,37 @@ window.TucuActivarData = (function () {
 
     const qTitular = splitTitular(p.get('titular') || '');
     const wTitular = splitTitular(w.titular || '');
-    const nombreTitular = pick(['nombre'], qTitular.nombre || w.nombreTitular || wTitular.nombre);
-    const apellidoTitular = pick(['apellido'], qTitular.apellido || w.apellidoTitular || wTitular.apellido);
-    const locRaw = pick(['localidad', 'ciudad'], w.ciudad || 'San Miguel de Tucumán');
+    const nombreTitular = pick(['nombre', 'titular_nombre'], qTitular.nombre || w.nombreTitular || w.titular_nombre || wTitular.nombre);
+    const apellidoTitular = pick(['apellido', 'titular_apellido'], qTitular.apellido || w.apellidoTitular || w.titular_apellido || wTitular.apellido);
+    const locRaw = pick(['localidad', 'ciudad'], w.localidad || w.ciudad || 'San Miguel de Tucumán');
     const localidad = LOCALIDADES.includes(locRaw) ? locRaw : 'San Miguel de Tucumán';
     const waRaw = pick(['whatsapp', 'telefono'], w.whatsapp || '');
+    const comercio = pick(['comercio'], w.comercio || w.nombre || '');
+    const plan = normalizeLevel(pick(['plan', 'level'], w.plan || w.level || 'l2'));
+    const tonoVoz = pick(['tono_voz', 'tono'], w.tono_voz || '');
+    const coverId = pick(['cover_id', 'cover'], w.cover_id || '');
+    const slug = pick(['slug'], w.slug || '');
+    const direccion = pick(['direccion'], w.direccion || '');
+    const instagram = pick(['instagram'], w.instagram || '');
+    const servicios = Array.isArray(w.servicios) ? w.servicios.filter(s => s && (s.name || s.nombre)) : [];
+    const asistenciaCarga = String(w.asistencia_carga || '').trim();
 
     return {
-      comercio: pick(['comercio'], w.nombre || ''),
-      nombreTitular,
-      apellidoTitular,
-      email: pick(['email'], w.email || ''),
-      rubro: normalizeRubro(pick(['rubro'], w.rubro || 'estetica')),
-      plan: normalizeLevel(pick(['plan', 'level'], w.level || 'l2')),
-      localidad,
-      whatsapp: formatE164Ar(waRaw).digits10,
-      horario: normalizeScheduleMode(pick(['horario', 'schedule'], w.schedule || w.horario || 'corrido'))
+      comercio, nombreTitular, apellidoTitular, email: pick(['email'], w.email || ''),
+      rubro: normalizeRubro(pick(['rubro'], w.rubro || 'estetica')), plan,
+      planLabel: LEVELS.find(l => l.id === plan)?.label || 'Plan Gestión',
+      localidad, whatsapp: formatE164Ar(waRaw).digits10,
+      horario: normalizeScheduleMode(pick(['horario', 'schedule'], w.schedule || w.horario || 'corrido')),
+      tonoVoz, tonoLabel: TONE_LABELS[tonoVoz] || w.tono_label || '',
+      coverId, coverLabel: formatCoverLabel(coverId, w.cover_nombre),
+      slug, direccion, instagram, servicios, asistenciaCarga,
+      hasInherited: Boolean(comercio || p.get('plan') || p.get('tono_voz') || p.get('cover_id') || w.fromEmpezar)
     };
   }
 
   function buildWhatsAppConfirmUrl(payload = {}) {
     const rubroLbl = RUBROS.find(r => r.id === payload.rubro)?.label || payload.rubro || 'Comercio';
-    const levelLbl = LEVELS.find(l => l.id === payload.plan)?.label || payload.plan || 'Nivel 2';
+    const levelLbl = LEVELS.find(l => l.id === payload.plan)?.label || payload.plan || 'Plan Gestión';
     const titular = `${payload.nombre_titular || ''} ${payload.apellido_titular || ''}`.trim() || 'Propietario';
     const dirFull = payload.direccion_referencia ? `${payload.direccion} (${payload.direccion_referencia})` : payload.direccion;
     const msg = [
@@ -135,7 +158,7 @@ window.TucuActivarData = (function () {
   }
 
   return {
-    TUCU_RED_PHONE, RUBROS, RUBRO_SPACE_CONFIG, LOCALIDADES, PAYMENT_METHODS, LEVELS,
+    TUCU_RED_PHONE, RUBROS, RUBRO_SPACE_CONFIG, LOCALIDADES, PAYMENT_METHODS, LEVELS, TONE_LABELS,
     normalizeRubro, normalizeLevel, normalizeScheduleMode, formatE164Ar,
     resolvePrefillData, buildWhatsAppConfirmUrl
   };

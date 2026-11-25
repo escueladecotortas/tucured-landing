@@ -1,5 +1,5 @@
 // Archivo: public/js/empezar/empezar_preview.js
-// Celular de Vista Previa en Vivo estilo Portada App TASK-104 con Playfair Display (< 130L)
+// Vista previa Turnero V2 auténtica: tipografía display, servicios en vivo, highlight y barra móvil (< 145L)
 
 window.TucuEmpezarPreview = (function () {
   const SVG = {
@@ -13,63 +13,89 @@ window.TucuEmpezarPreview = (function () {
 
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-  function getMonogram(name) {
-    const words = String(name || '').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
-    if (!words.length) return 'TC';
-    return words.length === 1 ? words[0].slice(0, 2).toUpperCase() : (words[0][0] + words[1][0]).toUpperCase();
+  function getActiveThumb(state) {
+    const coverSlot = window.TucuEmpezarMedia?.getSlot?.('cover');
+    if (state.coverMode === 'custom' && coverSlot?.url) return coverSlot.url;
+    const cov = window.TucuEmpezarCovers?.getCoverById?.(state.coverId) || window.TucuEmpezarCovers?.getDefaultCoverForRubro?.(state.rubro);
+    return cov?.poster || '/assets/covers/peluqueria/salon_luminoso_02.webp';
+  }
+
+  function renderServiceChip(state) {
+    const srvs = window.TucuEmpezarServicesStep?.cleanServices?.(state.servicios) || [];
+    if (srvs.length > 0) {
+      const first = srvs[0];
+      const priceTxt = first.price > 0 ? ` · $${first.price.toLocaleString('es-AR')}` : '';
+      const extra = srvs.length > 1 ? ` (+${srvs.length - 1})` : '';
+      return `<div id="preview-service-chip" class="inline-flex items-center gap-1.5 max-w-full px-2.5 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-[10px] font-semibold text-white/95 tabular-nums"><span class="truncate">${esc(first.name)} · ${first.duration} min${esc(priceTxt)}${extra}</span></div>`;
+    }
+    if (state.asistenciaCarga === 'whatsapp_email') {
+      return '<div id="preview-service-chip" class="inline-flex items-center px-2.5 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-[10px] font-semibold text-white/95">Lista asistida por WhatsApp</div>';
+    }
+    return '';
   }
 
   function renderMarkup(state) {
-    const S = window.TucuEmpezarState, M = window.TucuEmpezarMedia;
+    const S = window.TucuEmpezarState, M = window.TucuEmpezarMedia, C = window.TucuEmpezarCovers;
+    const theme = window.TucuCoverData?.RUBRO_THEMES?.[state.rubro];
     const rubro = S.getRubroMeta(state.rubro);
-    const accent = S.getAccentMeta(state.accent, state.rubro);
+    const accent = S.getEffectiveAccent(state);
+    const plan = S.getPlanMeta(state.plan);
     const logoSlot = M?.getSlot('logo'), coverSlot = M?.getSlot('cover');
-    const bgSrc = state.coverMode === 'custom' && coverSlot?.url ? coverSlot.url : rubro.bg;
     const bizName = (state.comercio || '').trim() || 'Tu Comercio';
     const tagline = (state.bajada || '').trim() || rubro.tagline;
     const slug = S.slugifySubdomain(state.slug || bizName);
-    const addr = (state.direccion || '').trim() ? `${state.direccion.trim()}, ${state.localidad}` : `Av. Principal 480, ${state.localidad}`;
+    const addr = (state.direccion || '').trim() ? `${state.direccion.trim()}, ${state.localidad}` : `25 de Mayo 480, ${state.localidad}`;
     const sched = S.buildScheduleSummary(state);
+    const closeTime = state.horarioModalidad === 'partido' ? (state.close2 || '21:00') : (state.close1 || '20:00');
+    const ctaLabel = window.TucuCoverData?.VOCAB?.[state.rubro]?.ctaLabel || 'Reservar turno';
+    const dispFont = theme?.displayFont || "'Instrument Serif', Georgia, serif";
+    const dispTrack = theme?.letterSpacing || '0em';
+    const accentLight = theme?.accentLight || '#FCD34D';
+    const backdropHtml = C?.renderPreviewBackdrop
+      ? C.renderPreviewBackdrop(state, coverSlot, bizName)
+      : `<img id="preview-cover-img" src="${esc(rubro.bg)}" alt="${esc(bizName)}" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" />`;
 
-    const brandCircle = logoSlot?.url
-      ? `<img src="${esc(logoSlot.url)}" alt="${esc(bizName)}" class="w-full h-full object-cover" />`
-      : `<span class="text-xs font-extrabold tracking-tight text-white">${esc(getMonogram(bizName))}</span>`;
+    const logoBadge = logoSlot?.url
+      ? `<div class="w-10 h-10 rounded-full border border-white/30 bg-black/30 backdrop-blur-md shadow-md overflow-hidden shrink-0"><img src="${esc(logoSlot.url)}" alt="${esc(bizName)}" class="w-full h-full object-cover" /></div>`
+      : '<span></span>';
 
     return `
       <div class="w-full max-w-[340px] mx-auto space-y-2.5">
-        <div id="preview-domain-pill" class="px-3 py-1.5 rounded-full bg-white border border-stone-200 shadow-2xs flex items-center justify-center gap-1.5 text-[11px] font-semibold text-stone-700 tabular-nums">
-          ${SVG.lock}
-          <span class="truncate">${esc(slug)}.tucured.com.ar</span>
+        <div id="preview-domain-pill" class="px-3 py-1.5 rounded-full bg-white border border-stone-200 shadow-2xs flex items-center justify-between gap-2 text-[11px] font-semibold text-stone-700 tabular-nums">
+          <span class="inline-flex items-center gap-1.5 min-w-0 truncate">${SVG.lock}<span class="truncate">${esc(slug)}.tucured.com.ar</span></span>
+          <span id="preview-plan-badge" class="px-2 py-0.5 rounded-full bg-[#FAF8F5] border border-stone-200 text-[10px] font-extrabold text-stone-800 shrink-0">${esc(plan.name)}</span>
         </div>
 
-        <div class="relative w-full rounded-[2.25rem] border-[7px] border-stone-800 bg-stone-950 overflow-hidden shadow-xl aspect-[9/16] max-h-[580px] flex flex-col justify-between text-white">
-          <img id="preview-cover-img" src="${esc(bgSrc)}" alt="${esc(bizName)}" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20 pointer-events-none"></div>
+        <div id="preview-phone-chassis" class="relative w-full rounded-[2.25rem] border-[7px] border-stone-800 bg-stone-950 overflow-hidden shadow-xl aspect-[9/16] max-h-[590px] flex flex-col justify-between text-white">
+          ${backdropHtml}
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15 pointer-events-none"></div>
 
           <div class="relative z-10 px-4 pt-4 flex items-center justify-between gap-2">
-            <div class="w-10 h-10 rounded-full border border-white/25 bg-white/15 backdrop-blur-md shadow-md overflow-hidden flex items-center justify-center shrink-0">${brandCircle}</div>
+            ${logoBadge}
             <div class="flex items-center gap-1.5 shrink-0">
-              <span class="w-8 h-8 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-white flex items-center justify-center">${SVG.ig}</span>
-              <span class="w-8 h-8 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-white flex items-center justify-center">${SVG.wa}</span>
+              <span class="w-8 h-8 rounded-full bg-black/35 border border-white/25 backdrop-blur-md text-white flex items-center justify-center">${SVG.ig}</span>
+              <span class="w-8 h-8 rounded-full bg-black/35 border border-white/25 backdrop-blur-md text-white flex items-center justify-center">${SVG.wa}</span>
             </div>
           </div>
 
-          <div class="relative z-10 px-4 pb-5 space-y-3">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/25 backdrop-blur-md text-[11px] font-semibold text-white/95 tabular-nums">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
-              <span>Abierto ahora · hasta las ${esc(state.horarioModalidad === 'partido' ? (state.close2 || '21:00') : (state.close1 || '20:00'))}</span>
-            </div>
+          <div class="relative z-10 px-4 pb-4 space-y-2.5">
             <div class="space-y-1">
-              <h3 id="preview-biz-name" class="font-serif-editorial text-2xl font-bold tracking-tight text-white leading-[1.1] break-words">${esc(bizName)}</h3>
+              <p id="preview-status-line" style="color:${esc(accentLight)}" class="text-[10px] font-bold uppercase tracking-[0.2em] tabular-nums">ABIERTO HASTA LAS ${esc(closeTime)}</p>
+              <h3 id="preview-biz-name" style="font-family:${esc(dispFont)};letter-spacing:${esc(dispTrack)}" class="font-display-editorial text-[26px] font-semibold text-white leading-[1.06] break-words">${esc(bizName)}</h3>
               <p id="preview-tagline" class="text-xs text-white/80 leading-snug line-clamp-2">${esc(tagline)}</p>
             </div>
-            <button type="button" id="preview-cta-btn" data-accent="${esc(accent.bg)}" style="background-color:${esc(accent.bg)};color:${esc(accent.text)}" class="w-full py-3 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg cursor-default">
+            ${renderServiceChip(state)}
+            <button type="button" id="preview-cta-btn" data-accent="${esc(accent.bg)}" style="background-color:${esc(accent.bg)};color:${esc(accent.text || '#FFFFFF')}" class="w-full py-3 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-xl cursor-default transition-colors">
               ${SVG.cal}
-              <span>Reservar turno</span>
+              <span>${esc(ctaLabel)}</span>
             </button>
-            <div class="space-y-1 text-[11px] text-white/80 tabular-nums">
-              <p id="preview-address" class="flex items-start gap-1.5 leading-snug">${SVG.pin}<span class="truncate">${esc(addr)}</span></p>
-              <p id="preview-schedule" class="flex items-center gap-1.5 text-white/75 leading-snug">${SVG.clk}<span class="truncate">${esc(sched)}</span></p>
+            <div class="space-y-1 text-[11px] text-white/75 tabular-nums">
+              <p id="preview-address" class="flex items-start gap-1.5 leading-snug underline decoration-white/30 underline-offset-2">${SVG.pin}<span class="truncate">${esc(addr)}</span></p>
+              <p id="preview-schedule" class="flex items-center gap-1.5 text-white/70 leading-snug">${SVG.clk}<span class="truncate">${esc(sched)}</span></p>
+            </div>
+            <div class="flex items-center justify-between pt-0.5 text-[10px] text-white/80">
+              <span class="underline decoration-white/35 underline-offset-4">¿Ya reservaste?</span>
+              <span class="text-white/60 font-medium">Tucu Red · Conectamos tu negocio</span>
             </div>
           </div>
         </div>
@@ -77,10 +103,32 @@ window.TucuEmpezarPreview = (function () {
     `;
   }
 
-  function render(el, state) {
-    if (!el || !state) return;
-    el.innerHTML = renderMarkup(state);
+  function syncFloatingBar(state) {
+    const thumb = document.getElementById('emp-float-thumb');
+    const dot = document.getElementById('emp-float-dot');
+    const title = document.getElementById('emp-float-title');
+    const sub = document.getElementById('emp-float-sub');
+    if (!state) return;
+    const accent = window.TucuEmpezarState.getEffectiveAccent(state);
+    const plan = window.TucuEmpezarState.getPlanMeta(state.plan);
+    if (thumb) thumb.src = getActiveThumb(state);
+    if (dot) dot.style.backgroundColor = accent.bg;
+    if (title) title.textContent = (state.comercio || '').trim() || 'Tu Comercio';
+    if (sub) sub.textContent = `${plan.name} · ${state.accentMode === 'auto' ? 'Color automático' : 'Color manual'}`;
   }
 
-  return { render };
+  function render(el, state, highlightSelector = '') {
+    if (!el || !state) return;
+    el.innerHTML = renderMarkup(state);
+    syncFloatingBar(state);
+    if (highlightSelector) {
+      const target = el.querySelector(highlightSelector);
+      if (target) {
+        target.classList.add('live-highlight');
+        setTimeout(() => target.classList.remove('live-highlight'), 800);
+      }
+    }
+  }
+
+  return { render, syncFloatingBar };
 })();

@@ -1,14 +1,14 @@
 // Archivo: public/js/empezar/empezar_state.js
-// Estado central del Wizard /empezar.html, planes, 6 rubros sincronizados y normalizadores (< 160L)
+// Estado central de /empezar.html: 10 micro-pantallas, borrador, servicios, color auto y slug <= 24 (< 155L)
 
 window.TucuEmpezarState = (function () {
   const RUBROS = [
-    { id: 'peluqueria', label: 'Peluquería y Barbería', short: 'Peluquería', bg: '/assets/showcase/hero_peluqueria.webp', tagline: 'Cortes de precisión, barba clásica y estilo pensado para vos.' },
-    { id: 'estetica', label: 'Estética y Spa', short: 'Estética', bg: '/assets/showcase/hero_unas.webp', tagline: 'Cuidado facial, uñas y bienestar en un espacio pensado para relajarte.' },
-    { id: 'gastronomia', label: 'Gastronomía', short: 'Gastronomía', bg: '/assets/showcase/gastronomia.webp', tagline: 'Cocina de estación, parrilla y tu mesa reservada sin esperas.' },
-    { id: 'deportes', label: 'Deportes y Canchas', short: 'Deportes', bg: '/assets/showcase/deportes.webp', tagline: 'Canchas iluminadas y turnos al instante para jugar cuando quieras.' },
-    { id: 'salud', label: 'Salud y Consultorios', short: 'Salud', bg: '/assets/showcase/hero_salud.webp', tagline: 'Atención médica programada, puntual y cercana para tu tranquilidad.' },
-    { id: 'servicios', label: 'Servicios Profesionales', short: 'Servicios', bg: '/assets/rubro_servicios.webp', tagline: 'Asesoramiento profesional claro y turnos organizados a tu medida.' }
+    { id: 'peluqueria', label: 'Peluquería y Barbería', short: 'Peluquería', bg: '/assets/covers/peluqueria/salon_luminoso_02.webp', tagline: 'Tu corte de siempre, con la atención cálida de tu barbería de confianza.' },
+    { id: 'estetica', label: 'Estética y Spa', short: 'Estética', bg: '/assets/covers/estetica/brillo_natural_02.webp', tagline: 'Un espacio cálido para cuidarte, renovar tu energía y sentirte bien.' },
+    { id: 'gastronomia', label: 'Gastronomía', short: 'Gastronomía', bg: '/assets/covers/gastronomia/cafe_sol_02.webp', tagline: 'Mesa lista para compartir sabores ricos, buena charla y momentos de disfrute.' },
+    { id: 'deportes', label: 'Deportes y Canchas', short: 'Deportes', bg: '/assets/covers/deportes/padel_sol_02.webp', tagline: 'Sumate a jugar con tus amigos en canchas cuidadas y el mejor ambiente.' },
+    { id: 'salud', label: 'Salud y Consultorios', short: 'Salud', bg: '/assets/covers/salud/clinica_luminosa_02.webp', tagline: 'Atención cercana y humana para cuidar tu bienestar con total tranquilidad.' },
+    { id: 'servicios', label: 'Servicios Profesionales', short: 'Servicios', bg: '/assets/covers/servicios/estudio_moderno_02.webp', tagline: 'Te acompañamos con trato directo y soluciones prácticas para lo que necesitás.' }
   ];
 
   const ACCENT_OPTIONS = [
@@ -21,9 +21,9 @@ window.TucuEmpezarState = (function () {
   ];
 
   const PLANS = [
-    { id: 'l1', badge: 'Nivel 1', name: 'Turnero Autónomo', promo: '$4.999', regular: '$14.900/mes', desc: 'Reservas en línea 24/7, señas configurables y comprobante automático.' },
-    { id: 'l2', badge: 'Nivel 2', name: 'Central Pro Multi-Box', promo: '$4.999', regular: '$24.900/mes', desc: 'Todo Nivel 1 más gestión de clientes, bloqueos y vacaciones.' },
-    { id: 'l3', badge: 'Nivel 3', name: 'Multi-Staff & Recursos', promo: '$4.999', regular: '$34.900/mes', desc: 'Agendas por profesional, espacios y confirmación automática previa.' }
+    { id: 'l1', badge: 'Esencial', name: 'Plan Esencial', promo: '$4.999', regular: '$14.900/mes', desc: 'Agenda web en 2 pasos, señas a tu Alias y comprobante online con 0% comisiones.' },
+    { id: 'l2', badge: 'Gestión', name: 'Plan Gestión', promo: '$4.999', regular: '$24.900/mes', desc: 'Todo Plan Esencial más base CRM de clientes, bloqueos preventivos y vacaciones.' },
+    { id: 'l3', badge: 'Equipos', name: 'Plan Equipos', promo: '$4.999', regular: '$34.900/mes', desc: 'Todo Plan Gestión más agendas por profesional, espacios y confirmación automática 2 hs antes.' }
   ];
 
   const LOCALIDADES = [
@@ -39,26 +39,22 @@ window.TucuEmpezarState = (function () {
     if (s.includes('deport') || s.includes('club')) return 'deportes';
     if (s.includes('salud') || s.includes('medic')) return 'salud';
     if (s.includes('servic') || s.includes('estud')) return 'servicios';
-    if (s.includes('peluq') || s.includes('barber')) return 'peluqueria';
     return 'peluqueria';
   }
 
   function normalizePlan(raw) {
     const s = String(raw || '').toLowerCase().trim();
-    if (s === 'l1' || s === '1') return 'l1';
-    if (s === 'l3' || s === '3') return 'l3';
+    if (s === 'l1' || s === '1' || s.includes('esencial')) return 'l1';
+    if (s === 'l3' || s === '3' || s.includes('equipo')) return 'l3';
     return 'l2';
   }
 
   function slugifySubdomain(raw) {
-    const clean = String(raw || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 32)
-      .replace(/-+$/, '');
+    if (window.TucuEmpezarSlugCheck?.sanitizeSlug) {
+      return window.TucuEmpezarSlugCheck.sanitizeSlug(raw) || 'tu-comercio';
+    }
+    const clean = String(raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/^-+|-+$/g, '').slice(0, 24).replace(/-+$/, '');
     return clean || 'tu-comercio';
   }
 
@@ -87,6 +83,15 @@ window.TucuEmpezarState = (function () {
     return theme ? { ...found, bg: theme.bg, hover: theme.hover, text: theme.text } : found;
   }
 
+  function getEffectiveAccent(state) {
+    if (state?.accentMode === 'auto' && state?.autoAccent?.bg) return state.autoAccent;
+    return getAccentMeta(state?.accent, state?.rubro);
+  }
+
+  function getPlanMeta(planId) {
+    return PLANS.find(p => p.id === normalizePlan(planId)) || PLANS[1];
+  }
+
   function buildScheduleSummary(st) {
     const days = st.horarioDias || 'Lunes a sábado';
     if (st.horarioModalidad === 'partido') {
@@ -97,44 +102,40 @@ window.TucuEmpezarState = (function () {
 
   function createInitialState(search = (typeof window !== 'undefined' ? window.location.search : '')) {
     const p = new URLSearchParams(search || '');
-    const rubro = normalizeRubro(p.get('rubro') || 'peluqueria');
-    const plan = normalizePlan(p.get('plan') || 'l2');
+    const draft = window.TucuEmpezarMicroSteps?.loadDraft?.() || {};
+    const hasQueryRubro = p.has('rubro');
+    const rubro = normalizeRubro(hasQueryRubro ? p.get('rubro') : (draft.rubro || 'peluqueria'));
+    const plan = normalizePlan(p.has('plan') ? p.get('plan') : (draft.plan || 'l2'));
+    const tonoVoz = window.TucuEmpezarTones?.normalizeTone(p.has('tono') ? p.get('tono') : (draft.tonoVoz || 'cercano')) || 'cercano';
+    const defCover = window.TucuEmpezarCovers?.getDefaultCoverForRubro?.(rubro);
+    const qCover = window.TucuEmpezarCovers?.getCoverById?.(p.get('cover'));
+    const dCover = !hasQueryRubro ? window.TucuEmpezarCovers?.getCoverById?.(draft.coverId) : null;
+    const bajada = (!hasQueryRubro && draft.bajada) ? draft.bajada : (window.TucuEmpezarTones?.getSuggestedTagline(rubro, tonoVoz) || getRubroMeta(rubro).tagline);
+    const baseTheme = getAccentMeta(rubro, rubro);
+    const servicios = (!hasQueryRubro && Array.isArray(draft.servicios) && draft.servicios.length)
+      ? draft.servicios
+      : (window.TucuEmpezarServicesStep?.getDefaultServices?.(rubro) || []);
+
     return {
-      step: 1,
-      comercio: '',
-      slug: 'tu-comercio',
-      slugTouched: false,
-      rubro,
-      plan,
-      bajada: '',
-      accent: rubro,
-      accentTouched: false,
-      coverMode: 'rubro',
-      localidad: 'San Miguel de Tucumán',
-      direccion: '',
-      direccionLat: '',
-      direccionLng: '',
-      horarioModalidad: 'corrido',
-      horarioDias: 'Lunes a sábado',
-      open1: '09:00',
-      close1: '20:00',
-      open2: '17:00',
-      close2: '21:00',
-      instagram: '',
-      titularNombre: '',
-      titularApellido: '',
-      whatsapp: '',
-      email: '',
-      termsAccepted: true,
-      error: '',
-      submitting: false,
-      submitted: false
+      step: Math.max(1, Math.min(10, Number(draft.step) || 1)), stepDir: 'next',
+      comercio: draft.comercio || '', slug: draft.slug || 'tu-comercio', slugTouched: Boolean(draft.slugTouched),
+      slugCheck: { status: 'idle', slug: draft.slug || 'tu-comercio', suggestions: [] },
+      rubro, plan, tonoVoz, bajada, bajadaManual: Boolean(draft.bajadaManual && !hasQueryRubro), taglineFromAi: Boolean(draft.taglineFromAi && !hasQueryRubro),
+      aiPanelOpen: false, aiIntention: 'Sin esperas', aiLoading: false, aiFeedback: '',
+      accent: draft.accent || rubro, accentMode: draft.accentMode || 'auto', autoAccent: { bg: baseTheme.bg, hover: baseTheme.hover, text: '#FFFFFF', source: 'rubro' },
+      coverId: qCover?.id || dCover?.id || defCover?.id || '', coverMode: 'live', coverTab: 'rubro', coverTouched: Boolean(qCover || dCover),
+      localidad: draft.localidad || 'San Miguel de Tucumán', direccion: draft.direccion || '', direccionLat: draft.direccionLat || '', direccionLng: draft.direccionLng || '',
+      horarioModalidad: draft.horarioModalidad || 'corrido', horarioDias: draft.horarioDias || 'Lunes a sábado',
+      open1: draft.open1 || '09:00', close1: draft.close1 || '20:00', open2: draft.open2 || '17:00', close2: draft.close2 || '21:00',
+      servicios, serviciosTouched: Boolean(!hasQueryRubro && draft.serviciosTouched), asistenciaCarga: draft.asistenciaCarga || '',
+      instagram: draft.instagram || '', titularNombre: draft.titularNombre || '', titularApellido: draft.titularApellido || '', whatsapp: draft.whatsapp || '', email: draft.email || '',
+      termsAccepted: draft.termsAccepted !== false, error: '', submitting: false, submitted: false
     };
   }
 
   return {
     RUBROS, ACCENT_OPTIONS, PLANS, LOCALIDADES,
     normalizeRubro, normalizePlan, slugifySubdomain, sanitizePhone10,
-    getRubroMeta, getAccentMeta, buildScheduleSummary, createInitialState
+    getRubroMeta, getAccentMeta, getEffectiveAccent, getPlanMeta, buildScheduleSummary, createInitialState
   };
 })();

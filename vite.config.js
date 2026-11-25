@@ -1,4 +1,6 @@
 // Archivo: vite.config.js
+import fs from 'fs';
+import path from 'path';
 import { defineConfig } from 'vite';
 
 function rewriteShortTicketMiddleware(req, _res, next) {
@@ -18,7 +20,11 @@ export default defineConfig({
     {
       name: 'tucured-short-ticket-redirect',
       configureServer(server) { server.middlewares.use(rewriteShortTicketMiddleware); },
-      configurePreviewServer(server) { server.middlewares.use(rewriteShortTicketMiddleware); }
+      configurePreviewServer(server) { server.middlewares.use(rewriteShortTicketMiddleware); },
+      closeBundle() {
+        const rawDir = path.resolve('dist/assets/mascot/raw');
+        if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
+      }
     }
   ]
 });

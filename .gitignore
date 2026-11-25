@@ -14,3 +14,4 @@ temp/
 .netlify
 .tmp-cdp-*/
 assets/brand_kit_png/*.pdf
+public/assets/mascot/raw/

@@ -16,10 +16,9 @@ Estructura soberana de orquestación y seguimiento operacional (Máximo 10 tarea
 
 ## [IN_PROGRESS]
 
-_Sin tareas activas en curso._
+- [/] **[TASK-113B]** Wizard `/empezar.html` (División compra vs. configuración + 4 tonos de voz + galería de 12 portadas vivas).
 
 ## [BACKLOG]
 
-- [ ] **[TASK-113B]** Wizard `/empezar.html` (División compra vs. configuración + 4 tonos de voz + galería de 12 portadas vivas).
 - [ ] **[TASK-102]** [Comercial / PR] Lanzamiento `@tucured.ar` & Prospección: redactar y publicar las primeras 3 piezas de grilla en Instagram (`@tucured.ar`), iniciar prospección inicial en San Miguel de Tucumán / Yerba Buena y enviar mensaje PR a Rubén Orlando.
 - [ ] **[TASK-115]** Vencimiento automático de ventana de seña (Fase 3 Backend/BFF).

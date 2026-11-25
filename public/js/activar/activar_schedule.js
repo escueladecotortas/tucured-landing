@@ -12,7 +12,7 @@ window.TucuActivarSchedule = (function () {
     { key: 'Dom', label: 'Domingo', open: false }
   ];
   const INTERVALS = [15, 20, 30, 45, 60];
-  const TIME_CLS = 'w-full px-2 py-1.5 rounded-lg bg-white border border-[#D5CEC2] focus:border-[#EA580C] outline-none text-xs font-mono text-[#1C1917]';
+  const TIME_CLS = 'w-full px-2 py-1.5 rounded-lg bg-white border border-[#D5CEC2] focus:border-[#EA580C] outline-none text-xs tabular-nums text-[#1C1917]';
 
   function renderDayRow(day, defaultMode) {
     const isPartido = defaultMode === 'partido';
@@ -109,7 +109,7 @@ window.TucuActivarSchedule = (function () {
         target.querySelector('.act-t-to').value = tt;
         syncRow(target);
       });
-      copyBtn.textContent = '✓ Copiado a Mar–Vie';
+      copyBtn.textContent = 'Listo: copiado a Mar–Vie';
       setTimeout(() => { copyBtn.textContent = 'Copiar Lunes a Mar–Vie'; }, 1800);
     });
   }

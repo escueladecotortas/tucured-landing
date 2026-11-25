@@ -1,5 +1,5 @@
 // Archivo: public/js/activar/activar_app.js
-// Orquestador Ficha Rápida v2: Geo, Logo WebP, 7 Días, Bloque 5 Dinámico y FormData (< 180L)
+// Orquestador Ficha Rápida v2: Geo, Logo WebP, 7 Días, Herencia de Servicios, Bloque 5 Dinámico y FormData (< 180L)
 
 (function () {
   const D = () => window.TucuActivarData;
@@ -73,7 +73,7 @@
     if (!waInfo.e164) return { err: 'Ingresá un número de WhatsApp válido de 10 dígitos (ej: 3815554321).' };
     if (plan === 'l2' && Number(val('act-l2-spaces')) < 1) return { err: `Indicá la cantidad de ${spaceCfg.plural}.` };
     if ((plan === 'l1' || plan === 'l2') && spaceCfg.needsCapacity && Number(val('act-cap-turno')) < 1) return { err: `Indicá ${spaceCfg.capLabel.toLowerCase()}.` };
-    if (plan === 'l3' && (staff.length === 0 || staff.some(s => !s.name))) return { err: 'Cargá al menos 1 profesional en el equipo para Nivel 3.' };
+    if (plan === 'l3' && (staff.length === 0 || staff.some(s => !s.name))) return { err: 'Cargá al menos 1 profesional en el equipo para Plan Equipos.' };
 
     return {
       payload: {
@@ -99,13 +99,22 @@
     const prefill = D().resolvePrefillData(window.location.search);
     root.innerHTML = M().renderForm(prefill);
 
+    const srvList = document.getElementById('act-services-list');
+    if (srvList && Array.isArray(prefill.servicios) && prefill.servicios.length > 0) {
+      srvList.innerHTML = prefill.servicios.map((s, idx) => M().renderServiceRow(idx, {
+        name: s.name || s.nombre || '',
+        price: s.price ?? s.precio ?? '',
+        duration: Number(s.duration ?? s.duracion ?? 30) || 30,
+        sena: s.sena !== false
+      })).join('');
+    }
+
     G().attach('act-direccion');
     L().mount(document.getElementById('act-logo-mount'));
     S().mount(document.getElementById('act-schedule-mount'), prefill.horario);
     syncSenaVisibility();
     bindStaffList();
 
-    const srvList = document.getElementById('act-services-list');
     document.getElementById('btn-add-service')?.addEventListener('click', () => {
       if (!srvList) return;
       srvList.insertAdjacentHTML('beforeend', M().renderServiceRow(srvList.querySelectorAll('.act-service-row').length, {}));
@@ -123,7 +132,7 @@
     document.getElementById('act-cbu')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 22); });
     document.getElementById('act-whatsapp')?.addEventListener('input', (e) => {
       const info = D().formatE164Ar(e.target.value), badge = document.getElementById('act-wa-e164');
-      if (badge) { badge.textContent = info.e164 || '+549...'; badge.className = `text-[11px] font-mono font-bold shrink-0 ${info.e164 ? 'text-emerald-700' : 'text-stone-400'}`; }
+      if (badge) { badge.textContent = info.e164 || '+549...'; badge.className = `text-[11px] tabular-nums font-bold shrink-0 ${info.e164 ? 'text-emerald-700' : 'text-stone-400'}`; }
     });
 
     const form = document.getElementById('activar-live-form'), submitBtn = document.getElementById('btn-activar-submit');
