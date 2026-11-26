@@ -15,3 +15,5 @@ temp/
 .tmp-cdp-*/
 assets/brand_kit_png/*.pdf
 public/assets/mascot/raw/
+public/lab_portadas.html
+public/lab/

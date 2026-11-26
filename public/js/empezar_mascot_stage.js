@@ -1,142 +1,169 @@
 // Archivo: public/js/empezar_mascot_stage.js
-// Escenario flotante GPU-friendly (.webm VP9 alpha + fallback .webp animado + poster) (< 165L)
+// Escenario de Lumi v2 (6 gestos WebM VP9 alpha + WebP fallback, sin nodos huérfanos) (< 180L)
 
-window.TucuMascotStage = (function () {
-  const CLIPS = ['intro', 'idle', 'thinking', 'celebrate'];
-  const POSTER_SRC = '/assets/mascot/mascot_poster.webp';
+(function (global) {
+  const CLIPS = {
+    intro: { webm: '/assets/mascot/intro.webm', webp: '/assets/mascot/intro.webp', loop: false, duration: 3100 },
+    idle: { webm: '/assets/mascot/idle.webm', webp: '/assets/mascot/idle.webp', loop: true, duration: 0 },
+    thinking: { webm: '/assets/mascot/thinking.webm', webp: '/assets/mascot/thinking.webp', loop: true, duration: 0 },
+    celebrate: { webm: '/assets/mascot/celebrate.webm', webp: '/assets/mascot/celebrate.webp', loop: false, duration: 2400 },
+    wink: { webm: '/assets/mascot/wink.webm', webp: '/assets/mascot/wink.webp', loop: false, duration: 2100 },
+    advisor: { webm: '/assets/mascot/advisor.webm', webp: '/assets/mascot/advisor.webp', loop: true, duration: 0 }
+  };
 
-  let layerEl = null;
-  let actorEl = null;
-  let format = 'poster';
-  let activeClip = 'idle';
-  let activeAnchor = 'guide';
-  let endTimer = null;
-  let rafId = null;
-  let bound = false;
-
-  const isReducedMotion = () =>
-    typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  let layer = null, actor = null, posterEl = null, format = null;
+  let currentClip = 'idle', currentAnchor = 'header', clipTimer = null;
+  const mediaPool = new Map();
 
   function detectFormat() {
-    if (isReducedMotion()) return 'poster';
-    const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-    const isSafariOrIos = /iPad|iPhone|iPod/.test(ua) || (/^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(ua));
-    if (isSafariOrIos) return 'webp';
-    try {
-      const v = document.createElement('video');
-      if (v.canPlayType && v.canPlayType('video/webm; codecs="vp9"')) return 'webm';
-    } catch {}
-    return 'webp';
+    if (format) return format;
+    const ua = navigator.userAgent || '';
+    const isApple = /iPhone|iPad|iPod|Macintosh/i.test(ua) && !/Chrome|Chromium|Edg/i.test(ua);
+    const v = document.createElement('video');
+    format = (Boolean(v.canPlayType && v.canPlayType('video/webm; codecs="vp9"')) && !isApple) ? 'webm' : 'webp';
+    return format;
   }
 
-  function buildMediaNodes(mode) {
-    if (mode === 'poster') {
-      return `<img class="tucu-m-clip is-active" data-clip="poster" src="${POSTER_SRC}" alt="" />`;
+  function ensureLayer() {
+    if (!layer || !document.body.contains(layer)) {
+      layer = document.getElementById('tucu-mascot-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'tucu-mascot-layer';
+        layer.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(layer);
+      }
     }
-    if (mode === 'webp') {
-      return `<img class="tucu-m-clip is-active" data-clip="poster" src="${POSTER_SRC}" alt="" />` +
-        CLIPS.map(id => `<img class="tucu-m-clip" data-clip="${id}" src="/assets/mascot/${id}.webp" alt="" decoding="async" />`).join('');
+    if (!actor) {
+      actor = document.getElementById('tucu-mascot-actor') || document.createElement('div');
+      actor.id = 'tucu-mascot-actor';
     }
-    return `<img class="tucu-m-clip is-active" data-clip="poster" src="${POSTER_SRC}" alt="" />` +
-      CLIPS.map(id => {
-        const loopAttr = (id === 'idle' || id === 'thinking') ? ' loop' : '';
-        return `<video class="tucu-m-clip" data-clip="${id}" muted playsinline preload="auto"${loopAttr} poster="${POSTER_SRC}"><source src="/assets/mascot/${id}.webm" type="video/webm" /></video>`;
-      }).join('');
+    if (!posterEl || posterEl.parentElement !== actor) {
+      posterEl = actor.querySelector('[data-clip-key="poster"]');
+      if (!posterEl) {
+        posterEl = document.createElement('img');
+        posterEl.src = '/assets/mascot/mascot_poster.webp';
+        posterEl.alt = 'Lumi';
+        posterEl.className = 'tucu-mascot-media is-clip-active';
+        posterEl.dataset.clipKey = 'poster';
+        actor.appendChild(posterEl);
+      }
+    }
+    if (!document.body.contains(actor)) (document.getElementById('tucu-mascot-anchor') || layer).appendChild(actor);
+    return layer;
   }
 
   function switchToWebpFallback() {
-    if (format === 'webp' || format === 'poster' || !actorEl) return;
+    if (format === 'webp') return;
     format = 'webp';
-    actorEl.innerHTML = buildMediaNodes('webp');
-    setClip(activeClip);
+    ensureLayer();
+    actor.querySelectorAll('video.tucu-mascot-media').forEach((v) => v.remove());
+    mediaPool.clear();
+    setClip(currentClip, { anchor: currentAnchor });
   }
 
-  function mountLayer() {
-    if (layerEl && document.body.contains(layerEl)) return;
-    format = detectFormat();
-    layerEl = document.createElement('div');
-    layerEl.id = 'tucu-mascot-layer';
-    layerEl.setAttribute('aria-hidden', 'true');
-    actorEl = document.createElement('div');
-    actorEl.id = 'tucu-mascot-actor';
-    actorEl.innerHTML = buildMediaNodes(format);
-    layerEl.appendChild(actorEl);
-    document.body.appendChild(layerEl);
-
-    if (!bound) {
-      bound = true;
-      const onMove = () => schedulePosition();
-      window.addEventListener('resize', onMove, { passive: true });
-      window.addEventListener('scroll', onMove, { passive: true });
+  function getOrCreateMedia(name) {
+    ensureLayer();
+    if (mediaPool.has(name)) {
+      const existing = mediaPool.get(name);
+      if (existing.parentElement !== actor) actor.appendChild(existing);
+      return existing;
     }
+    const cfg = CLIPS[name] || CLIPS.idle;
+    const fmt = detectFormat();
+    const el = document.createElement(fmt === 'webm' ? 'video' : 'img');
+    el.className = 'tucu-mascot-media';
+    el.dataset.clipKey = name;
+    el.decoding = 'async';
+    if (fmt === 'webm') {
+      Object.assign(el, { src: cfg.webm, muted: true, playsInline: true, loop: cfg.loop, autoplay: false, preload: 'auto' });
+      el.setAttribute('muted', '');
+      el.setAttribute('playsinline', '');
+      el.addEventListener('error', () => { if (el.parentElement === actor) switchToWebpFallback(); });
+    } else {
+      el.src = cfg.webp;
+      el.alt = 'Lumi';
+    }
+    actor.appendChild(el);
+    mediaPool.set(name, el);
+    return el;
   }
 
-  function computeTargetRect(anchorMode) {
-    const isDesktop = window.innerWidth >= 1024;
-    if (anchorMode === 'intro' && isDesktop) {
-      const logo = document.getElementById('emp-header-logo');
-      if (logo) {
-        const r = logo.getBoundingClientRect();
-        return { x: Math.min(window.innerWidth - 220, r.right + 14), y: Math.max(4, r.top - 18), w: 192, h: 108 };
-      }
-    }
-    if (anchorMode === 'celebrate' && isDesktop) {
-      const phone = document.getElementById('preview-phone-chassis');
-      if (phone) {
-        const r = phone.getBoundingClientRect();
-        return { x: Math.max(12, r.left + (r.width - 128) / 2), y: Math.max(66, r.top - 34), w: 128, h: 128 };
-      }
-    }
-    const slot = document.getElementById('tucu-mascot-slot');
-    if (slot) {
-      const r = slot.getBoundingClientRect();
-      return { x: r.left, y: r.top, w: Math.max(88, r.width), h: Math.max(88, r.height) };
-    }
-    return { x: 16, y: 80, w: 96, h: 96 };
+  function dockInto(slotEl) {
+    if (!slotEl || !actor) return false;
+    actor.classList.remove('is-floating-preview');
+    actor.style.width = '100%';
+    actor.style.height = '100%';
+    actor.style.transform = '';
+    if (actor.parentElement !== slotEl) slotEl.appendChild(actor);
+    return true;
   }
 
-  function positionActor(anchorMode = activeAnchor) {
-    activeAnchor = anchorMode;
-    if (!actorEl) return;
-    const t = computeTargetRect(anchorMode);
-    const w = activeClip === 'intro' && anchorMode === 'guide' ? Math.round(t.h * 1.6) : t.w;
-    const x = activeClip === 'intro' && anchorMode === 'guide' ? Math.max(8, t.x - (w - t.w) / 2) : t.x;
-    actorEl.style.width = `${Math.round(w)}px`;
-    actorEl.style.height = `${Math.round(t.h)}px`;
-    actorEl.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(t.y)}px, 0)`;
+  function positionActor(anchorMode) {
+    ensureLayer();
+    currentAnchor = anchorMode || currentAnchor || 'header';
+    if (currentAnchor === 'center' && dockInto(document.getElementById('lumi-intro-media-slot'))) return;
+    if (!dockInto(document.getElementById('tucu-mascot-anchor')) && actor.parentElement !== layer) layer.appendChild(actor);
   }
 
   function schedulePosition() {
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => { rafId = null; positionActor(activeAnchor); });
+    requestAnimationFrame(() => positionActor(currentAnchor));
   }
 
-  function setClip(clipName, { anchor, onEnded } = {}) {
-    mountLayer();
-    activeClip = CLIPS.includes(clipName) ? clipName : 'idle';
-    if (anchor) activeAnchor = anchor;
-    clearTimeout(endTimer);
+  function activateNode(targetNode) {
+    if (!actor || !targetNode || targetNode.parentElement !== actor) return;
+    actor.querySelectorAll('.tucu-mascot-media').forEach((node) => {
+      const isMatch = node === targetNode;
+      node.classList.toggle('is-clip-active', isMatch);
+      if (node.tagName === 'VIDEO' && !isMatch) node.pause();
+    });
+  }
 
-    const nodes = [...actorEl.querySelectorAll('.tucu-m-clip')];
-    const target = format === 'poster'
-      ? actorEl.querySelector('[data-clip="poster"]')
-      : actorEl.querySelector(`[data-clip="${activeClip}"]`);
-
-    nodes.forEach(n => n.classList.toggle('is-active', n === target));
-    positionActor(activeAnchor);
-
-    if (format === 'webm' && target?.tagName === 'VIDEO') {
-      target.onended = null;
-      if (activeClip === 'intro' || activeClip === 'celebrate') {
-        try { target.currentTime = 0; } catch {}
-        target.onended = () => { if (activeClip === clipName) onEnded?.(); };
+  function setClip(clipName, opts) {
+    const options = opts || {};
+    ensureLayer();
+    const target = CLIPS[clipName] ? clipName : 'idle';
+    const cfg = CLIPS[target];
+    if (clipTimer) { clearTimeout(clipTimer); clipTimer = null; }
+    positionActor(options.anchor || 'header');
+    const el = getOrCreateMedia(target);
+    currentClip = target;
+    if (el.tagName === 'VIDEO') {
+      if (el.readyState >= 2 && el.videoWidth > 0) activateNode(el);
+      else {
+        activateNode(posterEl);
+        const reveal = () => { if (currentClip === target && el.parentElement === actor && format === 'webm') activateNode(el); };
+        el.addEventListener('loadeddata', reveal, { once: true });
+        el.addEventListener('canplay', reveal, { once: true });
       }
-      const p = target.play();
-      if (p?.catch) p.catch(() => switchToWebpFallback());
-    } else if (activeClip === 'intro' || activeClip === 'celebrate') {
-      endTimer = setTimeout(() => { if (activeClip === clipName) onEnded?.(); }, format === 'poster' ? 900 : 3900);
+      try { el.currentTime = 0; } catch (_) {}
+      const p = el.play();
+      if (p && p.catch) p.catch((err) => {
+        if (err?.name !== 'AbortError' && el.parentElement === actor && (err?.name === 'NotSupportedError' || el.error)) switchToWebpFallback();
+      });
+      if (!cfg.loop && typeof options.onEnded === 'function') {
+        const done = () => { if (clipTimer) { clearTimeout(clipTimer); clipTimer = null; } el.onended = null; options.onEnded(); };
+        el.onended = done;
+        clipTimer = setTimeout(done, (cfg.duration || 2400) + 500);
+      }
+    } else {
+      if (!cfg.loop) { el.src = ''; el.src = cfg.webp; }
+      activateNode(el);
+      if (!cfg.loop && typeof options.onEnded === 'function') clipTimer = setTimeout(options.onEnded, cfg.duration || 2200);
     }
   }
 
-  return { mountLayer, detectFormat, setClip, positionActor, schedulePosition, getFormat: () => format };
-})();
+  function mountLayer() {
+    ensureLayer();
+    ['intro', 'idle', 'thinking', 'celebrate', 'wink', 'advisor'].forEach((k) => getOrCreateMedia(k));
+    window.addEventListener('resize', schedulePosition, { passive: true });
+    window.addEventListener('scroll', schedulePosition, { passive: true });
+    positionActor('header');
+  }
+
+  global.TucuMascotStage = {
+    mountLayer, detectFormat, setClip, positionActor, schedulePosition, switchToWebpFallback,
+    getFormat: () => detectFormat(),
+    getCurrentClip: () => currentClip
+  };
+})(window);

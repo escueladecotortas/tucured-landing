@@ -1,5 +1,5 @@
 // Archivo: public/js/admin_l1/admin_l1_core.js
-// Core L1 (Admin · Esencial): Paleta Heredada, KPIs, Temas & Navegación (< 155 líneas)
+// Core L1 (Admin · Turnos): Paleta Heredada, KPIs, Temas & Navegación (< 155 líneas)
 
 (function (global) {
   const DEFAULT_CONFIG = {
@@ -86,7 +86,7 @@
     const meta = seedMod ? seedMod.getRubroMeta(rubro) : null;
     const isDemo = !cfg.slug || cfg.slug.startsWith('demo-') || cfg.slug === 'mi-comercio';
     const initials = isDemo && meta?.initials ? meta.initials : (cfg.bizName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'BB');
-    const planTitle = global.AdminFeatures?.getPlanMeta?.('l1')?.title || 'Admin · Esencial';
+    const planTitle = global.AdminFeatures?.getPlanMeta?.('l1')?.title || 'Admin · Turnos';
     const tEl = document.getElementById('brand-title'), sEl = document.getElementById('brand-subtitle'), mobEl = document.getElementById('l1-mobile-title');
     if (tEl) tEl.textContent = cfg.bizName;
     if (sEl) sEl.textContent = planTitle;

@@ -1,5 +1,5 @@
 // Archivo: public/js/activar/activar_data.js
-// Constantes Canónicas, Planes Oficiales (Esencial/Gestión/Equipos), Prefill Dual, Servicios y WhatsApp (< 170L)
+// Constantes Canónicas, Planes Oficiales (Turnos/Gestión/Equipos), Prefill Dual, Servicios y WhatsApp (< 170L)
 
 window.TucuActivarData = (function () {
   const TUCU_RED_PHONE = '5493814132154';
@@ -31,7 +31,7 @@ window.TucuActivarData = (function () {
   const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'Débito/Crédito'];
 
   const LEVELS = [
-    { id: 'l1', label: 'Plan Esencial' },
+    { id: 'l1', label: 'Plan Turnos' },
     { id: 'l2', label: 'Plan Gestión' },
     { id: 'l3', label: 'Plan Equipos' }
   ];
@@ -56,7 +56,7 @@ window.TucuActivarData = (function () {
 
   function normalizeLevel(raw) {
     const s = String(raw || '').toLowerCase().trim();
-    if (s === '1' || s === 'l1' || s.includes('esencial')) return 'l1';
+    if (s === '1' || s === 'l1' || s.includes('esencial') || s.includes('turno')) return 'l1';
     if (s === '3' || s === 'l3' || s.includes('equipo')) return 'l3';
     return 'l2';
   }

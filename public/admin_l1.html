@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title id="html-page-title">Admin · Esencial — Tucu Red</title>
+  <title id="html-page-title">Admin · Turnos — Tucu Red</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <script>(function(){const t=localStorage.getItem('tucu_theme')||'light';if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');const p=new URLSearchParams(window.location.search);if(p.get('embed')==='true'||window.self!==window.top)document.documentElement.classList.add('is-embedded');})();</script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +19,7 @@
     <button id="btn-open-sidebar" type="button" aria-label="Abrir Menú" class="p-2 rounded-xl text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div class="flex items-center gap-2 min-w-0">
       <div data-admin-brand-slot="mobile" class="relative w-8 h-8 rounded-xl flex items-center justify-center shrink-0"><span data-admin-brand-initials class="w-full h-full rounded-xl tucu-primary-bg text-white flex items-center justify-center font-black text-[11px] shadow-xs">BB</span><img data-admin-brand-logo src="" alt="Logo" class="hidden w-8 h-8 rounded-xl object-contain bg-white border border-stone-200/80 dark:border-stone-700 p-0.5 shrink-0"></div>
-      <span id="l1-mobile-title" class="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100 truncate">Admin · Esencial</span>
+      <span id="l1-mobile-title" class="text-sm font-bold tracking-tight text-stone-900 dark:text-stone-100 truncate">Admin · Turnos</span>
     </div>
     <button type="button" id="mobile-turnero-pill" onclick="adminL1Core.toggleTurneroActive()" class="tucu-badge bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 cursor-pointer">Turnero Abierto</button>
   </header>
@@ -30,7 +30,7 @@
     <div class="flex items-center justify-between pt-1 pb-3.5 border-b border-[#D5CEC2] dark:border-stone-800">
       <div class="flex items-center gap-2.5 min-w-0">
         <div data-admin-brand-slot="sidebar" class="relative w-9 h-9 rounded-xl flex items-center justify-center shrink-0"><span id="brand-initials" data-admin-brand-initials class="w-full h-full rounded-xl tucu-primary-bg text-white flex items-center justify-center font-black text-xs shadow-xs">BB</span><img id="brand-logo-img" data-admin-brand-logo src="" alt="Logo" class="hidden w-9 h-9 rounded-xl object-contain bg-white border border-stone-200/80 dark:border-stone-700 p-0.5 shrink-0"></div>
-        <div class="min-w-0"><h1 id="brand-title" class="text-sm font-bold text-stone-900 dark:text-stone-100 leading-tight font-title truncate">Brava Barbería</h1><p id="brand-subtitle" class="block text-[10px] font-medium text-stone-500 dark:text-stone-400 truncate">Admin · Esencial</p></div>
+        <div class="min-w-0"><h1 id="brand-title" class="text-sm font-bold text-stone-900 dark:text-stone-100 leading-tight font-title truncate">Brava Barbería</h1><p id="brand-subtitle" class="block text-[10px] font-medium text-stone-500 dark:text-stone-400 truncate">Admin · Turnos</p></div>
       </div>
       <button id="btn-close-sidebar" type="button" class="lg:hidden p-1.5 rounded-lg text-stone-400 hover:text-stone-700 cursor-pointer"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
     </div>

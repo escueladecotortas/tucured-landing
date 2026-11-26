@@ -13,9 +13,9 @@ const ipHits = new Map();
 const phoneHits = new Map();
 
 const PLAN_LABELS = {
-  l1: 'Nivel 1 — Turnero Autónomo',
-  l2: 'Nivel 2 — Central Pro Multi-Box',
-  l3: 'Nivel 3 — Multi-Staff & Recursos'
+  l1: 'Plan Turnos',
+  l2: 'Plan Gestión',
+  l3: 'Plan Equipos'
 };
 
 const RUBRO_LABELS = {

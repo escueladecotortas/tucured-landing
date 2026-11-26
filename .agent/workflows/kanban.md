@@ -2,12 +2,12 @@
 # Tablero Kanban Master v2.0 - tucured-landing
 
 Estructura soberana de orquestación y seguimiento operacional (Máximo 10 tareas activas / < 200 líneas).
-**Estado del Proyecto:** `[CONSOLIDATED_V11]` | **Progreso Global:** `120 / 123` completadas (**97.6%**)
+**Estado del Proyecto:** `[CONSOLIDATED_V11]` | **Progreso Global:** `121 / 123` completadas (**98.4%**)
 
 | Módulo / Épica | Completadas | Pendientes | Avance |
 | :--- | :---: | :---: | :---: |
 | Hitos v1–v11 (Landing, Showroom V2, Turnero V2, Admin L1/L2/L3) | 120 | 0 | 100.0% |
-| Embudo & Wizard (`/empezar.html` — `TASK-113B`) | 0 | 1 | 0.0% |
+| Embudo & Wizard (`/empezar.html` — `TASK-113B`) | 1 | 0 | 100.0% |
 | Backend / BFF Fase 3 (`TASK-115`) | 0 | 1 | 0.0% |
 | Comercial / PR (`TASK-102`) | 0 | 1 | 0.0% |
 
@@ -16,7 +16,7 @@ Estructura soberana de orquestación y seguimiento operacional (Máximo 10 tarea
 
 ## [IN_PROGRESS]
 
-- [/] **[TASK-113B]** Wizard `/empezar.html` (División compra vs. configuración + 4 tonos de voz + galería de 12 portadas vivas).
+_Sin tareas activas en curso._
 
 ## [BACKLOG]
 

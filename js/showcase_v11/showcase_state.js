@@ -1,5 +1,5 @@
 // Archivo: js/showcase_v11/showcase_state.js
-// Estado reactivo y catalogo canonico de Showroom V2 (Turnero Unico + Esencial / Gestion / Equipos) (< 165L)
+// Estado reactivo y catalogo canonico de Showroom V2 (Turnero Unico + Turnos / Gestion / Equipos) (< 165L)
 
 export const RUBRO_ORDER = ['peluqueria', 'estetica', 'gastronomia', 'deportes', 'salud', 'servicios'];
 
@@ -36,7 +36,7 @@ export const CLIENT_EXPERIENCE_BENEFITS = [
 
 export const LEVELS = {
   l1: {
-    id: 'l1', shortLabel: 'Esencial', badge: 'Plan Esencial', regularPrice: '$14.900 ARS/mes',
+    id: 'l1', shortLabel: 'Turnos', badge: 'Plan Turnos', regularPrice: '$14.900 ARS/mes',
     badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
     summary: 'Ideal para profesionales y locales que ordenan su agenda online y señas sin intermediarios.',
     ownerBenefits: [
@@ -45,7 +45,7 @@ export const LEVELS = {
       'Horarios partidos Mañana / Tarde y Feriados Nacionales 2026 editables por mes.'
     ],
     mobileMeta: {
-      title: 'Admin · Esencial', badge: 'Agenda y Señas',
+      title: 'Admin · Turnos', badge: 'Agenda y Señas',
       kpis: [['Turnos hoy', '5'], ['Señas cobradas', '$18.000'], ['Asistencia', '92%']],
       chips: ['Pausar agenda web', 'Feriados 2026', 'Carga manual'],
       rows: [['15:00 hs', 'Martín Gómez', 'Confirmado'], ['16:30 hs', 'Sofía Núñez', 'Pendiente de seña']]
@@ -56,7 +56,7 @@ export const LEVELS = {
     badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200',
     summary: 'Pensado para comercios con alto volumen, recepción en mostrador y base de clientes.',
     ownerBenefits: [
-      'Todo Esencial + base CRM con importación de contactos directa del celular.',
+      'Todo Turnos + base CRM con importación de contactos directa del celular.',
       'Bloqueo preventivo de teléfonos restringidos, vacaciones y horarios cerrados.',
       'Control de ocupación, selector de personas o lugares e historial de precios.'
     ],

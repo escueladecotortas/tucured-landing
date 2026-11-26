@@ -1,7 +1,7 @@
 // Archivo: js/components/pricing.js
 /**
  * Tucu Red Web V2 - Sección Oficial de Planes y Precios Transparentes (SSOT v16.0)
- * 3 Niveles (Esencial, Gestión y Equipos), gancho $4.999 ARS (Mes Fundador) y conexión a #funnel.
+ * 3 Niveles (Turnos, Gestión y Equipos), gancho $4.999 ARS (Mes Fundador) y conexión a #funnel.
  * Restricción estricta: < 200 líneas (< 180L).
  */
 
@@ -10,7 +10,7 @@ export const PRICING_PLANS = [
     id: 'l1',
     levelNumber: 1,
     title: 'Plan 1',
-    subtitle: 'Esencial',
+    subtitle: 'Turnos',
     badge: 'Agenda Independiente',
     themeClass: 'border-sky-300/80 shadow-sky-100 hover:border-sky-500',
     accentText: 'text-sky-700',
@@ -19,7 +19,7 @@ export const PRICING_PLANS = [
     hookPeriod: 'Mes Fundador - Primer Mes',
     regularPrice: '$14.900 ARS / mes',
     commission: '0% comisiones',
-    ctaText: 'Elegir Plan Esencial',
+    ctaText: 'Elegir Plan Turnos',
     features: [
       'Turnero web en 2 pasos sin descargas ni contraseñas.',
       'Seña configurable por servicio directo a tu Alias/CBU con carga de comprobante.',
@@ -43,7 +43,7 @@ export const PRICING_PLANS = [
     commission: '0% comisiones',
     ctaText: 'Elegir Plan Gestión',
     features: [
-      'Todo lo de Esencial con turnos de mostrador, selector de cantidad de personas o lugares y % de ocupación.',
+      'Todo Plan Turnos con turnos de mostrador, selector de cantidad de personas o lugares y % de ocupación.',
       'CRM & Contactos con importación directa desde la agenda del celular (.vcf/.csv).',
       'Ficha completa de clientes con Email, Fecha de Cumpleaños y notas.',
       'Bloqueo preventivo de teléfonos restringidos en Turnero Web y papelera restaurable.',

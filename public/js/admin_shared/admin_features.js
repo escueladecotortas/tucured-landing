@@ -1,13 +1,13 @@
 // Archivo: public/js/admin_shared/admin_features.js
-// Registro modular único de capacidades por nivel (Esencial, Gestión, Equipos) y Add-ons (< 110L)
+// Registro modular único de capacidades por nivel (Turnos, Gestión, Equipos) y Add-ons (< 110L)
 
 (function (global) {
   const PLAN_META = {
     l1: {
       id: 'l1',
-      name: 'Esencial',
-      title: 'Admin · Esencial',
-      badge: 'Plan Esencial',
+      name: 'Turnos',
+      title: 'Admin · Turnos',
+      badge: 'Plan Turnos',
       features: {
         agenda: true,
         deposits: true,

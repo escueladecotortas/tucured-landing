@@ -1,5 +1,5 @@
 // Archivo: js/showcase_v11/showcase_admin_ui.js
-// Seccion 2 del Showroom V2: Selector de Paneles de Dueno (Esencial / Gestion / Equipos) (< 140L)
+// Seccion 2 del Showroom V2: Selector de Paneles de Dueno (Turnos / Gestion / Equipos) (< 140L)
 
 import { SVG, esc } from './showcase_v2_ui.js';
 
@@ -91,7 +91,7 @@ export function renderAdminSectionShell(state) {
             Elegí tu Panel de Dueño
           </h2>
           <p class="text-slate-600 text-xs sm:text-sm lg:text-base leading-relaxed max-w-2xl mx-auto">
-            Misma estética Warm Studio y paleta de tu rubro en los tres planes. Cambiá entre Esencial, Gestión y Equipos para probarlos en vivo.
+            Misma estética Warm Studio y paleta de tu rubro en los tres planes. Cambiá entre Turnos, Gestión y Equipos para probarlos en vivo.
           </p>
         </div>
         <div id="showroom-admin-selector-host">${renderAdminSelectorMarkup(state)}</div>

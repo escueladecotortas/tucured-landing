@@ -22,8 +22,10 @@ export default defineConfig({
       configureServer(server) { server.middlewares.use(rewriteShortTicketMiddleware); },
       configurePreviewServer(server) { server.middlewares.use(rewriteShortTicketMiddleware); },
       closeBundle() {
-        const rawDir = path.resolve('dist/assets/mascot/raw');
-        if (fs.existsSync(rawDir)) fs.rmSync(rawDir, { recursive: true, force: true });
+        for (const rel of ['dist/assets/mascot/raw', 'dist/lab_portadas.html', 'dist/lab']) {
+          const target = path.resolve(rel);
+          if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
+        }
       }
     }
   ]

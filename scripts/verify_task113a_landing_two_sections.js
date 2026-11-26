@@ -1,5 +1,5 @@
 // Archivo: scripts/verify_task113a_landing_two_sections.js
-// Compuerta QA + E2E [TASK-113A]: Landing en 2 Secciones + Renombre Esencial / Gestion / Equipos (< 190L)
+// Compuerta QA + E2E [TASK-113A]: Landing en 2 Secciones + Renombre Turnos / Gestion / Equipos (< 190L)
 
 import fs from 'fs';
 import path from 'path';
@@ -101,7 +101,7 @@ async function runDesktopE2E(cdp) {
   ok(!layout.ov && layout.ordered, 'Desktop 1280: 0 overflow-x y #showroom-cliente arriba de #showroom-admin');
   ok(!layout.badTxt, 'Desktop 1280: 0 textos visibles residuales (Autónomo/Central Pro/Multi-Staff/pase/ticket)');
   ok(layout.lvlsInSec1 === 0 && layout.cUrl.includes('/turnero.html?rubro=peluqueria&level=l1&embed=1'), `Desktop 1280 Sec 1 sin selector de 3 planes e iframe Turnero l1 (${layout.cUrl})`);
-  ok(layout.tabs.join('|') === 'Esencial|Gestión|Equipos' && layout.aUrl.includes('/admin_l1.html'), `Desktop 1280 Sec 2 muestra Esencial|Gestión|Equipos e iframe l1 (${layout.aUrl})`);
+  ok(layout.tabs.join('|') === 'Turnos|Gestión|Equipos' && layout.aUrl.includes('/admin_l1.html'), `Desktop 1280 Sec 2 muestra Turnos|Gestión|Equipos e iframe l1 (${layout.aUrl})`);
 
   await cdp.evalJs("document.getElementById('chk-client-multistaff')?.click()"); await wait(200);
   const cUrlL3 = await cdp.evalJs("document.getElementById('showroom-client-iframe')?.getAttribute('src') || ''");

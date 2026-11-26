@@ -25,8 +25,8 @@ const FAQS_DATA = [
     a: 'Configurás tu propio Alias y CBU/CVU desde el panel de administración, definís qué servicios exigen seña (en porcentaje o monto fijo) y habilitás tus medios de pago. Tus clientes transfieren directo a tu cuenta sin intermediarios ni comisiones y pueden adjuntar o informar el comprobante desde su comprobante online.'
   },
   {
-    q: '¿Puedo cambiar de plan (Esencial, Gestión o Equipos) más adelante?',
-    a: 'Sí, la actualización es inmediata. Podés empezar con Esencial o Gestión y escalar a Equipos cuando tu equipo crezca, conservando turnos, fichas de clientes y configuraciones previas.'
+    q: '¿Puedo cambiar de plan (Turnos, Gestión o Equipos) más adelante?',
+    a: 'Sí, la actualización es inmediata. Podés empezar con Turnos o Gestión y escalar a Equipos cuando tu equipo crezca, conservando turnos, fichas de clientes y configuraciones previas.'
   },
   {
     q: '¿Cuánto demoran en entregarme el turnero configurado?',

@@ -33,13 +33,13 @@ window.TucuActivarMarkup = (function () {
     if (plan === 'l1') {
       if (cfg.needsCapacity) {
         return `<div class="space-y-3 pt-2 border-t border-[#D5CEC2]/60">
-          <p class="text-xs text-stone-600">Tu Plan Esencial gestiona la agenda individual de tu local. Indicá el cupo máximo por turno:</p>
+          <p class="text-xs text-stone-600">Tu Plan Turnos gestiona la agenda individual de tu local. Indicá el cupo máximo por turno:</p>
           <div><label class="block text-xs font-bold mb-1">${esc(cfg.capLabel)} *</label><input id="act-cap-turno" type="number" min="1" value="4" class="${INP} tabular-nums sm:max-w-xs" /></div>
         </div>`;
       }
       return `<div class="p-3.5 rounded-2xl bg-[#FAF7F2] border border-[#D5CEC2] text-xs text-stone-700 leading-relaxed flex items-start gap-2.5">
         <span class="material-symbols-outlined text-[#EA580C] text-lg shrink-0">check_circle</span>
-        <span>Tu <strong>Plan Esencial</strong> opera con agenda individual 1 a 1. Solo cargá tus horarios, servicios y Alias propio.</span>
+        <span>Tu <strong>Plan Turnos</strong> opera con agenda individual 1 a 1. Solo cargá tus horarios, servicios y Alias propio.</span>
       </div>`;
     }
     if (plan === 'l2') {

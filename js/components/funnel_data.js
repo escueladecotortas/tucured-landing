@@ -35,16 +35,16 @@ export const EXPANDED_RUBROS = [
 export const FUNNEL_LEVELS = [
   {
     id: 'l1',
-    title: 'Plan Esencial',
+    title: 'Plan Turnos',
     regularPrice: '$14.900 ARS / mes',
     desc: 'Agenda web en 2 pasos sin contraseñas, seña configurable a tu Alias/CBU con comprobante online #TK con dirección y calendario, horarios partidos y feriados nacionales ($14.900/mes desde el 2° mes).',
-    badge: 'Esencial'
+    badge: 'Turnos'
   },
   {
     id: 'l2',
     title: 'Plan Gestión',
     regularPrice: '$24.900 ARS / mes',
-    desc: 'Todo Plan Esencial + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de cantidad de personas o lugares y % de ocupación ($24.900/mes desde el 2° mes).',
+    desc: 'Todo Plan Turnos + CRM y contactos desde el celular (.vcf/.csv), Email y cumpleaños, bloqueo preventivo, vacaciones, selector de cantidad de personas o lugares y % de ocupación ($24.900/mes desde el 2° mes).',
     badge: 'Gestión'
   },
   {

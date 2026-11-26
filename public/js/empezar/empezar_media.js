@@ -1,10 +1,12 @@
 // Archivo: public/js/empezar/empezar_media.js
-// Gestor de slots WebP en /empezar.html delegado al procesador universal con resolución mínima (< 55L)
+// Gestor de slots WebP y lista de precios <= 8 MB en /empezar.html (< 60L)
 
 window.TucuEmpezarMedia = (function () {
+  const MAX_PRICELIST_BYTES = 8 * 1024 * 1024;
   const store = {
     logo: { file: null, url: '', kb: 0, width: 0, height: 0 },
-    cover: { file: null, url: '', kb: 0, width: 0, height: 0 }
+    cover: { file: null, url: '', kb: 0, width: 0, height: 0 },
+    pricelist: { file: null, name: '', kb: 0 }
   };
 
   function revoke(slot) {
@@ -28,10 +30,22 @@ window.TucuEmpezarMedia = (function () {
     store[slot] = { file: null, url: '', kb: 0, width: 0, height: 0 };
   }
 
+  function setPriceList(file) {
+    if (!file) return store.pricelist;
+    if (file.size > MAX_PRICELIST_BYTES) {
+      throw new Error('El archivo supera los 8 MB permitidos. Podés mandarlo más liviano o por WhatsApp.');
+    }
+    store.pricelist = { file, name: file.name || 'lista-precios', kb: Math.max(1, Math.round(file.size / 1024)) };
+    return store.pricelist;
+  }
+
+  function clearPriceList() {
+    store.pricelist = { file: null, name: '', kb: 0 };
+  }
+
   return {
-    setMedia,
-    clearMedia,
-    getSlot: (slot) => store[slot] || { file: null, url: '', kb: 0, width: 0, height: 0 },
-    getFiles: () => ({ logo: store.logo.file, cover: store.cover.file })
+    setMedia, clearMedia, setPriceList, clearPriceList,
+    getSlot: (slot) => store[slot] || { file: null, url: '', name: '', kb: 0, width: 0, height: 0 },
+    getFiles: () => ({ logo: store.logo.file, cover: store.cover.file, pricelist: store.pricelist.file })
   };
 })();

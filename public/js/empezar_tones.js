@@ -69,9 +69,9 @@ window.TucuEmpezarTones = (function () {
     const current = normalizeTone(activeTone);
     const items = TONES.map(t => {
       const on = t.id === current;
-      return `<button type="button" data-emp-tone="${t.id}" aria-pressed="${on}" class="p-2.5 rounded-xl border text-left cursor-pointer transition-all ${on ? 'bg-stone-900 border-stone-900 text-white shadow-xs' : 'bg-[#FAF8F5] border-stone-200 text-stone-800 hover:bg-stone-100'}">
+      return `<button type="button" data-emp-tone="${t.id}" aria-pressed="${on}" class="p-2.5 rounded-xl text-left cursor-pointer transition-all ${on ? 'wg-option-active' : 'wg-option'}">
         <span class="block text-xs font-bold leading-tight">${esc(t.label)}</span>
-        <span class="block text-[11px] mt-0.5 leading-snug ${on ? 'text-stone-300' : 'text-stone-500'}">${esc(t.hint)}</span>
+        <span class="block text-[11px] mt-0.5 leading-snug text-stone-600">${esc(t.hint)}</span>
       </button>`;
     }).join('');
     return `<div class="space-y-1.5">

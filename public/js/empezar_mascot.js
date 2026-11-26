@@ -1,121 +1,156 @@
 // Archivo: public/js/empezar_mascot.js
-// Orquestador de subtítulos tipeados y estados de la mascota flotante en /empezar.html (< 145L)
+// Controlador conversacional de Lumi v2 (LUMI · TU GUIA TUCURED, Acto 1->2 y mapeo exacto 1-11) (< 170L)
 
-window.TucuMascot = (function () {
-  const Stage = () => window.TucuMascotStage;
-  let lineEl = null;
-  let typeTimer = null;
-  let currentMood = 'wake';
-  let userInteracted = false;
+(function (global) {
+  const SESSION_INTRO_KEY = 'tucu_lumi_intro_played_v2';
+  const STEP_LINES = {
+    1: 'Hola, soy Lumi. Contame el nombre de tu negocio para empezar.',
+    2: 'Elegí tu rubro y especialidades para adaptar el diseño a tu actividad.',
+    3: 'Elegí una portada exclusiva para tu negocio o subí tu propia foto.',
+    4: 'Sumá tu logo sobre blanco y definí el color que te identifica.',
+    5: 'Definí una frase corta que cuente lo que hace especial a tu lugar.',
+    6: 'Contame dónde está tu local y en qué horarios recibís turnos.',
+    7: 'Sumá tus primeros servicios o elegí mandarnos tu lista por WhatsApp.',
+    8: 'Elegí solo lo que tu negocio necesita hoy; si más adelante crecés, podés cambiar de plan sin perder nada.',
+    9: 'Dejanos tu nombre y WhatsApp para activar tu portada y enviarte los accesos.',
+    10: 'Revisá el resumen completo, elegí cómo abonar y activá tu Mes Fundador.',
+    11: '¡Felicitaciones! Tu App ya está en marcha y lista para compartir.'
+  };
 
-  const isReducedMotion = () =>
-    typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  let typingTimer = null;
+  let moodRevertTimer = null;
+  let currentLineText = '';
+  let currentAction = null;
+  let adviceApiRef = null;
 
-  function getScriptForStep(stepIndex, state = {}) {
-    const rawName = (state.comercio || '').trim();
-    const biz = rawName || 'tu comercio';
-    const hasName = Boolean(rawName);
-    const scripts = {
-      1: '¡Hola! Qué bueno verte por acá. Contame cómo se llama tu negocio y lo hacemos brillar juntos.',
-      2: hasName
-        ? `Hermoso nombre, ${biz}. ¿En qué rubro recibís a tus clientes todos los días?`
-        : '¿En qué rubro recibís a tus clientes todos los días? Elegí el que mejor te represente.',
-      3: hasName
-        ? `Ahora elegí el clima de ${biz}: tenés 12 portadas vivas de día o noche, o podés subir tu propia foto.`
-        : 'Elegí el clima visual de tu App: tenés 12 portadas vivas o podés subir tu foto favorita.',
-      4: 'Si querés sumar tu logo, tomamos su color principal en automático para que todo combine.',
-      5: hasName
-        ? `¿Cómo le habla ${biz} a su gente? Elegí un tono o probá frases nuevas hasta encontrar la tuya.`
-        : '¿Cómo querés recibir a tus clientes? Elegí tu tono y una frase que te represente.',
-      6: hasName
-        ? `Contame dónde queda ${biz} y en qué horarios atendés para que tus clientes reserven al toque.`
-        : 'Sumá tu dirección y tus horarios habituales para que tu agenda quede lista.',
-      7: 'Armá tus primeros servicios en segundos. Con uno solo ya podés arrancar, o mandarnos tu lista después.',
-      8: hasName
-        ? `¡Ya casi estamos! Elegí la dirección web de ${biz} y el plan que mejor acompañe tu ritmo.`
-        : 'Elegí la dirección web propia de tu comercio y el plan ideal para empezar.',
-      9: 'Dejame tus datos de contacto así te enviamos los accesos directos apenas terminemos.',
-      10: hasName
-        ? `Todo listo para que ${biz} cobre vida. Revisá tu resumen y activá tu Mes Fundador.`
-        : 'Todo listo para lanzar tu App. Revisá tu resumen y activá tu Mes Fundador.',
-      ready: hasName
-        ? `¡Felicitaciones! ${biz} ya tiene su lugar reservado. Ahora podés seguir sumando detalles o seguir tranquilo más tarde.`
-        : '¡Felicitaciones! Tu App ya tiene su lugar reservado y podés seguir personalizándola cuando quieras.'
-    };
-    return scripts[stepIndex] || scripts[1];
+  function renderDock(container) {
+    if (!container) return;
+    container.innerHTML = `
+      <div class="wg-card rounded-3xl px-4 py-3.5 flex items-center gap-3 sm:gap-4">
+        <div id="tucu-mascot-anchor" class="w-[74px] h-[74px] sm:w-[92px] sm:h-[92px] shrink-0 relative"></div>
+        <div class="min-w-0 flex-1 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#EA580C]">LUMI · TU GUÍA TUCURED</span>
+            <button type="button" id="btn-lumi-advice" class="wg-pill px-3 py-1 rounded-full text-[11px] font-semibold text-stone-700 hover:bg-[#EAE1D6] cursor-pointer transition-colors">
+              Pedime un consejo
+            </button>
+          </div>
+          <p id="tucu-mascot-line" class="text-sm sm:text-[15px] font-medium text-stone-800 leading-snug min-h-[2.4em]"></p>
+          <div id="lumi-advice-action" class="hidden pt-0.5"></div>
+        </div>
+      </div>`;
   }
 
   function typeText(text) {
-    if (!lineEl) return;
-    clearInterval(typeTimer);
-    const clean = String(text || '');
-    if (isReducedMotion()) { lineEl.textContent = clean; return; }
+    const el = document.getElementById('tucu-mascot-line');
+    if (!el || !text) return;
+    if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+    if (currentLineText === text && el.textContent === text) return;
+    currentLineText = text;
     let idx = 0;
-    lineEl.textContent = '';
-    typeTimer = setInterval(() => {
-      idx += 1;
-      lineEl.textContent = clean.slice(0, idx);
-      if (idx >= clean.length) clearInterval(typeTimer);
-    }, 26);
+    el.textContent = '';
+    typingTimer = setInterval(() => {
+      idx += 3;
+      el.textContent = text.slice(0, idx);
+      if (idx >= text.length) {
+        el.textContent = text;
+        clearInterval(typingTimer);
+        typingTimer = null;
+      }
+    }, 18);
   }
 
-  function setMood(mood, customLine = '') {
-    const nextMood = mood || 'attentive';
-    if (nextMood !== 'wake' && nextMood !== 'intro') userInteracted = true;
-    currentMood = nextMood;
+  function setAdviceAction(label, handler) {
+    const host = document.getElementById('lumi-advice-action');
+    if (!host) return;
+    currentAction = typeof handler === 'function' ? handler : null;
+    if (!label || !currentAction) {
+      host.classList.add('hidden');
+      host.innerHTML = '';
+      return;
+    }
+    host.classList.remove('hidden');
+    host.innerHTML = `<button type="button" id="btn-lumi-apply-advice" class="wg-btn-ai px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">${label}</button>`;
+    document.getElementById('btn-lumi-apply-advice')?.addEventListener('click', () => {
+      if (currentAction) currentAction(adviceApiRef);
+    });
+  }
+
+  function setMood(mood, customLine) {
+    if (moodRevertTimer) { clearTimeout(moodRevertTimer); moodRevertTimer = null; }
+    const stage = global.TucuMascotStage;
+    const isTransient = mood === 'intro' || mood === 'celebrate' || mood === 'wink';
+    if (stage) {
+      stage.setClip(mood || 'idle', {
+        anchor: 'header',
+        onEnded: isTransient ? () => stage.setClip('idle', { anchor: 'header' }) : null
+      });
+    }
     if (customLine) typeText(customLine);
-
-    if (nextMood === 'wake' || nextMood === 'intro') {
-      Stage()?.setClip?.('intro', {
-        anchor: window.innerWidth >= 1024 ? 'intro' : 'guide',
-        onEnded: () => { if (currentMood === nextMood) setMood('attentive'); }
-      });
-      return;
+    if (isTransient) {
+      moodRevertTimer = setTimeout(() => { stage?.setClip('idle', { anchor: 'header' }); }, 3200);
     }
-    if (nextMood === 'thinking') {
-      Stage()?.setClip?.('thinking', { anchor: 'guide' });
-      return;
-    }
-    if (nextMood === 'celebrate' || nextMood === 'ready') {
-      Stage()?.setClip?.('celebrate', {
-        anchor: nextMood === 'celebrate' ? 'celebrate' : 'guide',
-        onEnded: () => { if (currentMood === nextMood) setMood('attentive'); }
-      });
-      return;
-    }
-    Stage()?.setClip?.('idle', { anchor: 'guide' });
   }
 
-  function setStep(stepIndex, state = {}) {
-    const key = state?.submitted ? 'ready' : stepIndex;
-    const line = getScriptForStep(key, state);
-    if (state?.submitted) return setMood('ready', line);
-    if (!userInteracted && stepIndex === 1 && (currentMood === 'wake' || currentMood === 'intro')) {
-      typeText(line);
-      Stage()?.schedulePosition?.();
+  function setStep(stepIndex, state) {
+    const step = Number(stepIndex) || 1;
+    const radar = global.TucuLumiAdvisor?.evaluateRadar?.(step, state);
+    const line = radar?.line || STEP_LINES[step] || STEP_LINES[1];
+    setAdviceAction(radar?.actionLabel || '', radar?.apply || null);
+    setMood(radar?.mood === 'advisor' && step === 6 ? 'advisor' : 'idle', line);
+  }
+
+  function triggerAdvice(stepIndex, state) {
+    const step = Number(stepIndex) || 1;
+    const radar = global.TucuLumiAdvisor?.evaluateRadar?.(step, state);
+    const text = radar?.advice || STEP_LINES[step] || STEP_LINES[1];
+    setAdviceAction(radar?.actionLabel || '', radar?.apply || null);
+    setMood('advisor', text);
+  }
+
+  function playIntroSequence(stepMountEl, hasSavedDraft, onFinish) {
+    const dockMount = document.getElementById('empezar-mascot-mount');
+    const already = sessionStorage.getItem(SESSION_INTRO_KEY) === '1';
+    if (hasSavedDraft || already || !stepMountEl) {
+      dockMount?.classList.remove('hidden');
+      global.TucuMascotStage?.setClip('idle', { anchor: 'header' });
+      onFinish?.();
       return;
     }
-    setMood('attentive', line);
+    sessionStorage.setItem(SESSION_INTRO_KEY, '1');
+    dockMount?.classList.add('hidden');
+    stepMountEl.innerHTML = `
+      <div id="lumi-intro-stage-anchor" class="wg-card rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center space-y-3.5">
+        <img src="/assets/tucu_red_logo.svg" alt="TucuRed" class="h-7 sm:h-8 w-auto mx-auto" />
+        <div id="lumi-intro-media-slot" class="w-36 h-36 sm:w-44 sm:h-44 mx-auto relative lumi-intro-emerge"></div>
+        <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#EA580C]">LUMI · TU GUÍA TUCURED</span>
+        <h2 class="font-headline font-extrabold text-xl sm:text-2xl text-stone-900">Hola, vamos a crear el turnero de tu negocio</h2>
+        <p class="text-sm text-stone-600 max-w-md">Avanzamos con una decisión simple por pantalla mientras ves todo en vivo en tu celular.</p>
+        <button type="button" id="btn-skip-lumi-intro" class="wg-btn-primary px-5 py-2.5 rounded-2xl text-xs font-bold cursor-pointer">Empezar ahora</button>
+      </div>`;
+    global.TucuMascotStage?.setClip('intro', { anchor: 'center' });
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      dockMount?.classList.remove('hidden');
+      stepMountEl.classList.add('tucu-step-enter');
+      global.TucuMascotStage?.setClip('idle', { anchor: 'header' });
+      onFinish?.();
+    };
+    document.getElementById('btn-skip-lumi-intro')?.addEventListener('click', finish);
+    setTimeout(finish, 3100);
   }
 
-  function init(container) {
-    if (!container) return;
-    userInteracted = false;
-    currentMood = 'wake';
-    container.innerHTML = `<div class="flex items-center gap-3 sm:gap-4 py-1">
-      <div id="tucu-mascot-slot" class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 pointer-events-none" aria-hidden="true"></div>
-      <div class="min-w-0 flex-1 bg-white/95 border border-stone-200 rounded-3xl px-4 py-3 shadow-xs">
-        <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-orange-700 mb-0.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-          <span>Tu asistente TucuRed</span>
-        </span>
-        <p id="tucu-mascot-line" class="text-xs sm:text-sm font-semibold text-stone-800 leading-snug min-h-[2.4em]"></p>
-      </div>
-    </div>`;
-    lineEl = document.getElementById('tucu-mascot-line');
-    Stage()?.mountLayer?.();
-    setMood('wake');
+  function init(container, opts) {
+    adviceApiRef = opts?.adviceApi || null;
+    renderDock(container);
+    global.TucuMascotStage?.mountLayer();
+    global.TucuMascotStage?.setClip('idle', { anchor: 'header' });
+    document.getElementById('btn-lumi-advice')?.addEventListener('click', () => {
+      opts?.onAdviceClick?.();
+    });
   }
 
-  return { init, setStep, setMood };
-})();
+  global.TucuMascot = { init, setStep, setMood, typeText, setAdviceAction, triggerAdvice, playIntroSequence };
+})(window);

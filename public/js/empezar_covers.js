@@ -1,118 +1,142 @@
 // Archivo: public/js/empezar_covers.js
-// Galería de 12 portadas vivas con filtro de clima (Día/Nocturno) y subida universal (< 130L)
+// Selector de portadas exclusivas libres (filtro por rubro sin mutarlo, sin badges y lock API) (< 180L)
 
 window.TucuEmpezarCovers = (function () {
-  const DEFAULT_COVERS = [
-    { id: 'peluqueria-salon-luminoso-02', rubro: 'peluqueria', nombre: 'Salón Luminoso', estilo: 'dia', poster: '/assets/covers/peluqueria/salon_luminoso_02.webp', motion: '/assets/covers/peluqueria/salon_luminoso_02.mp4' },
-    { id: 'estetica-brillo-natural-02', rubro: 'estetica', nombre: 'Brillo Natural', estilo: 'dia', poster: '/assets/covers/estetica/brillo_natural_02.webp', motion: '/assets/covers/estetica/brillo_natural_02.mp4' },
-    { id: 'gastronomia-cafe-sol-02', rubro: 'gastronomia', nombre: 'Café & Sol', estilo: 'dia', poster: '/assets/covers/gastronomia/cafe_sol_02.webp', motion: '/assets/covers/gastronomia/cafe_sol_02.mp4' },
-    { id: 'deportes-padel-sol-02', rubro: 'deportes', nombre: 'Pádel al Sol', estilo: 'dia', poster: '/assets/covers/deportes/padel_sol_02.webp', motion: '/assets/covers/deportes/padel_sol_02.mp4' },
-    { id: 'salud-clinica-luminosa-02', rubro: 'salud', nombre: 'Clínica Luminosa', estilo: 'dia', poster: '/assets/covers/salud/clinica_luminosa_02.webp', motion: '/assets/covers/salud/clinica_luminosa_02.mp4' },
-    { id: 'servicios-estudio-moderno-02', rubro: 'servicios', nombre: 'Estudio Moderno', estilo: 'dia', poster: '/assets/covers/servicios/estudio_moderno_02.webp', motion: '/assets/covers/servicios/estudio_moderno_02.mp4' },
-    { id: 'peluqueria-oficio-vapor-01', rubro: 'peluqueria', nombre: 'Oficio y Vapor', estilo: 'nocturno', poster: '/assets/covers/peluqueria/oficio_vapor_01.webp', motion: '/assets/covers/peluqueria/oficio_vapor_01.mp4' },
-    { id: 'estetica-calma-vela-01', rubro: 'estetica', nombre: 'Calma de Vela', estilo: 'nocturno', poster: '/assets/covers/estetica/calma_vela_01.webp', motion: '/assets/covers/estetica/calma_vela_01.mp4' },
-    { id: 'gastronomia-mesa-calida-01', rubro: 'gastronomia', nombre: 'Mesa Cálida', estilo: 'nocturno', poster: '/assets/covers/gastronomia/mesa_calida_01.webp', motion: '/assets/covers/gastronomia/mesa_calida_01.mp4' },
-    { id: 'deportes-cancha-nocturna-01', rubro: 'deportes', nombre: 'Cancha Nocturna', estilo: 'nocturno', poster: '/assets/covers/deportes/cancha_nocturna_01.webp', motion: '/assets/covers/deportes/cancha_nocturna_01.mp4' },
-    { id: 'salud-luz-manana-01', rubro: 'salud', nombre: 'Luz de Mañana', estilo: 'nocturno', poster: '/assets/covers/salud/luz_manana_01.webp', motion: '/assets/covers/salud/luz_manana_01.mp4' },
-    { id: 'servicios-claridad-cafe-01', rubro: 'servicios', nombre: 'Claridad de Estudio', estilo: 'nocturno', poster: '/assets/covers/servicios/claridad_cafe_01.webp', motion: '/assets/covers/servicios/claridad_cafe_01.mp4' }
-  ];
+  const DEFAULT_ENGINE = 'https://engine.tucured.com.ar';
+  let catalog = [];
+  let takenSet = new Set();
+  let pageIndex = 0;
 
-  let catalog = DEFAULT_COVERS.slice();
-  const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function resolveEngineBase() {
+    if (window.TUCU_ENGINE_URL) return String(window.TUCU_ENGINE_URL).replace(/\/$/, '');
+    return DEFAULT_ENGINE;
+  }
 
-  const getAllCovers = () => catalog.slice();
-  const getCoversForRubro = (rubro) => catalog.filter(c => c.rubro === rubro);
-  const getCoverById = (id) => catalog.find(c => c.id === id) || null;
-  const getDefaultCoverForRubro = (rubro) => catalog.find(c => c.rubro === rubro && c.estilo === 'dia') || catalog.find(c => c.rubro === rubro) || catalog[0];
+  async function fetchJsonTimeout(url, opts, ms) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const res = await fetch(url, { ...(opts || {}), signal: ctrl.signal });
+      const data = await res.json().catch(() => null);
+      return { ok: res.ok, status: res.status, data };
+    } catch (_) {
+      return { ok: false, status: 0, data: null };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 
   async function hydrateFromCatalog() {
-    try {
-      const res = await fetch('/assets/covers/cover_catalog.json');
-      if (!res.ok) return catalog;
-      const data = await res.json();
-      if (Array.isArray(data?.covers) && data.covers.length >= 12) {
-        catalog = data.covers.map(c => ({ id: c.id, rubro: c.rubro, nombre: c.nombre, estilo: c.estilo, poster: c.poster, motion: c.motion }));
-      }
-    } catch {}
+    if (!catalog.length) {
+      const r = await fetchJsonTimeout('/assets/covers/cover_catalog.json', null, 5000);
+      catalog = Array.isArray(r.data?.covers) ? r.data.covers : [];
+    }
+    const s = await fetchJsonTimeout(`${resolveEngineBase()}/api/portal/covers/status`, null, 5000);
+    const locked = s.data?.lockedIds || s.data?.takenIds;
+    if (Array.isArray(locked)) {
+      takenSet = new Set(locked);
+    } else if (s.data?.covers && typeof s.data.covers === 'object') {
+      Object.entries(s.data.covers).forEach(([id, st]) => { if (st && st !== 'available') takenSet.add(id); });
+    }
     return catalog;
   }
 
-  function renderCoverTile(cover, isSelected) {
-    const isDay = cover.estilo === 'dia';
-    const badgeCls = isDay ? 'bg-amber-50/95 text-amber-900 border-amber-200' : 'bg-stone-900/90 text-white border-stone-700';
-    return `<button type="button" data-emp-cover-id="${esc(cover.id)}" aria-pressed="${isSelected}" class="group relative rounded-2xl overflow-hidden border text-left cursor-pointer transition-all ${isSelected ? 'border-stone-900 ring-2 ring-stone-900 shadow-sm' : 'border-stone-200 hover:border-stone-400'}">
-      <div class="relative aspect-[4/3] bg-stone-900 overflow-hidden">
-        <img src="${esc(cover.poster)}" alt="${esc(cover.nombre)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"></div>
-        <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeCls}">${isDay ? 'Día' : 'Nocturno'}</span>
-        <span class="absolute bottom-1.5 left-2 right-2 text-[11px] font-bold text-white leading-tight truncate">${esc(cover.nombre)}</span>
-      </div>
-    </button>`;
+  const isTaken = (cover) => Boolean(cover && ((cover.status && cover.status !== 'available') || takenSet.has(cover.id)));
+  const getCoverById = (id) => (!id || String(id).startsWith('temp_') || id === 'custom') ? null : (catalog.find((c) => c.id === id) || null);
+  const getDefaultCoverForRubro = (rubro) => catalog.find((c) => c.rubro === (rubro || 'peluqueria') && !isTaken(c)) || catalog.find((c) => c.rubro !== 'gastronomia' && !isTaken(c)) || null;
+
+  function getOrderedCovers(rubro, specialties = []) {
+    const specs = (Array.isArray(specialties) ? specialties : []).map((x) => x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    const free = catalog.filter((c) => c.rubro !== 'gastronomia' && !isTaken(c));
+    const score = (c) => {
+      let n = c.rubro === rubro ? 100 : 0;
+      const tags = (Array.isArray(c.tags) ? c.tags : []).map((t) => String(t).toLowerCase());
+      specs.forEach((sp) => { if (tags.some((t) => t.includes(sp) || sp.includes(t))) n += 10; });
+      return n;
+    };
+    return [...free].sort((a, b) => score(b) - score(a));
   }
 
-  function filterList(tab, rubro) {
-    if (tab === 'dia') return catalog.filter(c => c.estilo === 'dia');
-    if (tab === 'nocturno') return catalog.filter(c => c.estilo === 'nocturno');
-    if (tab === 'all') return getAllCovers();
-    return getCoversForRubro(rubro);
+  function stepPage(delta, rubro, specialties) {
+    const total = Math.max(1, Math.ceil(getOrderedCovers(rubro, specialties).length / 2));
+    pageIndex = (pageIndex + delta + total) % total;
   }
 
-  function renderCoverGallery(state, customSlot = {}) {
-    const tab = state.coverTab || 'rubro';
-    const tabs = [
-      ['rubro', 'Recomendadas del rubro'],
-      ['dia', 'Día / Luminoso'],
-      ['nocturno', 'Nocturno / Íntimo'],
-      ['all', 'Ver las 12'],
-      ['custom', 'Subir mi foto']
-    ].map(([id, label]) => {
-      const on = tab === id;
-      return `<button type="button" data-emp-cover-tab="${id}" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold border cursor-pointer transition-colors ${on ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-100'}">${esc(label)}</button>`;
+  function resetPage() { pageIndex = 0; }
+
+  async function lockCover(coverId, slug, comercio) {
+    if (!coverId || coverId === 'custom' || String(coverId).startsWith('temp_')) return { ok: true };
+    const res = await fetchJsonTimeout(`${resolveEngineBase()}/api/portal/covers/lock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coverId, slug, comercio })
+    }, 5000);
+    if (res.status === 409 || res.data?.error === 'COVER_ALREADY_TAKEN') {
+      takenSet.add(coverId);
+      return { ok: false, conflict: true };
+    }
+    return { ok: true };
+  }
+
+  function renderCoverGallery(state) {
+    const list = getOrderedCovers(state.rubro, state.specialties);
+    const totalPages = Math.max(1, Math.ceil(list.length / 2));
+    const safePage = pageIndex % totalPages;
+    const pair = list.slice(safePage * 2, safePage * 2 + 2);
+    const isMotion = state.coverMode !== 'still';
+    const isTemp = state.coverMode === 'temp' || String(state.coverId || '').startsWith('temp_');
+    const isCustom = state.coverMode === 'custom';
+    const styles = [
+      { id: 'editorial', label: 'Editorial' },
+      { id: 'poster', label: 'Póster Cristal' },
+      { id: 'bento', label: 'Bento' }
+    ];
+
+    const cardsHtml = pair.map((c) => {
+      const selected = !isTemp && !isCustom && state.coverId === c.id;
+      const ring = selected ? 'ring-2 ring-[#EA580C] ring-offset-2 ring-offset-[#FAF8F5]' : 'hover:opacity-95';
+      const media = isMotion && c.motion
+        ? `<video src="${c.motion}" poster="${c.poster}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>`
+        : `<img src="${c.poster}" alt="" class="w-full h-full object-cover" />`;
+      return `
+        <button type="button" data-emp-cover-id="${c.id}" aria-pressed="${selected}" aria-label="Elegir portada ${c.rubro}"
+          class="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-[#EFE8DF] transition-all cursor-pointer ${ring}">
+          ${media}
+          ${selected ? '<span class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-[#EA580C] text-white text-xs font-bold flex items-center justify-center shadow-md">&#10003;</span>' : ''}
+        </button>`;
     }).join('');
 
-    let body = '';
-    if (tab === 'custom') {
-      body = `<div class="p-3 rounded-xl bg-white border border-stone-200 space-y-2">
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-stone-800">Subir mi foto de portada</span>
-          ${customSlot.file ? '<button type="button" id="btn-clear-cover" class="text-[11px] font-bold text-rose-600 cursor-pointer">Quitar foto</button>' : ''}
+    return `
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="inline-flex p-1 rounded-2xl wg-pill gap-1" role="group" aria-label="Formato de portada">
+            <button type="button" data-emp-cover-media="live" class="px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${isMotion ? 'wg-option-active' : 'text-stone-600'}">Con movimiento</button>
+            <button type="button" data-emp-cover-media="still" class="px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${!isMotion ? 'wg-option-active' : 'text-stone-600'}">Imagen fija</button>
+          </div>
+          <div class="inline-flex items-center gap-1.5">
+            <button type="button" id="btn-emp-cover-prev" aria-label="Portadas anteriores" class="wg-btn-secondary w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center cursor-pointer">&#8592;</button>
+            <span class="text-[11px] font-semibold text-stone-500 px-1">${safePage + 1} / ${totalPages}</span>
+            <button type="button" id="btn-emp-cover-next" aria-label="Siguientes portadas" class="wg-btn-secondary w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center cursor-pointer">&#8594;</button>
+          </div>
         </div>
-        <label for="emp-cover-input" class="w-full py-2.5 px-3 rounded-xl bg-[#FAF8F5] hover:bg-stone-100 border border-dashed border-stone-300 text-xs font-semibold text-stone-700 flex items-center justify-center gap-1.5 cursor-pointer">
-          <span>${customSlot.file ? `Foto optimizada · ${customSlot.kb} KB (Cambiar)` : 'Elegir imagen JPG, PNG o WebP (mín. 800x450 px)'}</span>
-        </label>
-        <input id="emp-cover-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" />
+        <div class="grid grid-cols-2 gap-3">${cardsHtml || '<div class="col-span-2 py-8 text-center text-xs text-stone-500">Cargando portadas...</div>'}</div>
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Estilo visual en tu celular</p>
+          <div class="grid grid-cols-3 gap-2">
+            ${styles.map((st) => `<button type="button" data-emp-cover-style="${st.id}" class="px-2.5 py-2 rounded-2xl text-xs font-bold cursor-pointer ${(state.coverStyle || 'editorial') === st.id ? 'wg-option-active' : 'wg-option'}">${st.label}</button>`).join('')}
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <label for="emp-cover-input" class="wg-btn-secondary px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5">
+            <span>${isCustom ? 'Cambiar foto propia' : 'Subir foto propia'}</span>
+            <input type="file" id="emp-cover-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+          </label>
+          <button type="button" id="btn-emp-cover-temp" class="px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer ${isTemp ? 'wg-option-active' : 'wg-btn-secondary'}">
+            Continuar con portada temporal
+          </button>
+        </div>
       </div>`;
-    } else {
-      const list = filterList(tab, state.rubro);
-      const wrapCls = list.length > 2 ? 'grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1' : 'grid grid-cols-2 gap-2.5';
-      const activeId = state.coverMode === 'custom' ? '' : (state.coverId || getDefaultCoverForRubro(state.rubro).id);
-      body = `<div class="${wrapCls}">${list.map(c => renderCoverTile(c, c.id === activeId)).join('')}</div>`;
-    }
-
-    return `<div class="p-3 rounded-2xl bg-[#FAF8F5] border border-stone-200 space-y-2.5">
-      <div class="flex items-center justify-between gap-2 flex-wrap">
-        <span class="text-xs font-bold text-stone-800">Portada viva de tu App</span>
-        <span class="text-[11px] text-stone-500">Video loop en vivo o foto propia</span>
-      </div>
-      <div class="flex flex-wrap gap-1.5">${tabs}</div>
-      ${body}
-    </div>`;
   }
 
-  function renderPreviewBackdrop(state, customSlot, bizName) {
-    if (state.coverMode === 'custom' && customSlot?.url) {
-      return `<img id="preview-cover-img" src="${esc(customSlot.url)}" alt="${esc(bizName)}" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" />`;
-    }
-    const cover = getCoverById(state.coverId) || getDefaultCoverForRubro(state.rubro);
-    const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduced || !cover.motion) {
-      return `<img id="preview-cover-img" src="${esc(cover.poster)}" alt="${esc(bizName)}" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none" />`;
-    }
-    return `<video id="preview-cover-video" autoplay loop muted playsinline poster="${esc(cover.poster)}" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"><source src="${esc(cover.motion)}" type="video/mp4" /></video>`;
-  }
-
-  return {
-    getAllCovers, getCoversForRubro, getCoverById, getDefaultCoverForRubro,
-    hydrateFromCatalog, renderCoverGallery, renderPreviewBackdrop
-  };
+  return { hydrateFromCatalog, loadCatalog: hydrateFromCatalog, getCoverById, getDefaultCoverForRubro, getOrderedCovers, stepPage, resetPage, lockCover, renderCoverGallery };
 })();

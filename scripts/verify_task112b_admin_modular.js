@@ -106,7 +106,7 @@ async function inspectConsole(cdp, cfg) {
 
 async function runAdminE2E(cdp) {
   const specs = [
-    { lvl: 'l1', planWord: 'Esencial', planTitle: 'Admin · Esencial', subId: 'brand-subtitle', mobId: 'l1-mobile-title', btnSel: '#btn-quick-new-booking' },
+    { lvl: 'l1', planWord: 'Turnos', planTitle: 'Admin · Turnos', subId: 'brand-subtitle', mobId: 'l1-mobile-title', btnSel: '#btn-quick-new-booking' },
     { lvl: 'l2', planWord: 'Gestión', planTitle: 'Admin · Gestión', subId: 'l2-brand-subtitle', mobId: 'l2-mobile-title', btnSel: '#btn-open-new-booking-modal' },
     { lvl: 'l3', planWord: 'Equipos', planTitle: 'Admin · Equipos', subId: 'l3-brand-subtitle', mobId: 'l3-mobile-title', btnSel: '#admin-controls-card .admin-glass-primary' }
   ];
@@ -123,20 +123,20 @@ async function runAdminE2E(cdp) {
     }
   }
 
-  console.log('\n=== 3. E2E FERIADOS 2026 EN L1 (ESENCIAL) ===');
+  console.log('\n=== 3. E2E FERIADOS 2026 EN L1 (TURNOS) ===');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await cdp.goto('/admin_l1.html?rubro=peluqueria');
   await cdp.evalJs(`document.getElementById('main-view-btn-configuracion')?.click()`);
   await wait(300);
   const holBefore = await cdp.evalJs(`(() => {
     const btns = Array.from(document.querySelectorAll('#l1-holidays-container [data-holiday-toggle]'));
-    return { count: btns.length, d0: btns[0]?.dataset.holidayToggle || '', t0: btns[0]?.textContent?.trim() || '', d1: btns[1]?.dataset.holidayToggle || '' };
+    return { count: btns.length, d0: btns[0]?.dataset.holidayToggle || '', t0: btns[0]?.closest('label')?.querySelector('.tucu-badge')?.textContent?.trim() || '', d1: btns[1]?.dataset.holidayToggle || '' };
   })()`);
   ok(holBefore.count >= 10 && holBefore.t0 === 'Bloqueado', `L1 Configuración monta ${holBefore.count} feriados 2026 por mes (1ro=${holBefore.d0} "${holBefore.t0}")`);
   await cdp.evalJs(`document.querySelector('#l1-holidays-container [data-holiday-toggle]')?.click()`);
   await wait(150);
   const holAfter = await cdp.evalJs(`({
-    t0: document.querySelector('#l1-holidays-container [data-holiday-toggle]')?.textContent?.trim() || '',
+    t0: document.querySelector('#l1-holidays-container [data-holiday-toggle]')?.closest('label')?.querySelector('.tucu-badge')?.textContent?.trim() || '',
     blk0: window.AdminHolidays.isDateBlocked('l1', 'peluqueria', '${holBefore.d0}'),
     blk1: window.AdminHolidays.isDateBlocked('l1', 'peluqueria', '${holBefore.d1}'),
     raw: localStorage.getItem('tucu_l1_holidays_state_peluqueria') || ''

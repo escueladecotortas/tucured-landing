@@ -19,7 +19,7 @@ export const RUBRO_NAMES = {
 };
 
 export const LEVEL_NAMES = {
-  l1: 'Plan Esencial',
+  l1: 'Plan Turnos',
   l2: 'Plan Gestión',
   l3: 'Plan Equipos'
 };

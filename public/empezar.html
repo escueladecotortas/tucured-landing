@@ -8,17 +8,16 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Bricolage+Grotesque:wght@600;700&family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:wght@600;700&family=Instrument+Serif&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Outfit:wght@500;600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Instrument+Serif&family=Outfit:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/empezar_mascot.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background-color: #FAF8F5; color: #1C1917; }
-    .font-display-editorial, .font-serif-editorial { font-family: var(--tucu-display-font, 'Instrument Serif', Georgia, serif); letter-spacing: var(--tucu-display-tracking, 0em); }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
   </style>
 </head>
-<body class="min-h-screen bg-[#FAF8F5] text-stone-900 antialiased overflow-x-hidden">
-  <header id="emp-header" class="sticky top-0 z-30 border-b border-stone-200 bg-white/95 backdrop-blur-md relative">
+<body class="wg-shell min-h-screen antialiased overflow-x-hidden">
+  <header id="emp-header" class="sticky top-0 z-30 border-b border-[#E2D8CB] bg-[#FAF8F5]/92 backdrop-blur-md relative">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
       <a id="emp-header-logo" href="/" aria-label="TucuRed — Inicio" class="flex items-center shrink-0">
         <img src="/assets/tucu_red_logo.svg" alt="TucuRed" class="h-8 sm:h-9 w-auto object-contain" />
@@ -31,8 +30,8 @@
         <span class="hidden sm:inline">Volver a la web</span><span class="sm:hidden">Web</span>
       </a>
     </div>
-    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-stone-200/80 overflow-hidden">
-      <div id="emp-progress-bar" class="h-full bg-orange-600 transition-all duration-300" style="width:10%"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-[#E7DDD0] overflow-hidden">
+      <div id="emp-progress-bar" class="h-full bg-[#EA580C] transition-all duration-300" style="width:9%"></div>
     </div>
   </header>
 
@@ -40,34 +39,29 @@
     <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-6 lg:gap-8 items-start">
       <div class="min-w-0 space-y-3">
         <div id="empezar-mascot-mount"></div>
-        <section id="empezar-step-mount" class="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-2xs overflow-hidden"></section>
+        <section id="empezar-step-mount" class="wg-card rounded-3xl p-5 sm:p-7 overflow-hidden"></section>
       </div>
       <aside id="empezar-live-preview" class="hidden lg:block lg:sticky lg:top-20"></aside>
     </div>
   </main>
 
-  <div id="emp-mobile-floating-bar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-md px-4 py-2.5 shadow-[0_-8px_24px_-8px_rgba(28,25,23,0.12)]">
+  <div id="emp-mobile-floating-bar" class="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[#E2D8CB] bg-[#FAF8F5]/95 backdrop-blur-md px-4 py-2.5 shadow-[0_-8px_24px_-8px_rgba(41,37,36,0.12)]">
     <div class="max-w-md mx-auto flex items-center justify-between gap-3">
       <div class="flex items-center gap-2.5 min-w-0">
-        <img id="emp-float-thumb" src="/assets/covers/peluqueria/salon_luminoso_02.webp" alt="Portada activa" class="w-10 h-10 rounded-xl object-cover border border-stone-200 shrink-0" />
+        <span id="emp-float-dot" class="w-3 h-3 rounded-full shrink-0" style="background-color:#EA580C"></span>
         <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span id="emp-float-dot" class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color:#B45309"></span>
-            <span id="emp-float-title" class="text-xs font-extrabold text-stone-900 truncate">Tu Comercio</span>
-          </div>
-          <span id="emp-float-sub" class="block text-[11px] font-medium text-stone-500 truncate">Plan Gestión · Color automático</span>
+          <span id="emp-float-title" class="block text-xs font-extrabold text-stone-900 truncate">Tu negocio</span>
+          <span id="emp-float-sub" class="block text-[11px] font-medium text-stone-500 truncate">Vista previa en vivo</span>
         </div>
       </div>
-      <button type="button" id="btn-open-mobile-preview" class="px-3.5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shrink-0 cursor-pointer shadow-sm">
-        Ver cómo queda mi App
-      </button>
+      <button type="button" id="btn-open-mobile-preview" class="wg-btn-primary px-3.5 py-2.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer">Ver mi turnero</button>
     </div>
   </div>
 
-  <div id="empezar-preview-drawer" class="hidden fixed inset-0 z-50 bg-stone-950/75 backdrop-blur-sm p-4 overflow-y-auto">
+  <div id="empezar-preview-drawer" class="hidden fixed inset-0 z-50 bg-[#292524]/60 backdrop-blur-sm p-4 overflow-y-auto">
     <div class="max-w-sm mx-auto space-y-3 py-2">
       <div class="flex items-center justify-between text-white">
-        <span class="text-xs font-bold uppercase tracking-wider text-white/80">Vista previa en vivo</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-white/90">Vista previa en vivo</span>
         <button type="button" id="btn-close-mobile-preview" class="px-3 py-1.5 rounded-xl bg-white/15 border border-white/25 text-xs font-bold text-white cursor-pointer">Cerrar</button>
       </div>
       <div id="empezar-mobile-preview-mount"></div>
@@ -79,14 +73,16 @@
     <input type="text" name="bot-field" /><input type="text" name="name" />
     <input type="text" name="comercio" /><input type="text" name="slug" /><input type="text" name="rubro" />
     <input type="text" name="bajada" /><input type="text" name="accent" /><input type="text" name="plan" />
-    <input type="text" name="localidad" /><input type="text" name="direccion" />
+    <input type="text" name="localidad" /><input type="text" name="direccion" /><input type="text" name="piso_depto" />
     <input type="text" name="direccion_lat" /><input type="text" name="direccion_lng" />
     <input type="text" name="horario_modalidad" /><input type="text" name="horario_resumen" />
     <input type="text" name="titular_nombre" /><input type="text" name="titular_apellido" />
-    <input type="tel" name="whatsapp" /><input type="email" name="email" /><input type="text" name="instagram" />
+    <input type="tel" name="whatsapp" /><input type="text" name="instagram" />
     <input type="text" name="tono_voz" /><input type="text" name="cover_id" />
+    <input type="text" name="terms_accepted_at" /><input type="text" name="terms_version" />
+    <input type="text" name="payment_method" /><input type="text" name="mp_payment_id" />
     <input type="hidden" name="servicios_iniciales" /><input type="hidden" name="asistencia_carga" />
-    <input type="file" name="logo_file" /><input type="file" name="cover_file" />
+    <input type="file" name="logo_file" /><input type="file" name="cover_file" /><input type="file" name="pricelist_file" />
   </form>
 
   <script src="/js/admin_shared/turnero_cover_data.js"></script>
@@ -98,8 +94,12 @@
   <script src="/js/empezar_tagline_assist.js"></script>
   <script src="/js/empezar_slug_check.js"></script>
   <script src="/js/empezar_checkout_ui.js"></script>
+  <script src="/js/empezar_mp_brick.js"></script>
+  <script src="/js/empezar_step11.js"></script>
   <script src="/js/empezar_mascot_stage.js"></script>
+  <script src="/js/empezar_lumi_advisor.js"></script>
   <script src="/js/empezar_mascot.js"></script>
+  <script src="/js/empezar_preview_styles.js"></script>
   <script src="/js/empezar_services_step.js"></script>
   <script src="/js/empezar_micro_steps.js"></script>
   <script src="/js/empezar/empezar_state.js"></script>
@@ -107,6 +107,7 @@
   <script src="/js/empezar/empezar_preview.js"></script>
   <script src="/js/empezar/empezar_steps.js"></script>
   <script src="/js/empezar/empezar_submit.js"></script>
+  <script src="/js/empezar/empezar_events.js"></script>
   <script src="/js/empezar/empezar_app.js"></script>
 </body>
 </html>
