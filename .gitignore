@@ -7,7 +7,7 @@ logs/
 dist/
 build/
 .DS_Store
-temp/
+/temp/
 .nexus_trash/
 
 # Local Netlify folder
