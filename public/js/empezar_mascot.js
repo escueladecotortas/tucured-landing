@@ -4,7 +4,7 @@
 (function (global) {
   const SESSION_INTRO_KEY = 'tucu_lumi_intro_played_v2';
   const STEP_LINES = {
-    1: 'Hola, soy Lumi. Contame el nombre de tu negocio para empezar.',
+    1: 'Contame cómo se llama tu negocio para empezar a darle vida a tu App.',
     2: 'Elegí tu rubro y especialidades para adaptar el diseño a tu actividad.',
     3: 'Elegí una portada o subí tu foto. Cada portada disponible queda reservada solo para tu marca cuando confirmás el alta.',
     4: 'Sumá tu logo sobre blanco y definí el color que te identifica.',
@@ -94,9 +94,11 @@
 
   function setStep(stepIndex, state) {
     const step = Number(stepIndex) || 1;
+    const isFinal = step >= 11 || Boolean(state?.submitted);
+    document.getElementById('btn-lumi-advice')?.classList.toggle('hidden', isFinal);
     const radar = global.TucuLumiAdvisor?.evaluateRadar?.(step, state);
     const line = radar?.line || STEP_LINES[step] || STEP_LINES[1];
-    setAdviceAction(radar?.actionLabel || '', radar?.apply || null);
+    setAdviceAction(isFinal ? '' : (radar?.actionLabel || ''), isFinal ? null : (radar?.apply || null));
     setMood(radar?.mood === 'advisor' && step === 6 ? 'advisor' : 'idle', line);
   }
 

@@ -1,7 +1,7 @@
 // Archivo: .agent/workflows/kanban_archive.md
 # Histórico Consolidado de Tareas Kanban — tucured-landing
 
-> Archivo maestro de tareas `[DONE]` rotadas cronológicamente (**125** bloques históricos consolidados; rotación automática Nexus OS).
+> Archivo maestro de tareas `[DONE]` rotadas cronológicamente (**126** bloques históricos consolidados; rotación automática Nexus OS).
 
 ## [DONE_ARCHIVE]
 
@@ -256,3 +256,4 @@
 - [x] **[TASK-112G]** Bloqueos Modulares L3 (`admin_blocks_ui.js` `85L` + `view_system.js` `162L` `< 165L` + `admin_l3.html` `76L` `< 95L`), Limpieza Copy Showroom (`showcase_admin_ui.js` `113L`, remoción de `Módulos enchufables a medida` / `Mercado Pago`), Consolidación Documental (`.agent/audit/audit_features_l1_l2_l3.md` `40L` como SSOT y eliminación de `.agent/specs/turneros_v15_matrix.md`), paridad SHA-256 `3/3 MATCH (100%)` con `tucured-engine`, `vite build` (`756ms`) + `scripts/verify_task112g_release_close.js` (`139L`): `16/16 PASS | FAIL=0` (`375x667`, `600x760`, `1280x800`), push producción `tucured-landing` (`ee53f54`) + `tucured-engine` (`487d025`) y deploy Netlify `https://tucured.ar/` HTTP `200`. *(23/11/2026, 05:15:30)*
 - [x] **[TASK-113B]** Wizard `/empezar.html`: rediseño integral Warm Glass, Lumi v2 visible y blindada con `Failure-to-Gate`, 3 estilos de portada, Payment Brick Sandbox y renombre global a `Plan Turnos`. _(2026-11-26)_
 - [x] **[TASK-113C]** Pulido B Integral: 5 portadas temporales `.webp` (`<= 90 KB`), Acto 1 manual desde logo, especialidades dinámicas, moderación visual, banco curado P5 + IA separada, Estilo Visual en P10 con contraste automático, Modal interno T&C `v1.1`, 2 estados reales P11, WhatsApp link corto y `/activar.html?s=<slug>`. _(2026-11-27)_
+- [x] **[TASK-113D]** Micro-Pulido C: saludo directo P1, especialidad única en Salud/Servicios y máx. 3 en Peluquería/Estética/Deportes, persistencia `localStorage` de foto propia y logo con salvaguarda, preview proporcional P10 móvil + selector de 3 estilos en modal `"Ver mi turnero"`, y limpieza final P11. _(2026-11-27)_

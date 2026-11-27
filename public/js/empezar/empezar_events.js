@@ -98,9 +98,13 @@ window.TucuEmpezarEvents = (function () {
       Srv()?.ensureServicesForRubro?.(state); state.error = ''; renderAll('', { updateMascot: true }); return refreshAutoAccent();
     }
     if (b('[data-emp-spec]')) {
-      const sp = b('[data-emp-spec]').dataset.empSpec, list = [...(state.specialties || [])], i = list.indexOf(sp);
-      if (i >= 0) list.splice(i, 1); else list.push(sp);
-      state.specialties = list; state.phrasePage = 0;
+      const sp = b('[data-emp-spec]').dataset.empSpec, cur = [...(state.specialties || [])], i = cur.indexOf(sp);
+      const limit = window.TucuEmpezarSpecialtyData?.getSpecialtyLimit?.(state.rubro) ?? 3;
+      let next = cur;
+      if (i >= 0) { next.splice(i, 1); }
+      else if (limit === 1) { next = [sp]; }
+      else if (cur.length < limit) { next.push(sp); }
+      state.specialties = next; state.phrasePage = 0;
       if (!state.serviciosTouched) state.servicios = Srv()?.getDefaultServices?.(state.rubro, state.specialties) || state.servicios;
       return renderAll('', { updateMascot: false });
     }

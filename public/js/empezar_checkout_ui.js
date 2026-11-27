@@ -69,7 +69,11 @@ window.TucuEmpezarCheckoutUI = (function () {
     const styleSection = `<div id="emp-step10-style-selector" class="p-3.5 rounded-2xl bg-white/80 border border-[#E2D8CB] space-y-2.5">
       <div class="flex items-center justify-between gap-2"><span class="text-xs font-extrabold text-stone-900">Estilo visual de tu portada</span><span class="text-[11px] font-semibold text-stone-500">1 toque para comparar</span></div>
       <div class="grid grid-cols-3 gap-2">${styleChips}</div>
-      <div id="emp-step10-mobile-style-preview" class="lg:hidden rounded-2xl overflow-hidden border border-[#E2D8CB] bg-[#FAF8F5] h-[300px]"></div>
+      <div class="lg:hidden flex justify-center pt-1">
+        <div class="emp-mini-phone-shell">
+          <div id="emp-step10-mobile-style-preview" class="emp-mini-phone-canvas"></div>
+        </div>
+      </div>
     </div>`;
 
     const rows = [

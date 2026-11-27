@@ -16,7 +16,7 @@
   function syncPreview(highlightSel = '') {
     P().render(document.getElementById('empezar-live-preview'), state, highlightSel);
     const mob = document.getElementById('empezar-mobile-preview-mount');
-    if (mob && !document.getElementById('empezar-preview-drawer')?.classList.contains('hidden')) P().render(mob, state, highlightSel);
+    if (mob && !document.getElementById('empezar-preview-drawer')?.classList.contains('hidden')) P().render(mob, state, highlightSel, { inModal: true });
     const step10Mob = document.getElementById('emp-step10-mobile-style-preview');
     if (step10Mob && state.step === 10 && Styles()?.renderCoverStyle) step10Mob.innerHTML = Styles().renderCoverStyle(state);
   }
@@ -155,8 +155,14 @@
   }
 
   async function init() {
+    M()?.restoreFromStorage?.();
     const params = new URLSearchParams(window.location.search), hasDraft = Boolean(Micro()?.loadDraft?.());
     state = S().createInitialState(window.location.search);
+    if ((state.coverMode === 'custom' || state.coverId === 'custom' || state.coverId === 'custom_upload') && !M()?.getSlot?.('cover')?.url) {
+      const fallbackRub = state.rubro || 'peluqueria';
+      state.coverMode = 'temp';
+      state.coverId = `temp_${fallbackRub}`;
+    }
     const willPlayIntro = !hasDraft && state.step === 1 && !state.comercio;
     const adviceApi = { setCoverStyle: (n) => { state.coverStyle = n; renderAll('', { updateMascot: false }); }, applyAccentHex: (h) => { state.accentMode = 'manual'; state.customAccentHex = h; renderAll('', { updateMascot: true }); } };
     Mascot()?.init?.(document.getElementById('empezar-mascot-mount'), { adviceApi, deferIdle: willPlayIntro, onAdviceClick: () => Mascot()?.triggerAdvice?.(state.step, state) });
@@ -165,8 +171,11 @@
     mount?.addEventListener('input', handleInput); mount?.addEventListener('change', handleChange); mount?.addEventListener('focusout', handleFocusOut);
     mount?.addEventListener('click', (e) => window.TucuEmpezarEvents.handleClick(e, ctx));
     mount?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target?.tagName === 'INPUT' && e.target.type !== 'checkbox' && !state.submitted && state.step < 10) { e.preventDefault(); goNext(); } });
-    document.addEventListener('click', (e) => { const pm = e.target?.closest?.('[data-emp-preview-mode]'); if (pm) { state.previewMode = pm.dataset.empPreviewMode; syncPreview(); } });
-    document.getElementById('btn-open-mobile-preview')?.addEventListener('click', () => { drawer?.classList.remove('hidden'); P().render(document.getElementById('empezar-mobile-preview-mount'), state); });
+    document.addEventListener('click', (e) => {
+      const pm = e.target?.closest?.('[data-emp-preview-mode]'); if (pm) { state.previewMode = pm.dataset.empPreviewMode; syncPreview(); return; }
+      const ms = e.target?.closest?.('[data-emp-modal-cover-style]'); if (ms) { state.coverStyle = ms.dataset.empModalCoverStyle; renderAll('', { updateMascot: false }); }
+    });
+    document.getElementById('btn-open-mobile-preview')?.addEventListener('click', () => { drawer?.classList.remove('hidden'); P().render(document.getElementById('empezar-mobile-preview-mount'), state, '', { inModal: true }); });
     document.getElementById('btn-close-mobile-preview')?.addEventListener('click', () => drawer?.classList.add('hidden'));
     window.TucuEmpezarApp = { getState: () => state, renderAll, refreshAutoAccent, mountMpIfNeeded };
     C()?.hydrateFromCatalog?.().then(() => { if (!state.submitted && state.step >= 3) refreshAutoAccent(); });

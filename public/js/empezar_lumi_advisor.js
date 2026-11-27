@@ -29,7 +29,7 @@
       const name = String(s.comercio || '').trim();
       return name
         ? { mood: 'wink', line: `${name} suena claro y cercano. Sigamos al rubro de tu negocio.`, advice: 'Ya podés avanzar para elegir tu rubro y adaptar la tipografía del celular.', actionLabel: '', apply: null }
-        : { mood: 'idle', line: 'Hola, soy Lumi. Contame el nombre de tu negocio para empezar.', advice: 'Usá un nombre corto y recordable tal como te buscan en Instagram o Maps.', actionLabel: '', apply: null };
+        : { mood: 'idle', line: 'Contame cómo se llama tu negocio para empezar a darle vida a tu App.', advice: 'Usá un nombre corto y recordable tal como te buscan en Instagram o Maps.', actionLabel: '', apply: null };
     }
 
     if (stepIndex === 3) {

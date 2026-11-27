@@ -103,6 +103,7 @@ window.TucuEmpezarSubmit = (function () {
     window.TucuEmpezarCheckoutUI?.saveWizardSnapshot?.(st);
     window.TucuEmpezarTaglineAssist?.adoptCurrentTagline?.(st);
     window.TucuEmpezarMicroSteps?.clearDraft?.();
+    window.TucuEmpezarMedia?.clearStorage?.();
     const waPayload = buildWaWelcomePayload(st, activarUrl);
     if (!isLocal) {
       try { const c = new AbortController(); setTimeout(() => c.abort(), 5000); fetch('/api/wa-welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, signal: c.signal, body: JSON.stringify(waPayload) }).catch(() => {}); } catch {}

@@ -81,7 +81,9 @@ window.TucuEmpezarMicroSteps = (function () {
       </button>`;
     }).join('');
     const specs = st.rubroSelected ? (S.RUBRO_SPECIALTIES[st.rubro] || []) : [];
-    const specBlock = specs.length ? `<div class="space-y-1.5 pt-1"><p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Especialidades (opcional)</p><div class="flex flex-wrap gap-1.5">${specs.map((sp) => {
+    const specLimit = window.TucuEmpezarSpecialtyData?.getSpecialtyLimit?.(st.rubro) ?? 3;
+    const specHeading = specLimit === 1 ? 'Especialidad (elegí una · opcional)' : 'Especialidades (hasta 3 · opcional)';
+    const specBlock = specs.length ? `<div class="space-y-1.5 pt-1"><p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">${specHeading}</p><div class="flex flex-wrap gap-1.5">${specs.map((sp) => {
       const on = (st.specialties || []).includes(sp);
       return `<button type="button" data-emp-spec="${esc(sp)}" aria-pressed="${on}" class="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${on ? 'wg-option-active' : 'wg-option'}">${esc(sp)}</button>`;
     }).join('')}</div></div>` : '';

@@ -65,14 +65,17 @@ window.TucuEmpezarStep11 = (function () {
       : `Guardamos el diseño y tu link para <strong>${esc(st.comercio)}</strong> en <strong>${esc(plan.name)}</strong>.`;
 
     const transferNotice = !isPaid ? `
-      <div id="emp-transfer-24h-box" class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs text-stone-800 space-y-1.5 leading-relaxed">
+      <div id="emp-transfer-24h-box" class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs text-stone-800 space-y-2.5 leading-relaxed">
         <p class="font-extrabold text-amber-900">Importante: tenés 24 horas para confirmar tu transferencia</p>
         <p>Transferí <strong>$4.999</strong> al Alias <strong class="tabular-nums">tucured</strong> (Titular: <strong>Leonardo Laricchiuta</strong>) y enviá el comprobante por WhatsApp. Vencido ese plazo sin acreditación, el link y la portada exclusiva vuelven a liberarse automáticamente.</p>
+        <button type="button" id="btn-emp-copy-alias" class="wg-btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer inline-flex items-center gap-1.5">
+          <span id="emp-copy-alias-label" data-copy-label="1">Copiar Alias</span>
+        </button>
       </div>` : '';
 
     const steps = isPaid
       ? ['Recibimos tu diseño, portada exclusiva y pago acreditado.', 'Dejamos tu link listo para recibir reservas.', st.asistenciaCarga === 'whatsapp_email' ? 'Podés mandarnos tu lista de precios por WhatsApp ahora.' : 'Podés sumar más detalles cuando quieras en la Ficha Rápida.']
-      : ['Tu diseño, portada y link quedaron reservados por 24 horas.', 'Aboná $4.999 al Alias tucured (Leonardo Laricchiuta) y mandá el comprobante por WhatsApp.', 'Apenas lo validemos, activamos tu App y te enviamos los accesos finales.'];
+      : ['Tu diseño, portada y link ya quedaron reservados.', 'Realizá la transferencia y enviá el comprobante tocando el botón verde de WhatsApp.', 'Apenas lo validemos, activamos tu App y te enviamos tus accesos.'];
 
     return `
       ${isPaid ? '<canvas id="emp-confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>' : ''}

@@ -101,6 +101,7 @@ window.TucuEmpezarSpecialtyData = (function () {
     servicios: ['Asesoría 1 a 1', 'Presupuestos claros', 'Soporte técnico', 'Atención dedicada', 'Seguimiento']
   };
 
+  const getSpecialtyLimit = (rubro) => (rubro === 'servicios' || rubro === 'salud' ? 1 : 3);
   const getCtaVerb = (rubro) => (rubro === 'salud' ? 'Reservar consulta' : (rubro === 'deportes' ? 'Reservar cancha' : 'Reservar turno'));
 
   function getInitialServices(rubro, specialties = []) {
@@ -120,5 +121,5 @@ window.TucuEmpezarSpecialtyData = (function () {
 
   const getSpecialtyContext = (specialties = []) => (Array.isArray(specialties) ? specialties.filter(Boolean).join(', ') : '');
 
-  return { MAP, getCtaVerb, getInitialServices, getKeywords, getSpecialtyContext };
+  return { MAP, getSpecialtyLimit, getCtaVerb, getInitialServices, getKeywords, getSpecialtyContext };
 })();

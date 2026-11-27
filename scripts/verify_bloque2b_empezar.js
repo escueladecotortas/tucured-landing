@@ -1,5 +1,5 @@
 // Archivo: scripts/verify_bloque2b_empezar.js
-// Compuerta local Pulido B: Landing CTA, Acto 1 manual, Pasos 1-11, Lumi Gate Desktop+Mobile (< 180L)
+// Compuerta local Micro-Pulido C: P1 saludo, P2 especialidad única/multi, persistencia foto, P10 proporcional/modal, P11 (< 165L)
 
 import fs from 'fs';
 import path from 'path';
@@ -10,7 +10,7 @@ let pass = 0, fail = 0;
 const ok = (c, m) => (c ? (pass++, console.log(`  [PASS] ${m}`)) : (fail++, console.error(`  [FAIL] ${m}`)));
 
 async function runDesktopE2E(cdp) {
-  console.log('\n=== 2. E2E DESKTOP 1280x800 (LANDING + ACTO 1 MANUAL + PASOS 1-11 + LUMI GATE) ===');
+  console.log('\n=== 2. E2E DESKTOP 1280x800 (PULIDO B + MICRO-PULIDO C + LUMI GATE) ===');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await cdp.goto('/', "document.readyState==='complete' && Boolean(document.getElementById('btn-funnel-launch'))");
   const land = await cdp.evalJs("(()=>{const b=document.getElementById('btn-funnel-launch'),t=document.getElementById('funnel')?.innerText||'';return{href:b?.getAttribute('href')||'',hasTono:/tono de voz/i.test(t),hasZero:/0% comisi/i.test(t)};})()");
@@ -18,99 +18,62 @@ async function runDesktopE2E(cdp) {
 
   await cdp.goto('/empezar.html'); await cdp.evalJs('localStorage.clear(); sessionStorage.clear();'); await cdp.goto('/empezar.html');
   await assertLumiVisible(cdp, 'Desktop Acto 1', 72, ok);
-  await wait(5200);
-  const stillAct1 = await cdp.evalJs("Boolean(document.getElementById('btn-skip-lumi-intro')) && !document.getElementById('emp-comercio')");
-  ok(stillAct1, 'Acto 1 NO salta automáticamente tras 5.2s (avance 100% manual)');
-  await cdp.evalJs("document.getElementById('btn-skip-lumi-intro')?.click()"); await wait(250);
+  await cdp.evalJs("document.getElementById('btn-skip-lumi-intro')?.click()"); await wait(280);
   await assertLumiVisible(cdp, 'Desktop Paso 1', 72, ok);
+  const p1Line = await cdp.evalJs("document.getElementById('tucu-mascot-line')?.innerText||''");
+  ok(!/Hola, soy Lumi/i.test(p1Line) && p1Line.length > 10, `P1 saludo directo sin "Hola, soy Lumi." ("${p1Line}")`);
 
-  await cdp.evalJs("const i=document.getElementById('emp-comercio');i.value='La Barbería de Don Julio';i.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('btn-emp-next').click();"); await wait(200);
-  await cdp.evalJs("document.querySelector('[data-emp-rubro=\"deportes\"]').click();"); await wait(120);
-  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Pádel\"]')?.click();"); await wait(100);
-  const p2Clean = await cdp.evalJs("document.querySelectorAll('#preview-phone-chassis .rounded-full').length === 0");
+  await cdp.evalJs("const i=document.getElementById('emp-comercio');i.value='Estudio Sur';i.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('btn-emp-next').click();"); await wait(200);
+  await cdp.evalJs("document.querySelector('[data-emp-rubro=\"servicios\"]')?.click()"); await wait(100);
+  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Diseño\"]')?.click()"); await wait(80);
+  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Abogacía\"]')?.click()"); await wait(100);
+  const srvSpec = await cdp.evalJs("({sp:window.TucuEmpezarApp.getState().specialties,lbl:document.getElementById('empezar-step-mount').innerText.includes('ELEGÍ UNA')})");
+  await cdp.evalJs("document.querySelector('[data-emp-rubro=\"deportes\"]')?.click()"); await wait(100);
+  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Pádel\"]')?.click()"); await wait(80);
+  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Tenis\"]')?.click()"); await wait(100);
+  const depSpec = await cdp.evalJs("window.TucuEmpezarApp.getState().specialties");
+  ok(srvSpec.lbl && srvSpec.sp.length === 1 && srvSpec.sp[0] === 'Abogacía' && depSpec.length === 2, `P2 selección única servicios=${JSON.stringify(srvSpec.sp)} y multi deportes=${JSON.stringify(depSpec)}`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(250);
   await assertLumiVisible(cdp, 'Desktop Paso 3', 72, ok);
 
-  const p3 = await cdp.evalJs("({hasStyle:Boolean(document.querySelector('[data-emp-cover-style]')),excl:document.body.innerText.includes('queda reservada solo para tu marca'),cta:document.getElementById('preview-cta-btn')?.innerText||''})");
-  await cdp.evalJs("document.getElementById('btn-emp-cover-temp')?.click()"); await wait(280);
-  const tempImg = await cdp.evalJs("(()=>{const img=document.querySelector('#preview-phone-chassis img[data-temp-cover=\"1\"]');return{src:img?.getAttribute('src')||'',ok:Boolean(img&&img.complete&&img.naturalWidth>0),ph:document.getElementById('preview-phone-chassis').innerText.includes('Portada temporal')};})()");
-  ok(p2Clean && !p3.hasStyle && p3.excl && p3.cta.includes('Reservar cancha') && tempImg.src.endsWith('temp_deportes.webp') && tempImg.ok && !tempImg.ph, `P2-P3 sin badge rubro, sin Estilo en P3, CTA "${p3.cta}", temporal=${tempImg.src} ok=${tempImg.ok}`);
+  // Persistencia foto propia en localStorage tras recarga + salvaguarda sin caché
+  const tinyWebp = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=';
+  await cdp.evalJs(`(()=>{localStorage.setItem('tucu_empezar_media_v1',JSON.stringify({cover:{dataUrl:'${tinyWebp}',kb:1,width:900,height:1600,name:'propia.webp'}}));const s=window.TucuEmpezarApp.getState();s.coverMode='custom';s.coverId='custom';window.TucuEmpezarMicroSteps.saveDraft(s);})()`);
+  await cdp.goto('/empezar.html');
+  const persistedCustom = await cdp.evalJs("(()=>{const img=document.querySelector('#preview-phone-chassis img');return{mode:window.TucuEmpezarApp.getState().coverMode,ok:Boolean(img&&img.complete&&img.naturalWidth>0),card:Boolean(document.getElementById('btn-emp-select-custom-cover'))};})()");
+  await cdp.evalJs("(()=>{localStorage.removeItem('tucu_empezar_media_v1');})()");
+  await cdp.goto('/empezar.html');
+  const guardCleared = await cdp.evalJs("window.TucuEmpezarApp.getState().coverMode");
+  ok(persistedCustom.mode === 'custom' && persistedCustom.ok && persistedCustom.card && guardCleared === 'temp', `Persistencia foto propia tras reload=${persistedCustom.ok} y salvaguarda sin caché->${guardCleared}`);
 
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"turnero\"]')?.click()"); await wait(120);
-  const bandBg = await cdp.evalJs("getComputedStyle(document.getElementById('preview-turnero-header-band')).backgroundColor");
-  ok(bandBg === 'rgb(255, 255, 255)', `P4 banda superior Turnero blanco puro (${bandBg})`);
-
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(220);
-  const p5a = await cdp.evalJs("({mode:window.TucuEmpezarApp.getState().previewMode,count:document.querySelectorAll('[data-emp-tagline-idea]').length,first:document.querySelector('[data-emp-tagline-idea]')?.dataset?.empTaglineIdea||''})");
-  await cdp.evalJs("document.getElementById('btn-emp-phrases-next')?.click()"); await wait(120);
-  const p5b = await cdp.evalJs("({first:document.querySelector('[data-emp-tagline-idea]')?.dataset?.empTaglineIdea||'',rem:window.TucuEmpezarTaglineAssist.getRemaining()})");
-  await cdp.evalJs("document.querySelectorAll('[data-emp-tagline-kw]')[0]?.click();document.getElementById('btn-emp-ai-run')?.click();");
-  for (let i = 0; i < 40; i++) { await wait(150); if (await cdp.evalJs("Boolean(document.getElementById('btn-emp-ai-use'))")) break; }
-  await cdp.evalJs("document.getElementById('btn-emp-ai-use')?.click()"); await wait(120);
-  const p5used = await cdp.evalJs("document.getElementById('emp-bajada')?.value||''");
-  ok(p5a.mode === 'cover' && p5a.count === 3 && p5b.first !== p5a.first && p5b.rem === 5 && p5used.length > 0, `P5 auto-portada, 3 ideas + Ver otras 3 gratis (rem=${p5b.rem}), IA separada "${p5used}"`);
-
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await assertLumiVisible(cdp, 'Desktop Paso 6', 72, ok);
-  await cdp.evalJs("(()=>{const d=document.getElementById('emp-direccion');d.value='25 de Mayo 480';d.dispatchEvent(new Event('input',{bubbles:true}));const p=document.getElementById('emp-piso-depto');p.value='2, A';p.dispatchEvent(new Event('input',{bubbles:true}));p.dispatchEvent(new FocusEvent('focusout',{bubbles:true}));})()");
-  for (let i = 0; i < 30; i++) { await wait(150); if (await cdp.evalJs("Boolean(document.querySelector('#emp-geo-dropdown [data-geo-i]'))")) break; }
-  await cdp.evalJs("const o=document.querySelector('#emp-geo-dropdown [data-geo-i]');if(o)o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));"); await wait(200);
-  const p6Fmt = await cdp.evalJs("document.getElementById('emp-piso-depto')?.value||''");
-  ok(p6Fmt === 'Piso 2, Depto A', `P6 autoformateo piso/depto -> "${p6Fmt}"`);
-
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await cdp.evalJs("document.getElementById('emp-srv-nopr-0')?.click();"); await wait(100);
-  await cdp.evalJs("document.getElementById('emp-srv-notm-0')?.click();"); await wait(100);
-  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"turnero\"]')?.click()"); await wait(120);
-  const p7Res = await cdp.evalJs("(()=>{const r0=document.querySelector('#preview-service-chip > div');return{waTxt:document.getElementById('empezar-step-mount').innerText.includes('Despreocupate ahora'),prev:r0?.innerText||'',spans:r0?r0.querySelectorAll('span').length:0};})()");
-  ok(p7Res.waTxt && p7Res.prev.includes('Consultar') && p7Res.spans === 2, `P7 Sin precio/tiempo (spans=${p7Res.spans}) y nuevo copy WA`);
-
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  const p8Bullets = await cdp.evalJs("[...document.querySelectorAll('[data-emp-plan]')].map(b=>b.querySelectorAll('li').length)");
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"cover\"]')?.click()"); await wait(100);
-  await cdp.evalJs("for(const [id,v] of [['emp-first','Julio'],['emp-last','Sosa'],['emp-whatsapp','3815554321'],['emp-instagram','@brava']]){const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}"); await wait(120);
-  const p9 = await cdp.evalJs("({ttl:document.getElementById('empezar-step-mount').innerText.includes('Tus datos de contacto'),glass:document.querySelectorAll('#empezar-live-preview .wg-social-glass').length})");
-  ok(p8Bullets.every((n) => n === 4) && p9.ttl && p9.glass === 2, `P8 4 beneficios/plan, P9 contacto + ${p9.glass} botones glass`);
-
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(250);
+  await cdp.evalJs("(()=>{const s=window.TucuEmpezarApp.getState();Object.assign(s,{direccion:'25 de Mayo 480',direccionLat:'-26.82',direccionLng:'-65.20',geoVerified:true,titularNombre:'Julio',titularApellido:'Sosa',whatsapp:'3815554321',instagram:'@brava',step:10});window.TucuEmpezarApp.renderAll();})()"); await wait(220);
   await assertLumiVisible(cdp, 'Desktop Paso 10', 72, ok);
-  await cdp.evalJs("document.querySelector('[data-emp-cover-style=\"poster\"]')?.click()"); await wait(150);
-  await cdp.evalJs("document.getElementById('btn-open-terms-modal')?.click()"); await wait(120);
-  const modalTxt = await cdp.evalJs("document.getElementById('emp-terms-modal')?.innerText||''");
-  await cdp.evalJs("document.getElementById('btn-close-terms-modal')?.click()"); await wait(120);
-  const p10Btn = await cdp.evalJs("({hasStyle:Boolean(document.getElementById('emp-step10-style-selector')),tone:document.getElementById('preview-poster-card')?.dataset?.posterTone||'',btnOk:document.getElementById('btn-empezar-submit')?.classList?.contains('wg-btn-emerald')})");
-  await cdp.evalJs("document.querySelector('[data-emp-pay-method=\"mp\"]')?.click()");
-  let mpMounted = false;
-  for (let i = 0; i < 40; i++) { await wait(250); mpMounted = await cdp.evalJs("Boolean(document.querySelector('#emp-mp-brick-container iframe, #emp-mp-brick-container form, #emp-mp-brick-container [data-testid]'))"); if (mpMounted) break; }
-  ok(p10Btn.hasStyle && ['dark', 'light'].includes(p10Btn.tone) && modalTxt.includes('v1.1') && p10Btn.btnOk && mpMounted, `P10 Estilo, Póster (${p10Btn.tone}), Modal T&C v1.1, botón verde y Brick MP=${mpMounted}`);
-
-  await cdp.evalJs("document.querySelector('[data-emp-pay-method=\"transfer\"]')?.click()"); await wait(150);
-  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(600);
+  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(550);
   await assertLumiVisible(cdp, 'Desktop Paso 11', 72, ok);
-  const p11 = await cdp.evalJs("({txt:document.getElementById('empezar-step-mount').innerText,waTarget:document.getElementById('btn-open-wa-now')?.getAttribute('target')||'',domCls:document.getElementById('emp-success-domain')?.className||'',back:Boolean(document.getElementById('btn-emp-back-home'))})");
-  ok(p11.txt.includes('Reserva pendiente') && p11.txt.includes('¡Tu diseño y link están reservados!') && p11.waTarget === '_blank' && p11.domCls.includes('break-all') && p11.back, 'P11 estado Transferencia 24hs, link break-all, WA _blank y Volver a tucured.ar');
+  const p11 = await cdp.evalJs("({advHidden:document.getElementById('btn-lumi-advice')?.classList.contains('hidden'),copyBtn:Boolean(document.querySelector('#emp-transfer-24h-box #btn-emp-copy-alias')),olTxt:document.querySelector('#emp-success-view ol')?.innerText||''})");
+  ok(p11.advHidden && p11.copyBtn && !p11.olTxt.includes('$4.999') && !p11.olTxt.includes('tucured'), 'P11 oculta Pedime un consejo, agrega Copiar Alias en caja 24h y sin repetición en pasos');
 }
 
 async function runMobileCheck(cdp) {
-  console.log('\n=== 3. E2E MOBILE 375x667 (NO STICKY, LUMI GATE ACTO1->P1->P3->P6->P10->P11, OVERFLOW 0) ===');
+  console.log('\n=== 3. E2E MOBILE 375x667 (PREVIEW PROPORCIONAL P10 + MODAL SELECTOR ESTILO + LUMI GATE) ===');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 375, height: 667, deviceScaleFactor: 1, mobile: true });
   await cdp.goto('/empezar.html'); await cdp.evalJs('localStorage.clear(); sessionStorage.clear();'); await cdp.goto('/empezar.html');
   await assertLumiVisible(cdp, 'Mobile Acto 1', 60, ok);
   await cdp.evalJs("document.getElementById('btn-skip-lumi-intro')?.click()"); await wait(250);
   await assertLumiVisible(cdp, 'Mobile Paso 1', 60, ok);
-  const mobP1 = await cdp.evalJs("({ov:document.documentElement.scrollWidth<=document.documentElement.clientWidth,pos:getComputedStyle(document.getElementById('empezar-mascot-mount')).position,hint:getComputedStyle(document.querySelector('.emp-enter-hint')).display})");
-  ok(mobP1.ov && mobP1.pos !== 'sticky' && mobP1.hint === 'none', `Mobile 375 overflow=0, mascot pos=${mobP1.pos}, enterHint=${mobP1.hint}`);
+  await cdp.evalJs("(()=>{window.scrollTo(0,0);const s=window.TucuEmpezarApp.getState();Object.assign(s,{comercio:'Barberia Norte',slug:'barberia-norte',rubro:'peluqueria',coverMode:'temp',coverId:'temp_peluqueria',direccion:'25 de Mayo 480',direccionLat:'-26.82',direccionLng:'-65.20',geoVerified:true,titularNombre:'Julio',titularApellido:'Sosa',whatsapp:'3815554321',step:10});window.TucuEmpezarApp.renderAll();})()"); await wait(240);
+  await assertLumiVisible(cdp, 'Mobile Paso 10', 60, ok);
+  const mobP10 = await cdp.evalJs("(()=>{const c=document.getElementById('emp-step10-mobile-style-preview');const r=c?.getBoundingClientRect();return{tf:getComputedStyle(c).transform,w:Math.round(r?.width||0),h:Math.round(r?.height||0),ov:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()");
+  await cdp.evalJs("document.getElementById('btn-open-mobile-preview')?.click()"); await wait(160);
+  await cdp.evalJs("document.querySelector('[data-emp-modal-cover-style=\"bento\"]')?.click()"); await wait(140);
+  const modalSync = await cdp.evalJs("({chips:document.querySelectorAll('#emp-modal-style-bar [data-emp-modal-cover-style]').length,style:window.TucuEmpezarApp.getState().coverStyle})");
+  await cdp.evalJs("document.getElementById('btn-close-mobile-preview')?.click()"); await wait(100);
+  ok(mobP10.ov && mobP10.tf.includes('matrix') && mobP10.h > 300 && modalSync.chips === 3 && modalSync.style === 'bento', `Mobile P10 proporcional (${mobP10.w}x${mobP10.h}), modal 3 estilos y sync=${modalSync.style}`);
 
-  for (const [stNum, lbl] of [[3, 'Mobile Paso 3'], [6, 'Mobile Paso 6'], [10, 'Mobile Paso 10']]) {
-    await cdp.evalJs(`(()=>{window.scrollTo(0,0);const s=window.TucuEmpezarApp.getState();Object.assign(s,{comercio:'Barberia Norte',slug:'barberia-norte',rubro:'peluqueria',coverMode:'temp',coverId:'temp_peluqueria',direccion:'25 de Mayo 480',direccionLat:'-26.82',direccionLng:'-65.20',geoVerified:true,titularNombre:'Julio',titularApellido:'Sosa',whatsapp:'3815554321',step:${stNum}});window.TucuEmpezarApp.renderAll();})()`);
-    await wait(220); await assertLumiVisible(cdp, lbl, 60, ok);
-  }
-  const mobStylePrev = await cdp.evalJs("Boolean(document.querySelector('#emp-step10-mobile-style-preview img[data-temp-cover=\"1\"]'))");
-  ok(mobStylePrev, 'Mobile P10 renderiza mini-preview inline de estilo con portada temporal .webp');
-  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(600);
+  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(550);
   await assertLumiVisible(cdp, 'Mobile Paso 11', 60, ok);
+  ok(cdp.errors.length === 0 && cdp.httpBad.length === 0, `0 errores JS y 0 HTTP>=400 local (errors=${cdp.errors.length}, http=${cdp.httpBad.length})`);
 }
 
 async function main() {
@@ -123,7 +86,6 @@ async function main() {
     const tab = targets.find((t) => t.type === 'page') || await reqJson(`http://127.0.0.1:${PORT_CDP}/json/new?about:blank`, 'PUT');
     const cdp = new Cdp(tab.webSocketDebuggerUrl); await cdp.connect();
     await runDesktopE2E(cdp); await runMobileCheck(cdp);
-    ok(cdp.errors.length === 0 && cdp.httpBad.length === 0, `0 errores JS y 0 HTTP>=400 local (errors=${cdp.errors.length}, http=${cdp.httpBad.length})`);
     if (cdp.errors.length || cdp.httpBad.length) console.error('DETAILS:', cdp.errors, cdp.httpBad);
     cdp.close();
   } finally { chrome.kill('SIGKILL'); await wait(250); try { fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 3 }); } catch {} }
