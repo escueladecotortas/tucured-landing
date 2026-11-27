@@ -1,8 +1,10 @@
 // Archivo: public/js/activar/activar_data.js
-// Constantes Canónicas, Planes Oficiales (Turnos/Gestión/Equipos), Prefill Dual, Servicios y WhatsApp (< 170L)
+// Constantes Canónicas, hidratación por ?s=<slug> (AbortController 5000ms), Plan Turnos y WhatsApp (< 190L)
 
 window.TucuActivarData = (function () {
   const TUCU_RED_PHONE = '5493814132154';
+  const DEFAULT_ENGINE = 'https://engine.tucured.com.ar';
+  const resolveEngine = () => (window.TUCU_ENGINE_URL ? String(window.TUCU_ENGINE_URL).replace(/\/$/, '') : DEFAULT_ENGINE);
 
   const RUBROS = [
     { id: 'peluqueria', label: 'Peluquería y Barbería' },
@@ -29,19 +31,8 @@ window.TucuActivarData = (function () {
   ];
 
   const PAYMENT_METHODS = ['Efectivo', 'Transferencia', 'Débito/Crédito'];
-
-  const LEVELS = [
-    { id: 'l1', label: 'Plan Turnos' },
-    { id: 'l2', label: 'Plan Gestión' },
-    { id: 'l3', label: 'Plan Equipos' }
-  ];
-
-  const TONE_LABELS = {
-    cercano: 'Cercano & Barrial',
-    boutique: 'Boutique & Elegante',
-    agil: 'Directo & Ágil',
-    profesional: 'Profesional & Clínico'
-  };
+  const LEVELS = [{ id: 'l1', label: 'Plan Turnos' }, { id: 'l2', label: 'Plan Gestión' }, { id: 'l3', label: 'Plan Equipos' }];
+  const TONE_LABELS = { cercano: 'Cercano & Barrial', boutique: 'Boutique & Elegante', agil: 'Directo & Ágil', profesional: 'Profesional & Clínico' };
 
   function normalizeRubro(raw) {
     const s = String(raw || '').toLowerCase().trim();
@@ -68,8 +59,7 @@ window.TucuActivarData = (function () {
 
   function formatE164Ar(raw) {
     let d = String(raw || '').replace(/\D/g, '');
-    if (d.startsWith('549')) d = d.slice(3);
-    else if (d.startsWith('54')) d = d.slice(2);
+    if (d.startsWith('549')) d = d.slice(3); else if (d.startsWith('54')) d = d.slice(2);
     if (d.startsWith('0')) d = d.slice(1);
     if (d.length > 10) {
       if (d.slice(3, 5) === '15') d = d.slice(0, 3) + d.slice(5);
@@ -80,11 +70,9 @@ window.TucuActivarData = (function () {
   }
 
   function splitTitular(raw) {
-    const clean = String(raw || '').trim();
+    const clean = String(raw || '').trim(), idx = clean.indexOf(' ');
     if (!clean) return { nombre: '', apellido: '' };
-    const idx = clean.indexOf(' ');
-    if (idx === -1) return { nombre: clean, apellido: '' };
-    return { nombre: clean.slice(0, idx).trim(), apellido: clean.slice(idx + 1).trim() };
+    return idx === -1 ? { nombre: clean, apellido: '' } : { nombre: clean.slice(0, idx).trim(), apellido: clean.slice(idx + 1).trim() };
   }
 
   function readStoredWizard() {
@@ -92,74 +80,82 @@ window.TucuActivarData = (function () {
     catch { return {}; }
   }
 
+  async function fetchRemoteActivation(slug) {
+    const clean = String(slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!clean) return null;
+    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 5000);
+    try {
+      const res = await fetch(`${resolveEngine()}/api/portal/activations/${encodeURIComponent(clean)}`, { signal: ctrl.signal });
+      if (!res.ok) return null;
+      const body = await res.json().catch(() => null);
+      return body?.ok && body?.data ? body.data : null;
+    } catch { return null; } finally { clearTimeout(timer); }
+  }
+
   function formatCoverLabel(coverId, fallbackName) {
     if (fallbackName) return fallbackName;
     if (!coverId) return '';
     if (coverId === 'custom') return 'Foto propia WebP';
+    if (String(coverId).startsWith('temp_')) return 'Portada temporal';
     return String(coverId).split('-').slice(1, -1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || coverId;
   }
 
-  function resolvePrefillData(search = (typeof window !== 'undefined' ? window.location.search : '')) {
-    const p = new URLSearchParams(search || '');
-    const w = readStoredWizard();
+  function resolvePrefillData(search = (typeof window !== 'undefined' ? window.location.search : ''), remote = null) {
+    const p = new URLSearchParams(search || ''), w = { ...readStoredWizard(), ...(remote || {}) };
     const pick = (qKeys, fallback) => {
-      for (const k of qKeys) {
-        const v = (p.get(k) || '').trim();
-        if (v) return v;
-      }
+      for (const k of qKeys) { const v = (p.get(k) || '').trim(); if (v) return v; }
       return String(fallback || '').trim();
     };
-
-    const qTitular = splitTitular(p.get('titular') || '');
-    const wTitular = splitTitular(w.titular || '');
-    const nombreTitular = pick(['nombre', 'titular_nombre'], qTitular.nombre || w.nombreTitular || w.titular_nombre || wTitular.nombre);
-    const apellidoTitular = pick(['apellido', 'titular_apellido'], qTitular.apellido || w.apellidoTitular || w.titular_apellido || wTitular.apellido);
+    const qTitular = splitTitular(p.get('titular') || ''), wTitular = splitTitular(w.titular || '');
+    const nombreTitular = pick(['nombre', 'titular_nombre'], qTitular.nombre || w.titularNombre || w.nombreTitular || w.titular_nombre || wTitular.nombre);
+    const apellidoTitular = pick(['apellido', 'titular_apellido'], qTitular.apellido || w.titularApellido || w.apellidoTitular || w.titular_apellido || wTitular.apellido);
     const locRaw = pick(['localidad', 'ciudad'], w.localidad || w.ciudad || 'San Miguel de Tucumán');
     const localidad = LOCALIDADES.includes(locRaw) ? locRaw : 'San Miguel de Tucumán';
     const waRaw = pick(['whatsapp', 'telefono'], w.whatsapp || '');
     const comercio = pick(['comercio'], w.comercio || w.nombre || '');
     const plan = normalizeLevel(pick(['plan', 'level'], w.plan || w.level || 'l2'));
     const tonoVoz = pick(['tono_voz', 'tono'], w.tono_voz || '');
-    const coverId = pick(['cover_id', 'cover'], w.cover_id || '');
-    const slug = pick(['slug'], w.slug || '');
-    const direccion = pick(['direccion'], w.direccion || '');
+    const coverId = pick(['cover_id', 'cover'], w.coverId || w.cover_id || '');
+    const slug = pick(['s', 'slug'], w.slug || '');
+    const dirBase = pick(['direccion'], w.direccion || '');
+    const direccion = (dirBase && w.pisoDepto && !dirBase.includes(w.pisoDepto)) ? `${dirBase}, ${w.pisoDepto}` : dirBase;
     const instagram = pick(['instagram'], w.instagram || '');
     const servicios = Array.isArray(w.servicios) ? w.servicios.filter(s => s && (s.name || s.nombre)) : [];
-    const asistenciaCarga = String(w.asistencia_carga || '').trim();
 
     return {
       comercio, nombreTitular, apellidoTitular, email: pick(['email'], w.email || ''),
       rubro: normalizeRubro(pick(['rubro'], w.rubro || 'estetica')), plan,
       planLabel: LEVELS.find(l => l.id === plan)?.label || 'Plan Gestión',
       localidad, whatsapp: formatE164Ar(waRaw).digits10,
-      horario: normalizeScheduleMode(pick(['horario', 'schedule'], w.schedule || w.horario || 'corrido')),
+      horario: normalizeScheduleMode(pick(['horario', 'schedule'], w.horarioModalidad || w.schedule || w.horario || 'corrido')),
       tonoVoz, tonoLabel: TONE_LABELS[tonoVoz] || w.tono_label || '',
       coverId, coverLabel: formatCoverLabel(coverId, w.cover_nombre),
-      slug, direccion, instagram, servicios, asistenciaCarga,
-      hasInherited: Boolean(comercio || p.get('plan') || p.get('tono_voz') || p.get('cover_id') || w.fromEmpezar)
+      slug, direccion, instagram, servicios, asistenciaCarga: String(w.asistenciaCarga || w.asistencia_carga || '').trim(),
+      hasInherited: Boolean(comercio || slug || p.get('plan') || p.get('cover_id') || w.fromEmpezar || remote)
     };
   }
 
   function buildWhatsAppConfirmUrl(payload = {}) {
     const rubroLbl = RUBROS.find(r => r.id === payload.rubro)?.label || payload.rubro || 'Comercio';
-    const levelLbl = LEVELS.find(l => l.id === payload.plan)?.label || payload.plan || 'Plan Gestión';
+    const levelLbl = LEVELS.find(l => l.id === payload.plan)?.label || payload.plan || 'Plan Turnos';
     const titular = `${payload.nombre_titular || ''} ${payload.apellido_titular || ''}`.trim() || 'Propietario';
     const dirFull = payload.direccion_referencia ? `${payload.direccion} (${payload.direccion_referencia})` : payload.direccion;
     const msg = [
       `¡Hola Tucu Red! Ya completé la ficha de configuración para *${payload.comercio || 'mi comercio'}*.`,
+      payload.slug ? `• Link de reservas: https://${payload.slug}.tucured.com.ar` : '',
       `• Titular: ${titular}`,
       `• Rubro: ${rubroLbl}`,
       `• Plan: ${levelLbl}`,
       `• Localidad y Dirección: ${payload.localidad} — ${dirFull}`,
       `• WhatsApp del local: ${payload.whatsapp_local}`,
       'Quedo atento para recibir los enlaces oficiales de mi Turnero y Panel de Control.'
-    ].join('\n');
+    ].filter(Boolean).join('\n');
     return `https://wa.me/${TUCU_RED_PHONE}?text=${encodeURIComponent(msg)}`;
   }
 
   return {
     TUCU_RED_PHONE, RUBROS, RUBRO_SPACE_CONFIG, LOCALIDADES, PAYMENT_METHODS, LEVELS, TONE_LABELS,
     normalizeRubro, normalizeLevel, normalizeScheduleMode, formatE164Ar,
-    resolvePrefillData, buildWhatsAppConfirmUrl
+    fetchRemoteActivation, resolvePrefillData, buildWhatsAppConfirmUrl
   };
 })();

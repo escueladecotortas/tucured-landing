@@ -1,5 +1,5 @@
 // Archivo: public/js/empezar_tagline_assist.js
-// Frase corta <= 55 chars sincronizada al rubro, chips activos y cupo real 5/5 de IA (< 190L)
+// Paso 5 en 4 bloques: 3 ideas curadas + Ver otras 3, IA en casilla separada (avoidPhrases), input y Sin frase (< 180L)
 
 window.TucuEmpezarTaglineAssist = (function () {
   const MAX_LEN = 55;
@@ -8,40 +8,14 @@ window.TucuEmpezarTaglineAssist = (function () {
   const REM_KEY = 'tucu_emp_ai_rem';
   const DEFAULT_ENGINE = 'https://engine.tucured.com.ar';
 
-  const RUBRO_CFG = {
-    peluqueria: {
-      keywords: ['Corte y estilo', 'Barbería', 'Coloración', 'Alisados', 'Atención directa'],
-      placeholder: 'Ej: Cortes clásicos y barba sin esperas.',
-      ideas: ['Cortes y color pensados para vos.', 'Tu look cuidado y tu turno sin esperas.', 'Barbería clásica con reserva en segundos.']
-    },
-    estetica: {
-      keywords: ['Uñas esculpidas', 'Limpieza facial', 'Pestañas y cejas', 'Depilación', 'Bienestar'],
-      placeholder: 'Ej: Estética integral con horarios a tu medida.',
-      ideas: ['Un momento de cuidado pensado para vos.', 'Estética integral con horarios a tu medida.', 'Manos, rostro y bienestar en un solo lugar.']
-    },
-    deportes: {
-      keywords: ['Canchas de pádel', 'Fútbol 5 y 7', 'Clases grupales', 'Torneos', 'Alquiler por hora'],
-      placeholder: 'Ej: Reservá tu cancha y armá el partido.',
-      ideas: ['Tu cancha lista para jugar sin llamadas.', 'Reservá tu turno y armá el partido.', 'Espacios preparados para entrenar mejor.']
-    },
-    salud: {
-      keywords: ['Turnos claros', 'Consultorio privado', 'Obras sociales', 'Evaluación integral', 'Seguimiento'],
-      placeholder: 'Ej: Atención profesional con horarios claros.',
-      ideas: ['Atención profesional con horarios claros.', 'Tu consulta programada de forma simple.', 'Cuidado cercano y turnos organizados.']
-    },
-    servicios: {
-      keywords: ['Asesoría 1 a 1', 'Presupuestos', 'Soporte técnico', 'Atención por cita', 'Seguimiento'],
-      placeholder: 'Ej: Asesoramiento claro en tu horario elegido.',
-      ideas: ['Asesoramiento claro en tu horario elegido.', 'Soluciones a medida con cita previa.', 'Consultas ágiles para resolver hoy.']
-    }
-  };
-
   const resolveEngineBase = () => (window.TUCU_ENGINE_URL ? String(window.TUCU_ENGINE_URL).replace(/\/$/, '') : DEFAULT_ENGINE);
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const clipTagline = (raw) => String(raw || '').replace(/\s+/g, ' ').trim().slice(0, MAX_LEN);
-  const getCfg = (rubro) => RUBRO_CFG[rubro] || RUBRO_CFG.servicios;
-  const getKeywordsForRubro = (rubro) => getCfg(rubro).keywords;
-  const getIdeasForRubro = (rubro) => getCfg(rubro).ideas.map(clipTagline);
+
+  function getKeywordsForState(st) {
+    const mod = window.TucuEmpezarSpecialtyData;
+    return mod ? mod.getKeywords(st?.rubro, st?.specialties) : ['Atención directa', 'Calidad real', 'Espacio cómodo', 'Profesionales', 'A tu medida'];
+  }
 
   function getSessionId() {
     try {
@@ -66,11 +40,15 @@ window.TucuEmpezarTaglineAssist = (function () {
     return clean;
   }
 
-  function buildFallback(st) {
+  function buildFallback(st, avoid = []) {
+    const pool = window.TucuEmpezarPhrasesBank?.getPool?.(st?.rubro, st?.specialties) || [];
     const kws = Array.isArray(st?.keywords) ? st.keywords : [];
-    if (kws.length >= 2) return clipTagline(`${kws[0]} y ${kws[1].toLowerCase()} sin esperas.`);
-    if (kws.length === 1) return clipTagline(`${kws[0]} con reserva rápida online.`);
-    return getIdeasForRubro(st?.rubro)[0];
+    const candidates = [];
+    if (kws.length >= 2) candidates.push(clipTagline(`${kws[0]} y ${kws[1].toLowerCase()} para vos.`));
+    if (kws.length >= 1) candidates.push(clipTagline(`${kws[0]} con atención dedicada.`));
+    pool.forEach((p) => candidates.push(p));
+    const avoidSet = new Set((avoid || []).map((x) => String(x || '').toLowerCase().trim()));
+    return candidates.find((c) => c && !avoidSet.has(c.toLowerCase())) || candidates[0] || 'Calidad y dedicación en cada encuentro.';
   }
 
   async function requestAiTagline(st) {
@@ -78,12 +56,24 @@ window.TucuEmpezarTaglineAssist = (function () {
     if (rem <= 0) return { ok: false, error: 'LIMIT_REACHED', remaining: 0 };
     const sid = getSessionId(), ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 15000);
     const kws = Array.isArray(st.keywords) ? st.keywords : [];
+    const avoid = [...new Set([...(st.aiHistory || []), st.bajada, st.aiSuggestion].filter(Boolean))];
+    const specCtx = window.TucuEmpezarSpecialtyData?.getSpecialtyContext?.(st.specialties) || '';
     try {
       const res = await fetch(`${resolveEngineBase()}/api/ai/tagline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-session-id': sid },
         signal: ctrl.signal,
-        body: JSON.stringify({ rubro: st.rubro || 'peluqueria', tono: st.tonoVoz || 'cercano', comercio: st.comercio || '', keywords: kws, intention: kws.join(', ') || getCfg(st.rubro).keywords[0], draftText: st.bajada || '', sessionId: sid })
+        body: JSON.stringify({
+          rubro: st.rubro || 'peluqueria',
+          tono: st.tonoVoz || 'cercano',
+          comercio: st.comercio || '',
+          especialidad: specCtx,
+          keywords: kws,
+          intention: kws.join(', ') || getKeywordsForState(st)[0],
+          draftText: st.bajada || '',
+          avoidPhrases: avoid,
+          sessionId: sid
+        })
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 429 || data?.error === 'LIMIT_REACHED') { setRemaining(0); return { ok: false, error: 'LIMIT_REACHED', remaining: 0 }; }
@@ -94,7 +84,7 @@ window.TucuEmpezarTaglineAssist = (function () {
       throw new Error('AI_UNAVAILABLE');
     } catch (_) {
       const nextRem = setRemaining(rem - 1);
-      return { ok: true, tagline: buildFallback(st), remaining: nextRem, source: 'fallback' };
+      return { ok: true, tagline: buildFallback(st, avoid), remaining: nextRem, source: 'fallback' };
     } finally { clearTimeout(timer); }
   }
 
@@ -110,36 +100,56 @@ window.TucuEmpezarTaglineAssist = (function () {
   }
 
   function renderStep5Controls(st) {
-    const cfg = getCfg(st.rubro), chosen = Array.isArray(st.keywords) ? st.keywords : [];
+    const keywords = getKeywordsForState(st), chosen = Array.isArray(st.keywords) ? st.keywords : [];
     const current = clipTagline(st.bajada || ''), disabled = Boolean(st.noTagline), rem = getRemaining();
-    const aiTxt = rem <= 0 ? '0 de 5 ideas IA disponibles' : (st.aiLoading ? 'Pensando frase...' : `${current.trim() ? 'Mejorar mi frase con IA' : 'Crear frase con IA'} · ${rem} de ${MAX_USES} disponibles`);
-    return `
-      <div class="space-y-4">
-        <div class="space-y-1.5">
-          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Elegí 1 a 3 palabras clave de tu rubro</p>
-          <div class="flex flex-wrap gap-1.5">
-            ${cfg.keywords.map((kw) => {
-              const on = chosen.includes(kw);
-              return `<button type="button" data-emp-tagline-kw="${esc(kw)}" aria-pressed="${on}" class="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${on ? 'wg-option-active' : 'wg-option'}">${esc(kw)}</button>`;
-            }).join('')}
-          </div>
+    const bankPage = window.TucuEmpezarPhrasesBank?.getPage?.(st.rubro, st.specialties, st.phrasePage || 0) || { items: [], page: 0, totalPages: 1 };
+    const aiTxt = rem <= 0 ? '0 de 5 ideas IA disponibles' : (st.aiLoading ? 'Pensando frase...' : `Generar con IA · ${rem} de ${MAX_USES} disponibles`);
+
+    const bankHtml = bankPage.items.map((idea) => {
+      const active = !disabled && current === idea;
+      return `<button type="button" data-emp-tagline-idea="${esc(idea)}" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer flex items-center justify-between gap-2 ${active ? 'wg-option-active' : 'wg-option'}">
+        <span>${esc(idea)}</span><span class="text-[10px] font-bold shrink-0 text-[#EA580C]">${active ? 'Elegida' : 'Elegir'}</span>
+      </button>`;
+    }).join('');
+
+    const aiResultHtml = st.aiSuggestion ? `
+      <div id="emp-ai-result-box" class="mt-2.5 p-3 rounded-xl bg-white border border-orange-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p class="text-xs font-semibold text-stone-800 leading-snug">"${esc(st.aiSuggestion)}"</p>
+        <button type="button" id="btn-emp-ai-use" class="wg-btn-primary px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0 cursor-pointer">Usar esta frase</button>
+      </div>` : '';
+
+    return `<div class="space-y-4">
+      <div class="p-3.5 rounded-2xl bg-white/75 border border-[#E7DDD0] space-y-2.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-xs font-extrabold text-stone-800">1. Ideas listas para tu negocio</span>
+          <button type="button" id="btn-emp-phrases-next" class="text-[11px] font-bold text-[#EA580C] hover:underline cursor-pointer">Ver otras 3</button>
         </div>
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between text-xs"><label for="emp-bajada" class="font-semibold text-stone-700">Frase corta (una sola línea)</label><span id="emp-tagline-counter" class="font-semibold text-stone-500 tabular-nums">${current.length}/${MAX_LEN}</span></div>
-          <input id="emp-bajada" type="text" maxlength="${MAX_LEN}" value="${esc(current)}" ${disabled ? 'disabled' : ''} placeholder="${esc(cfg.placeholder)}" class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-[#E2D8CB] text-sm text-stone-900 focus:outline-none focus:border-[#EA580C] disabled:opacity-50" />
+        <div id="emp-tagline-ideas-drawer" class="space-y-1.5">${bankHtml}</div>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-orange-50/55 border border-orange-200/80 space-y-2.5">
+        <span class="block text-xs font-extrabold text-stone-800">2. Crear con IA</span>
+        <div class="flex flex-wrap gap-1.5">
+          ${keywords.map((kw) => {
+            const on = chosen.includes(kw);
+            return `<button type="button" data-emp-tagline-kw="${esc(kw)}" aria-pressed="${on}" class="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer ${on ? 'wg-option-active' : 'wg-option'}">${esc(kw)}</button>`;
+          }).join('')}
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button type="button" id="btn-emp-ai-run" ${disabled || st.aiLoading || rem <= 0 ? 'disabled' : ''} class="wg-btn-ai px-4 py-2.5 rounded-2xl text-xs font-bold cursor-pointer disabled:opacity-45">${esc(aiTxt)}</button>
-          ${st.previousBajada ? '<button type="button" id="btn-emp-ai-revert" class="wg-btn-secondary px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer">Volver a mi versión</button>' : ''}
-          <button type="button" id="btn-emp-no-tagline" class="px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer ${disabled ? 'wg-option-active' : 'wg-btn-secondary'}">${disabled ? 'Volver a incluir frase' : 'Sin frase'}</button>
-        </div>
-        <div>
-          <button type="button" id="btn-emp-tagline-ideas" class="text-xs font-semibold text-[#EA580C] hover:underline cursor-pointer">Ver ideas sugeridas</button>
-          <div id="emp-tagline-ideas-drawer" class="${st.ideasOpen ? '' : 'hidden '}mt-2 space-y-1.5">${cfg.ideas.map((idea) => `<button type="button" data-emp-tagline-idea="${esc(clipTagline(idea))}" class="w-full text-left px-3 py-2 rounded-xl wg-option text-xs font-medium cursor-pointer">${esc(clipTagline(idea))}</button>`).join('')}</div>
-        </div>
+        <button type="button" id="btn-emp-ai-run" ${disabled || st.aiLoading || rem <= 0 ? 'disabled' : ''} class="wg-btn-ai px-4 py-2 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-45">${esc(aiTxt)}</button>
+        ${aiResultHtml}
         ${st.aiFeedback ? `<p id="emp-ai-feedback" class="text-[11px] font-medium text-[#C2410C]">${esc(st.aiFeedback)}</p>` : ''}
-      </div>`;
+      </div>
+
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs"><label for="emp-bajada" class="font-bold text-stone-800">3. Tu propia frase / eslogan</label><span id="emp-tagline-counter" class="font-semibold text-stone-500 tabular-nums">${current.length}/${MAX_LEN}</span></div>
+        <input id="emp-bajada" type="text" maxlength="${MAX_LEN}" value="${esc(current)}" ${disabled ? 'disabled' : ''} placeholder="Escribí una frase corta que identifique tu lugar" class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-[#E2D8CB] text-sm text-stone-900 focus:outline-none focus:border-[#EA580C] disabled:opacity-50" />
+      </div>
+
+      <div class="pt-0.5 flex items-center justify-between gap-2">
+        <button type="button" id="btn-emp-no-tagline" class="px-3.5 py-2 rounded-2xl text-xs font-semibold cursor-pointer ${disabled ? 'wg-option-active' : 'wg-btn-secondary'}">${disabled ? 'Volver a incluir frase' : 'Sin frase'}</button>
+      </div>
+    </div>`;
   }
 
-  return { MAX_LEN, MAX_USES, clipTagline, getKeywordsForRubro, getIdeasForRubro, getRemaining, setRemaining, requestAiTagline, adoptCurrentTagline, renderStep5Controls, loadPool: async () => true };
+  return { MAX_LEN, MAX_USES, clipTagline, getKeywordsForRubro: (r) => getKeywordsForState({ rubro: r }), getRemaining, setRemaining, requestAiTagline, adoptCurrentTagline, renderStep5Controls };
 })();

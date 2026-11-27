@@ -1,43 +1,52 @@
 // Archivo: public/js/empezar_services_step.js
-// Paso 7 Servicios de Turnos: 5 rubros, colapso al elegir WhatsApp y archivo <= 8 MB (< 170L)
+// Paso 7 Servicios: especialidad dinámica, toggles Sin precio / Sin tiempo y WhatsApp <= 8 MB (< 165L)
 
 window.TucuEmpezarServicesStep = (function () {
   const DURATIONS = [15, 20, 30, 45, 60, 90, 120];
-  const RUBRO_DEFAULTS = {
-    peluqueria: [{ name: 'Corte clásico', duration: 30, price: 8500 }, { name: 'Corte y barba', duration: 45, price: 12000 }, { name: 'Perfilado de barba', duration: 20, price: 6000 }],
-    estetica: [{ name: 'Limpieza facial profunda', duration: 60, price: 18000 }, { name: 'Esmaltado semipermanente', duration: 45, price: 14000 }, { name: 'Masaje descontracturante', duration: 60, price: 19500 }],
-    deportes: [{ name: 'Alquiler de cancha 60 min', duration: 60, price: 24000 }, { name: 'Turno doble 90 min', duration: 90, price: 34000 }, { name: 'Clase personalizada', duration: 60, price: 15000 }],
-    salud: [{ name: 'Consulta inicial', duration: 30, price: 20000 }, { name: 'Control y seguimiento', duration: 20, price: 15000 }, { name: 'Sesión terapéutica', duration: 45, price: 22000 }],
-    servicios: [{ name: 'Asesoramiento inicial', duration: 30, price: 12000 }, { name: 'Servicio estándar', duration: 60, price: 20000 }, { name: 'Revisión técnica', duration: 45, price: 16000 }]
-  };
-
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const getDefaultServices = (rubro) => (RUBRO_DEFAULTS[rubro] || RUBRO_DEFAULTS.peluqueria).map((s) => ({ ...s }));
+
+  function getDefaultServices(rubro, specialties = []) {
+    const mod = window.TucuEmpezarSpecialtyData;
+    if (mod?.getInitialServices) return mod.getInitialServices(rubro, specialties);
+    return [{ name: 'Servicio principal', duration: 30, price: 8500, noPrice: false, noTime: false }];
+  }
 
   function ensureServicesForRubro(state) {
     if (!state) return;
-    if (!state.serviciosTouched || !Array.isArray(state.servicios)) state.servicios = getDefaultServices(state.rubro);
+    if (!state.serviciosTouched || !Array.isArray(state.servicios)) {
+      state.servicios = getDefaultServices(state.rubro, state.specialties);
+    }
   }
 
   function cleanServices(list) {
     if (!Array.isArray(list)) return [];
-    return list.map((s) => ({ name: String(s?.name || '').trim(), duration: Math.max(15, Number(s?.duration || 30) || 30), price: Math.max(0, Number(s?.price || 0) || 0) }))
-      .filter((s) => s.name.length > 0);
+    return list.map((s) => ({
+      name: String(s?.name || '').trim(),
+      duration: Math.max(15, Number(s?.duration || 30) || 30),
+      price: Math.max(0, Number(s?.price || 0) || 0),
+      noPrice: Boolean(s?.noPrice),
+      noTime: Boolean(s?.noTime)
+    })).filter((s) => s.name.length > 0);
   }
 
   const serializeServices = (state) => (state?.asistenciaCarga === 'whatsapp_email' ? '[]' : JSON.stringify(cleanServices(state?.servicios)));
 
   function renderServiceItem(srv, idx, canDelete) {
     const durOpts = DURATIONS.map((m) => `<option value="${m}" ${Number(srv.duration || 30) === m ? 'selected' : ''}>${m} min</option>`).join('');
-    return `<div class="emp-srv-row p-3 rounded-2xl wg-option space-y-2" data-emp-srv-idx="${idx}">
+    const noPrice = Boolean(srv.noPrice), noTime = Boolean(srv.noTime);
+    return `<div class="emp-srv-row p-3 rounded-2xl wg-option space-y-2.5" data-emp-srv-idx="${idx}">
       <div class="flex items-center justify-between gap-2">
         <span class="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Servicio ${idx + 1}</span>
         ${canDelete ? `<button type="button" data-emp-del-srv="${idx}" class="text-[11px] font-bold text-rose-600 hover:text-rose-700 cursor-pointer">Quitar</button>` : ''}
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
         <div class="sm:col-span-6"><input id="emp-srv-name-${idx}" type="text" maxlength="64" data-emp-srv-field="name" data-idx="${idx}" value="${esc(srv.name)}" placeholder="Ej. Corte clásico" class="w-full p-2.5 rounded-xl bg-white border border-[#E2D8CB] focus:border-[#EA580C] text-xs sm:text-sm text-stone-900 outline-none" /></div>
-        <div class="sm:col-span-3"><select id="emp-srv-dur-${idx}" data-emp-srv-field="duration" data-idx="${idx}" class="w-full p-2.5 rounded-xl bg-white border border-[#E2D8CB] focus:border-[#EA580C] text-xs text-stone-900 tabular-nums outline-none">${durOpts}</select></div>
-        <div class="sm:col-span-3 relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-400 pointer-events-none">$</span><input id="emp-srv-price-${idx}" type="number" min="0" step="100" data-emp-srv-field="price" data-idx="${idx}" value="${srv.price === '' ? '' : Number(srv.price || 0)}" placeholder="0" class="w-full p-2.5 pl-6 rounded-xl bg-white border border-[#E2D8CB] focus:border-[#EA580C] text-xs sm:text-sm text-stone-900 tabular-nums outline-none" /></div>
+        <div class="sm:col-span-3 ${noTime ? 'opacity-45' : ''}"><select id="emp-srv-dur-${idx}" ${noTime ? 'disabled' : ''} data-emp-srv-field="duration" data-idx="${idx}" class="w-full p-2.5 rounded-xl bg-white border border-[#E2D8CB] focus:border-[#EA580C] text-xs text-stone-900 tabular-nums outline-none disabled:bg-stone-100">${durOpts}</select></div>
+        <div class="sm:col-span-3 relative ${noPrice ? 'opacity-45' : ''}"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-400 pointer-events-none">$</span><input id="emp-srv-price-${idx}" type="number" min="0" step="100" ${noPrice ? 'disabled' : ''} data-emp-srv-field="price" data-idx="${idx}" value="${noPrice ? '' : (srv.price === '' ? '' : Number(srv.price || 0))}" placeholder="${noPrice ? 'Consultar' : '0'}" class="w-full p-2.5 pl-6 rounded-xl bg-white border border-[#E2D8CB] focus:border-[#EA580C] text-xs sm:text-sm text-stone-900 tabular-nums outline-none disabled:bg-stone-100" /></div>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 pt-0.5 text-[11px] font-semibold text-stone-600">
+        <label class="inline-flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="emp-srv-nopr-${idx}" data-emp-srv-toggle="noPrice" data-idx="${idx}" ${noPrice ? 'checked' : ''} class="w-3.5 h-3.5 accent-[#EA580C] rounded" /><span>Sin precio</span></label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="emp-srv-notm-${idx}" data-emp-srv-toggle="noTime" data-idx="${idx}" ${noTime ? 'checked' : ''} class="w-3.5 h-3.5 accent-[#EA580C] rounded" /><span>Sin tiempo</span></label>
       </div>
     </div>`;
   }
@@ -69,7 +78,7 @@ window.TucuEmpezarServicesStep = (function () {
       <div class="p-3.5 rounded-2xl transition-colors ${assistOn ? 'wg-option-active' : 'wg-option'}">
         <label for="emp-assist-check" class="flex items-start gap-3 cursor-pointer">
           <input id="emp-assist-check" type="checkbox" ${assistOn ? 'checked' : ''} class="mt-0.5 w-4 h-4 rounded border-stone-300 accent-[#EA580C] cursor-pointer shrink-0" />
-          <span class="text-xs leading-snug"><strong class="block font-bold text-stone-900">Prefiero mandar mi lista de precios por WhatsApp</strong><span class="text-[11px] text-stone-600">Colapsa las filas de muestra y nuestro equipo la carga por vos al activar.</span></span>
+          <span class="text-xs leading-snug"><strong class="block font-bold text-stone-900">Prefiero mandar mi lista de precios por WhatsApp</strong><span class="text-[11px] text-stone-600">Despreocupate ahora: nuestro equipo carga tu lista apenas confirmes tu reserva.</span></span>
         </label>
         ${waUploadExtra}
       </div>
@@ -83,37 +92,46 @@ window.TucuEmpezarServicesStep = (function () {
     if (!Array.isArray(state.servicios) || !state.servicios[idx]) return { handled: false };
     state.serviciosTouched = true;
     state.servicios[idx][field] = field === 'name' ? t.value : (Number(t.value) || 0);
-    return { handled: true, rerender: false, celebrate: false };
+    return { handled: true, rerender: false };
   }
 
   function handleClick(e, state) {
     const el = e.target;
     if (el.closest('#btn-emp-add-service')) {
       if (!Array.isArray(state.servicios)) state.servicios = [];
-      state.serviciosTouched = true; state.servicios.push({ name: '', duration: 30, price: 0 });
-      return { handled: true, rerender: true, celebrate: true };
+      state.serviciosTouched = true; state.servicios.push({ name: '', duration: 30, price: 0, noPrice: false, noTime: false });
+      return { handled: true, rerender: true };
     }
     const delBtn = el.closest('[data-emp-del-srv]');
     if (delBtn) {
       const idx = Number(delBtn.dataset.empDelSrv);
       if (Array.isArray(state.servicios) && state.servicios.length > 1) { state.serviciosTouched = true; state.servicios.splice(idx, 1); }
-      return { handled: true, rerender: true, celebrate: false };
+      return { handled: true, rerender: true };
     }
     return { handled: false };
   }
 
   function handleChange(e, state) {
-    if (e.target?.id === 'emp-assist-check') {
-      state.asistenciaCarga = e.target.checked ? 'whatsapp_email' : '';
-      return { handled: true, rerender: true, celebrate: e.target.checked };
+    const t = e.target;
+    if (t?.dataset?.empSrvToggle) {
+      const idx = Number(t.dataset.idx), key = t.dataset.empSrvToggle;
+      if (Array.isArray(state.servicios) && state.servicios[idx]) {
+        state.serviciosTouched = true;
+        state.servicios[idx][key] = Boolean(t.checked);
+      }
+      return { handled: true, rerender: true };
     }
-    if (e.target?.id === 'emp-pricelist-input') {
-      const file = e.target.files?.[0]; state.pricelistError = '';
+    if (t?.id === 'emp-assist-check') {
+      state.asistenciaCarga = t.checked ? 'whatsapp_email' : '';
+      return { handled: true, rerender: true };
+    }
+    if (t?.id === 'emp-pricelist-input') {
+      const file = t.files?.[0]; state.pricelistError = '';
       if (file) {
         try { window.TucuEmpezarMedia?.setPriceList?.(file); }
         catch (err) { state.pricelistError = err?.message || 'Archivo demasiado grande.'; }
       }
-      return { handled: true, rerender: true, celebrate: !state.pricelistError };
+      return { handled: true, rerender: true };
     }
     return { handled: false };
   }

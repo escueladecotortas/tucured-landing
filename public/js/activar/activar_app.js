@@ -1,5 +1,5 @@
 // Archivo: public/js/activar/activar_app.js
-// Orquestador Ficha Rápida v2: Geo, Logo WebP, 7 Días, Herencia de Servicios, Bloque 5 Dinámico y FormData (< 180L)
+// Orquestador Ficha Rápida v2: hidratación ?s=<slug>, Geo, Logo WebP, 7 Días, Servicios y FormData (< 190L)
 
 (function () {
   const D = () => window.TucuActivarData;
@@ -38,8 +38,7 @@
     const stList = document.getElementById('act-staff-list');
     document.getElementById('btn-add-staff')?.addEventListener('click', () => {
       if (!stList) return;
-      const idx = stList.querySelectorAll('.act-staff-row').length;
-      stList.insertAdjacentHTML('beforeend', M().renderStaffRow(idx, {}));
+      stList.insertAdjacentHTML('beforeend', M().renderStaffRow(stList.querySelectorAll('.act-staff-row').length, {}));
     });
     stList?.addEventListener('click', (e) => {
       const btn = e.target.closest('.btn-del-staff');
@@ -48,11 +47,10 @@
   }
 
   function syncSenaVisibility() {
-    const isNoSena = val('act-sena-mode') === 'sin_sena';
-    document.getElementById('act-sena-fields-wrap')?.classList.toggle('hidden', isNoSena);
+    document.getElementById('act-sena-fields-wrap')?.classList.toggle('hidden', val('act-sena-mode') === 'sin_sena');
   }
 
-  function buildValidatedPayload() {
+  function buildValidatedPayload(slugVal = '') {
     const d = D(), comercio = val('act-comercio'), nombreTitular = val('act-nombre-titular'), apellidoTitular = val('act-apellido-titular');
     const email = val('act-email'), rubro = val('act-rubro'), localidad = val('act-localidad');
     const direccion = val('act-dir-norm') || val('act-direccion'), sched = S().serializeSchedule(), srvs = collectServices();
@@ -77,7 +75,7 @@
 
     return {
       payload: {
-        'form-name': 'ficha-activacion-tucured', 'bot-field': '', comercio,
+        'form-name': 'ficha-activacion-tucured', 'bot-field': '', slug: slugVal, comercio,
         nombre_titular: nombreTitular, apellido_titular: apellidoTitular, email, instagram: val('act-instagram'),
         rubro, localidad, direccion, direccion_referencia: val('act-dir-ref'),
         direccion_lat: val('act-dir-lat'), direccion_lng: val('act-dir-lng'),
@@ -93,19 +91,19 @@
     };
   }
 
-  function init() {
+  async function init() {
     const root = document.getElementById('activar-form-root'), succRoot = document.getElementById('activar-success-root');
     if (!root || !D() || !M() || !G() || !L() || !S()) return;
-    const prefill = D().resolvePrefillData(window.location.search);
+    const qp = new URLSearchParams(window.location.search);
+    const shortSlug = (qp.get('s') || qp.get('slug') || '').trim();
+    const remote = shortSlug ? await D().fetchRemoteActivation(shortSlug) : null;
+    const prefill = D().resolvePrefillData(window.location.search, remote);
     root.innerHTML = M().renderForm(prefill);
 
     const srvList = document.getElementById('act-services-list');
     if (srvList && Array.isArray(prefill.servicios) && prefill.servicios.length > 0) {
       srvList.innerHTML = prefill.servicios.map((s, idx) => M().renderServiceRow(idx, {
-        name: s.name || s.nombre || '',
-        price: s.price ?? s.precio ?? '',
-        duration: Number(s.duration ?? s.duracion ?? 30) || 30,
-        sena: s.sena !== false
+        name: s.name || s.nombre || '', price: s.price ?? s.precio ?? '', duration: Number(s.duration ?? s.duracion ?? 30) || 30, sena: s.sena !== false
       })).join('');
     }
 
@@ -116,8 +114,7 @@
     bindStaffList();
 
     document.getElementById('btn-add-service')?.addEventListener('click', () => {
-      if (!srvList) return;
-      srvList.insertAdjacentHTML('beforeend', M().renderServiceRow(srvList.querySelectorAll('.act-service-row').length, {}));
+      if (srvList) srvList.insertAdjacentHTML('beforeend', M().renderServiceRow(srvList.querySelectorAll('.act-service-row').length, {}));
     });
     srvList?.addEventListener('click', (e) => {
       const btn = e.target.closest('.btn-del-srv');
@@ -138,7 +135,7 @@
     const form = document.getElementById('activar-live-form'), submitBtn = document.getElementById('btn-activar-submit');
     form?.addEventListener('submit', async (e) => {
       e.preventDefault(); showErr('');
-      const { err, payload } = buildValidatedPayload();
+      const { err, payload } = buildValidatedPayload(prefill.slug || shortSlug);
       if (err) return showErr(err);
 
       const formData = new FormData();
@@ -146,7 +143,7 @@
       formData.append('form-name', 'ficha-activacion-tucured');
       formData.append('name', senderName);
       Object.entries(payload).forEach(([k, v]) => {
-        if (k === 'form-name' || k === 'name' || k === 'bot-field') return;
+        if (k === 'form-name' || k === 'name' || k === 'bot-field' || k === 'slug') return;
         formData.append(k, v ?? '');
       });
       const logoFile = L().getLogoFile();
@@ -159,11 +156,11 @@
       } else {
         if (submitBtn) submitBtn.disabled = true;
         try {
-          const res = await fetch('/', { method: 'POST', body: formData });
+          const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 5000);
+          const res = await fetch('/', { method: 'POST', body: formData, signal: ctrl.signal });
+          clearTimeout(tm);
           const respText = await res.text();
-          if (!res.ok || !respText.includes('NETLIFY_FORM_ACCEPTED')) {
-            throw new Error(`Netlify no confirmó la recepción (HTTP ${res.status})`);
-          }
+          if (!res.ok || !respText.includes('NETLIFY_FORM_ACCEPTED')) throw new Error(`Netlify no confirmó la recepción (HTTP ${res.status})`);
         } catch (ex) {
           console.error('[TucuRed Activar] Error Netlify Forms:', ex);
           if (submitBtn) submitBtn.disabled = false;

@@ -1,5 +1,5 @@
 // Archivo: public/js/empezar/empezar_state.js
-// Estado central de /empezar.html: 11 pasos, 5 rubros, planes canonicos, E.164 y horarios (< 175L)
+// Estado central de /empezar.html: 11 pasos, 5 rubros, 4 beneficios por plan, piso/depto y E.164 (< 170L)
 
 window.TucuEmpezarState = (function () {
   const RUBROS = [
@@ -27,9 +27,24 @@ window.TucuEmpezarState = (function () {
   ];
 
   const PLANS = [
-    { id: 'l1', badge: 'Turnos', name: 'Plan Turnos', promo: '$4.999', regular: '$14.900/mes', bullets: ['Reservas online en 2 pasos', 'Señas directo a tu Alias', 'Tus clientes adjuntan el comprobante de seña desde la misma reserva'] },
-    { id: 'l2', badge: 'Gestión', name: 'Plan Gestión', promo: '$4.999', regular: '$24.900/mes', bullets: ['Todo lo de Turnos', 'Ficha e historial de clientes', 'Bloqueos de feriados, vacaciones y turnos de mostrador'] },
-    { id: 'l3', badge: 'Equipos', name: 'Plan Equipos', promo: '$4.999', regular: '$34.900/mes', bullets: ['Todo lo de Gestión', 'Confirmación automática 2 hs antes', 'Agenda propia para cada profesional'] }
+    { id: 'l1', badge: 'Turnos', name: 'Plan Turnos', promo: '$4.999', regular: '$14.900/mes', bullets: [
+      'Portada exclusiva con tu link propio en .tucured.com.ar',
+      'Reservas simples desde el celular en 2 pasos',
+      'Cobro de señas directo a tu Alias con comprobante adjunto',
+      'Agenda diaria ordenada y avisos directos al cliente'
+    ] },
+    { id: 'l2', badge: 'Gestión', name: 'Plan Gestión', promo: '$4.999', regular: '$24.900/mes', bullets: [
+      'Todo lo incluido en Plan Turnos',
+      'Ficha e historial completo de cada cliente',
+      'Bloqueos de feriados, vacaciones y turnos de mostrador',
+      'Organización de múltiples box, sillones o espacios'
+    ] },
+    { id: 'l3', badge: 'Equipos', name: 'Plan Equipos', promo: '$4.999', regular: '$34.900/mes', bullets: [
+      'Todo lo incluido en Plan Gestión',
+      'Agenda propia e independiente para cada profesional',
+      'Recordatorio automático por WhatsApp 2 hs antes del turno',
+      'Vista unificada del rendimiento y ocupación del equipo'
+    ] }
   ];
 
   const LOCALIDADES = [
@@ -64,6 +79,15 @@ window.TucuEmpezarState = (function () {
     return (meaningful.length ? meaningful : tokens).slice(0, 2).join('-').slice(0, 24).replace(/^-+|-+$/g, '') || 'tu-comercio';
   }
 
+  function formatPisoDepto(raw) {
+    const clean = String(raw || '').replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+    if (/^(local|pb|oficina|of\.|piso|depto|dpto|casa|mz|lote)/i.test(clean)) return clean;
+    const m = clean.match(/^(\d{1,2})\s*[,;\-\s]+\s*([a-zA-Z0-9]{1,3})$/);
+    if (m) return `Piso ${m[1]}, Depto ${m[2].toUpperCase()}`;
+    return clean;
+  }
+
   function sanitizePhone10(raw) {
     let d = String(raw || '').replace(/\D/g, '');
     if (d.startsWith('549')) d = d.slice(3); else if (d.startsWith('54')) d = d.slice(2);
@@ -89,8 +113,8 @@ window.TucuEmpezarState = (function () {
   function getPlanMeta(planId, rubro = '') {
     const p = PLANS.find((x) => x.id === normalizePlan(planId)) || PLANS[1];
     if (p.id !== 'l3') return p;
-    const teamBullet = rubro === 'deportes' ? 'Agenda independiente para cada cancha o espacio' : 'Agenda propia para cada profesional';
-    return { ...p, bullets: [p.bullets[0], p.bullets[1], teamBullet] };
+    const teamBullet = rubro === 'deportes' ? 'Agenda independiente para cada cancha o espacio' : 'Agenda propia e independiente para cada profesional';
+    return { ...p, bullets: [p.bullets[0], teamBullet, p.bullets[2], p.bullets[3]] };
   }
 
   function validateSchedule(st) {
@@ -111,18 +135,20 @@ window.TucuEmpezarState = (function () {
   function createInitialState(search = (typeof window !== 'undefined' ? window.location.search : '')) {
     const p = new URLSearchParams(search || ''), draft = window.TucuEmpezarMicroSteps?.loadDraft?.() || {}, hasQRub = p.has('rubro');
     const rubro = hasQRub ? normalizeRubro(p.get('rubro')) : (draft.rubro || ''), rubroSelected = Boolean(hasQRub || (draft.rubroSelected && rubro));
+    const specialties = Array.isArray(draft.specialties) ? draft.specialties : [];
     const plan = normalizePlan(p.has('plan') ? p.get('plan') : (draft.plan || 'l2')), covKey = rubro || 'peluqueria';
     const defCover = window.TucuEmpezarCovers?.getDefaultCoverForRubro?.(covKey), baseTheme = getAccentMeta(rubro, rubro);
-    const servicios = (!hasQRub && Array.isArray(draft.servicios) && draft.servicios.length) ? draft.servicios : (window.TucuEmpezarServicesStep?.getDefaultServices?.(covKey) || []);
+    const servicios = (!hasQRub && Array.isArray(draft.servicios) && draft.servicios.length) ? draft.servicios : (window.TucuEmpezarServicesStep?.getDefaultServices?.(covKey, specialties) || []);
     return {
       step: Math.max(1, Math.min(11, Number(draft.step) || 1)), stepDir: 'next', returnToSummary: false,
       comercio: draft.comercio || '', slug: draft.slug || 'tu-comercio', slugTouched: Boolean(draft.slugTouched),
       slugCheck: { status: 'idle', slug: draft.slug || 'tu-comercio', suggestions: [] },
-      rubro, rubroSelected, specialties: Array.isArray(draft.specialties) ? draft.specialties : [], plan, tonoVoz: draft.tonoVoz || 'cercano',
+      rubro, rubroSelected, specialties, plan, tonoVoz: draft.tonoVoz || 'cercano',
       bajada: (!hasQRub && typeof draft.bajada === 'string') ? draft.bajada.slice(0, 55) : '', previousBajada: draft.previousBajada || '', noTagline: Boolean(draft.noTagline),
-      keywords: Array.isArray(draft.keywords) ? draft.keywords : [], bajadaManual: Boolean(draft.bajadaManual && !hasQRub), taglineFromAi: Boolean(draft.taglineFromAi && !hasQRub),
-      ideasOpen: false, aiLoading: false, aiFeedback: '', accent: draft.accent || rubro || 'default', accentMode: draft.accentMode || 'auto', customAccentHex: draft.customAccentHex || '',
-      autoAccent: { bg: baseTheme.bg, hover: baseTheme.hover, text: '#FFFFFF', source: 'rubro' },
+      phrasePage: Number(draft.phrasePage) || 0, aiSuggestion: '', aiHistory: [], keywords: Array.isArray(draft.keywords) ? draft.keywords : [],
+      bajadaManual: Boolean(draft.bajadaManual && !hasQRub), taglineFromAi: Boolean(draft.taglineFromAi && !hasQRub),
+      aiLoading: false, aiFeedback: '', accent: draft.accent || rubro || 'default', accentMode: draft.accentMode || 'auto', customAccentHex: draft.customAccentHex || '',
+      autoAccent: { bg: baseTheme.bg, hover: baseTheme.hover, text: '#FFFFFF', source: 'rubro' }, posterTone: draft.posterTone || 'dark',
       coverId: draft.coverId || defCover?.id || '', coverMode: draft.coverMode || 'live', coverStyle: draft.coverStyle || 'editorial', previewMode: draft.previewMode || 'cover',
       coverTouched: Boolean(draft.coverTouched), localidad: draft.localidad || 'San Miguel de Tucumán', direccion: draft.direccion || '', pisoDepto: draft.pisoDepto || '',
       direccionLat: draft.direccionLat || '', direccionLng: draft.direccionLng || '', geoVerified: Boolean(draft.geoVerified && draft.direccionLat && draft.direccionLng),
@@ -130,14 +156,14 @@ window.TucuEmpezarState = (function () {
       open1: draft.open1 || '09:00', close1: draft.close1 || '20:00', open2: draft.open2 || '17:00', close2: draft.close2 || '21:00',
       servicios, serviciosTouched: Boolean(!hasQRub && draft.serviciosTouched), asistenciaCarga: draft.asistenciaCarga || '', pricelistError: '',
       instagram: draft.instagram || '', titularNombre: draft.titularNombre || '', titularApellido: draft.titularApellido || '', whatsapp: draft.whatsapp || '',
-      paymentMethod: draft.paymentMethod === 'mp' ? 'mp' : 'transfer', termsAccepted: false, termsAcceptedAt: '', termsVersion: 'v1-2026',
-      paidViaMp: false, mpPaymentId: '', error: '', submitting: false, submitted: Boolean(draft.submitted)
+      paymentMethod: draft.paymentMethod === 'mp' ? 'mp' : 'transfer', paymentStatus: draft.paymentStatus || '', shortActivarUrl: draft.shortActivarUrl || '',
+      termsAccepted: false, termsAcceptedAt: '', termsVersion: 'v1.1', paidViaMp: false, mpPaymentId: '', error: '', submitting: false, submitted: Boolean(draft.submitted)
     };
   }
 
   return {
     RUBROS, RUBRO_SPECIALTIES, ACCENT_OPTIONS, PLANS, LOCALIDADES,
-    normalizeRubro, normalizePlan, slugifySubdomain, sanitizePhone10, toE164Whatsapp,
+    normalizeRubro, normalizePlan, slugifySubdomain, formatPisoDepto, sanitizePhone10, toE164Whatsapp,
     getRubroMeta, getAccentMeta, getEffectiveAccent, getPlanMeta, validateSchedule, buildScheduleSummary, createInitialState
   };
 })();

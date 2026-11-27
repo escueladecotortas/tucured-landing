@@ -1,29 +1,33 @@
 // Archivo: public/js/empezar/empezar_app.js
-// Orquestador Pasos 1-11: geo localidad, horarios, Brick MP Sandbox y retorno ?mp_return=1 (< 180L)
+// Orquestador Pasos 1-11: scrollTop al avanzar, auto-portada en P5/P6, luminancia Póster Cristal y moderación (< 180L)
 
 (function () {
   const S = () => window.TucuEmpezarState, M = () => window.TucuEmpezarMedia, P = () => window.TucuEmpezarPreview;
   const UI = () => window.TucuEmpezarSteps, C = () => window.TucuEmpezarCovers, Pay = () => window.TucuEmpezarCheckoutUI;
   const Micro = () => window.TucuEmpezarMicroSteps, Srv = () => window.TucuEmpezarServicesStep, Mascot = () => window.TucuMascot;
   const ColorExt = () => window.TucuEmpezarColorExtract, Assist = () => window.TucuEmpezarTaglineAssist, Slug = () => window.TucuEmpezarSlugCheck;
-  const Mp = () => window.TucuEmpezarMpBrick, Step11 = () => window.TucuEmpezarStep11;
+  const Mp = () => window.TucuEmpezarMpBrick, Step11 = () => window.TucuEmpezarStep11, Styles = () => window.TucuEmpezarPreviewStyles;
 
   let state = null, geoTimer = null;
   const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const PIN_SVG = '<svg class="w-3.5 h-3.5 text-stone-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>';
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'auto' });
 
   function syncPreview(highlightSel = '') {
     P().render(document.getElementById('empezar-live-preview'), state, highlightSel);
     const mob = document.getElementById('empezar-mobile-preview-mount');
     if (mob && !document.getElementById('empezar-preview-drawer')?.classList.contains('hidden')) P().render(mob, state, highlightSel);
+    const step10Mob = document.getElementById('emp-step10-mobile-style-preview');
+    if (step10Mob && state.step === 10 && Styles()?.renderCoverStyle) step10Mob.innerHTML = Styles().renderCoverStyle(state);
   }
 
   async function refreshAutoAccent() {
     if (!ColorExt()?.resolveAutoAccent || !state) return;
     const cov = C()?.getCoverById?.(state.coverId) || C()?.getDefaultCoverForRubro?.(state.rubro || 'peluqueria');
     const coverSlot = M()?.getSlot?.('cover'), logoSlot = M()?.getSlot?.('logo');
-    const coverPosterUrl = state.coverMode === 'custom' && coverSlot?.url ? coverSlot.url : cov?.poster;
+    const coverPosterUrl = state.coverMode === 'custom' && coverSlot?.url ? coverSlot.url : (state.coverMode === 'temp' ? C()?.getTempCoverPath?.(state.rubro || 'peluqueria') : cov?.poster);
     state.autoAccent = await ColorExt().resolveAutoAccent({ logoUrl: logoSlot?.url || '', coverPosterUrl, fallbackHex: S().getAccentMeta(state.rubro, state.rubro).bg });
+    if (ColorExt().measureTopLuminance) state.posterTone = await ColorExt().measureTopLuminance(coverPosterUrl, 'dark');
     const sw = document.getElementById('emp-auto-swatch');
     if (sw && state.autoAccent?.bg) sw.style.backgroundColor = state.autoAccent.bg;
     syncPreview('#preview-cta-btn');
@@ -95,7 +99,8 @@
 
   async function handleChange(e) {
     const t = e.target; if (!t?.id) return;
-    if (Srv()?.handleChange?.(e, state)?.handled) { Pay()?.saveWizardSnapshot?.(state); return renderAll('', { updateMascot: false }); }
+    const srvChg = Srv()?.handleChange?.(e, state);
+    if (srvChg?.handled) { Pay()?.saveWizardSnapshot?.(state); return renderAll('', { updateMascot: false, highlightSelector: '#preview-service-chip' }); }
     if (t.id === 'emp-logo-input' || t.id === 'emp-cover-input') {
       const slot = t.id === 'emp-cover-input' ? 'cover' : 'logo', file = t.files?.[0]; if (!file) return;
       try {
@@ -103,14 +108,27 @@
         if (slot === 'cover') { state.coverMode = 'custom'; state.coverId = 'custom'; state.coverTouched = true; }
         if (slot === 'logo') state.previewMode = 'turnero';
         state.error = ''; Pay()?.saveWizardSnapshot?.(state); renderAll('', { updateMascot: false });
-        Mascot()?.setMood?.('celebrate', slot === 'logo' ? '¡Excelente logo! Mirá cómo luce sobre blanco en tu turnero.' : '¡Linda foto! Tu portada ya se ve en la vista previa.');
+        Mascot()?.setMood?.('celebrate', slot === 'logo' ? '¡Excelente logo! Mirá cómo luce sobre blanco en tu turnero.' : '¡Tu foto quedó cargada y activa en la portada!');
         return await refreshAutoAccent();
-      } catch (err) { return showInlineError(err?.message || 'No pudimos procesar la imagen.'); }
+      } catch (err) {
+        const msg = err?.message || 'No pudimos procesar la imagen.';
+        showInlineError(msg);
+        return Mascot()?.setMood?.('advisor', msg);
+      }
     }
     const map = { 'emp-localidad': 'localidad', 'emp-sched-days': 'horarioDias', 'emp-open1': 'open1', 'emp-close1': 'close1', 'emp-open2': 'open2', 'emp-close2': 'close2' };
     if (map[t.id]) { state[map[t.id]] = t.value; if (t.id === 'emp-localidad') { state.geoVerified = false; renderAll('', { updateMascot: true }); return; } return renderAll('', { updateMascot: state.step === 6, highlightSelector: '#preview-schedule' }); }
     if (t.id === 'emp-terms') { state.termsAccepted = t.checked; state.termsAcceptedAt = t.checked ? new Date().toISOString() : ''; if (t.checked) showInlineError(''); }
     syncPreview(Micro()?.getHighlightSelector?.(state.step) || ''); Micro()?.saveDraft?.(state);
+  }
+
+  function handleFocusOut(e) {
+    if (e.target?.id !== 'emp-piso-depto') return;
+    const formatted = S().formatPisoDepto(e.target.value);
+    if (formatted !== state.pisoDepto || formatted !== e.target.value) {
+      state.pisoDepto = formatted; e.target.value = formatted;
+      syncPreview('#preview-address'); Micro()?.saveDraft?.(state);
+    }
   }
 
   function mountMpIfNeeded() {
@@ -119,17 +137,19 @@
       containerId: 'emp-mp-brick-container', getState: () => state,
       onTermsMissing: () => { showInlineError('Aceptá los Términos y Condiciones para abonar.'); Mascot()?.setMood?.('advisor', 'Tildá la casilla de Términos y Condiciones arriba antes de abonar.'); },
       onCoverConflict: () => { showInlineError('Esa portada fue reservada recién. Elegí otra libre.'); Mascot()?.setMood?.('advisor', 'Usá Cambiar en Portada para elegir otra foto libre.'); },
-      onApproved: async (data) => { state.paidViaMp = true; state.mpPaymentId = String(data?.paymentId || data?.id || ''); await window.TucuEmpezarEvents.finalizeOrder({ state, renderAll }, true); }
+      onApproved: async (data) => { state.mpPaymentId = String(data?.paymentId || data?.id || ''); await window.TucuEmpezarEvents.finalizeOrder({ state, renderAll }, true); }
     });
   }
 
   function goNext() {
+    if (state.step === 6 && state.pisoDepto) state.pisoDepto = S().formatPisoDepto(state.pisoDepto);
     if (state.step === 7 && state.asistenciaCarga !== 'whatsapp_email') state.servicios = Srv()?.cleanServices?.(state.servicios) || [];
     const err = Micro()?.validateStep?.(state.step, state) || '';
     if (err) { if (state.step === 6) Mascot()?.setMood?.('advisor', err); return showInlineError(err); }
     if (state.step === 1 && !state.slugTouched) state.slug = S().slugifySubdomain(state.comercio);
     state.error = ''; state.stepDir = 'next'; state.step = Math.min(11, state.step + 1);
-    Pay()?.saveWizardSnapshot?.(state); renderAll('', { animateStep: true, highlightSelector: Micro()?.getHighlightSelector?.(state.step) || '' });
+    if (state.step === 5 || state.step === 6) state.previewMode = 'cover';
+    scrollTop(); Pay()?.saveWizardSnapshot?.(state); renderAll('', { animateStep: true, highlightSelector: Micro()?.getHighlightSelector?.(state.step) || '' });
     if (state.step === 8) triggerSlugCheck(state.slug);
     mountMpIfNeeded();
   }
@@ -137,24 +157,25 @@
   async function init() {
     const params = new URLSearchParams(window.location.search), hasDraft = Boolean(Micro()?.loadDraft?.());
     state = S().createInitialState(window.location.search);
+    const willPlayIntro = !hasDraft && state.step === 1 && !state.comercio;
     const adviceApi = { setCoverStyle: (n) => { state.coverStyle = n; renderAll('', { updateMascot: false }); }, applyAccentHex: (h) => { state.accentMode = 'manual'; state.customAccentHex = h; renderAll('', { updateMascot: true }); } };
-    Mascot()?.init?.(document.getElementById('empezar-mascot-mount'), { adviceApi, onAdviceClick: () => Mascot()?.triggerAdvice?.(state.step, state) });
+    Mascot()?.init?.(document.getElementById('empezar-mascot-mount'), { adviceApi, deferIdle: willPlayIntro, onAdviceClick: () => Mascot()?.triggerAdvice?.(state.step, state) });
     const mount = document.getElementById('empezar-step-mount'), drawer = document.getElementById('empezar-preview-drawer');
     const ctx = { state, renderAll, refreshAutoAccent, goNext, showInlineError, mountMpIfNeeded };
-    mount?.addEventListener('input', handleInput); mount?.addEventListener('change', handleChange);
+    mount?.addEventListener('input', handleInput); mount?.addEventListener('change', handleChange); mount?.addEventListener('focusout', handleFocusOut);
     mount?.addEventListener('click', (e) => window.TucuEmpezarEvents.handleClick(e, ctx));
     mount?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target?.tagName === 'INPUT' && e.target.type !== 'checkbox' && !state.submitted && state.step < 10) { e.preventDefault(); goNext(); } });
     document.addEventListener('click', (e) => { const pm = e.target?.closest?.('[data-emp-preview-mode]'); if (pm) { state.previewMode = pm.dataset.empPreviewMode; syncPreview(); } });
     document.getElementById('btn-open-mobile-preview')?.addEventListener('click', () => { drawer?.classList.remove('hidden'); P().render(document.getElementById('empezar-mobile-preview-mount'), state); });
     document.getElementById('btn-close-mobile-preview')?.addEventListener('click', () => drawer?.classList.add('hidden'));
     window.TucuEmpezarApp = { getState: () => state, renderAll, refreshAutoAccent, mountMpIfNeeded };
-    C()?.hydrateFromCatalog?.().then(() => { if (!state.submitted && state.step >= 3) syncPreview(); });
+    C()?.hydrateFromCatalog?.().then(() => { if (!state.submitted && state.step >= 3) refreshAutoAccent(); });
     if (params.get('mp_return') === '1' && params.get('slug')) {
       const stMp = await Mp()?.checkReturnStatus?.(params.get('slug'));
-      if (stMp?.paid) { state.slug = params.get('slug'); state.paidViaMp = true; state.paymentMethod = 'mp'; state.mpPaymentId = String(stMp.paymentId || ''); state.submitted = true; state.step = 11; renderAll(window.TucuEmpezarSubmit.buildLocalActivarHref(state), { animateStep: true }); Step11()?.launchConfetti?.(S().getEffectiveAccent(state).bg); return; }
+      if (stMp?.paid) { state.slug = params.get('slug'); state.paidViaMp = true; state.paymentStatus = 'paid'; state.paymentMethod = 'mp'; state.mpPaymentId = String(stMp.paymentId || ''); state.submitted = true; state.step = 11; renderAll(window.TucuEmpezarSubmit.buildLocalActivarHref(state), { animateStep: true }); Step11()?.launchConfetti?.(S().getEffectiveAccent(state).bg); return; }
     }
     syncPreview();
-    if (!hasDraft && state.step === 1 && !state.comercio) Mascot()?.playIntroSequence?.(mount, false, () => { renderAll('', { animateStep: true }); refreshAutoAccent(); });
+    if (willPlayIntro) Mascot()?.playIntroSequence?.(mount, false, () => { scrollTop(); renderAll('', { animateStep: true }); refreshAutoAccent(); });
     else { renderAll(); refreshAutoAccent(); mountMpIfNeeded(); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

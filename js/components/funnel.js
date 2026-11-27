@@ -1,20 +1,7 @@
 // Archivo: js/components/funnel.js
-// Orquestador liviano del disparador #funnel hacia /empezar.html con soporte Safari/iOS WebP (< 75L)
+// Orquestador liviano del disparador #funnel hacia /empezar.html con soporte Safari/iOS WebP (< 65L)
 
-import { getFunnelMarkup, EXPANDED_RUBROS, FUNNEL_LEVELS } from './funnel_markup.js';
-
-const RUBRO_ALIASES = { barberia: 'peluqueria', resto: 'gastronomia' };
-
-function normalizeRubro(raw) {
-  const mapped = RUBRO_ALIASES[raw] || raw;
-  return EXPANDED_RUBROS.some(r => r.id === mapped) ? mapped : 'peluqueria';
-}
-
-function normalizeLevel(raw) {
-  const s = String(raw || '').toLowerCase().trim();
-  const id = s.startsWith('l') ? s : `l${s}`;
-  return FUNNEL_LEVELS.some(l => l.id === id) ? id : 'l2';
-}
+import { getFunnelMarkup } from './funnel_markup.js';
 
 function hydrateFunnelMascot() {
   const mount = document.getElementById('funnel-mascot-mount');
@@ -39,31 +26,10 @@ export function renderFunnel(containerId = 'app-funnel') {
   if (window._funnelAbort) window._funnelAbort.abort();
   const abortCtrl = new AbortController();
   window._funnelAbort = abortCtrl;
-  const { signal } = abortCtrl;
 
-  let selectedRubro = 'peluqueria';
-  let selectedLevel = 'l2';
-  container.innerHTML = getFunnelMarkup({}, selectedRubro, selectedLevel);
+  container.innerHTML = getFunnelMarkup();
   hydrateFunnelMascot();
 
-  const syncLaunchHref = () => {
-    const btn = document.getElementById('btn-funnel-launch');
-    if (btn) {
-      btn.setAttribute('href', `/empezar.html?plan=${encodeURIComponent(selectedLevel)}&rubro=${encodeURIComponent(selectedRubro)}`);
-    }
-  };
-
-  window.addEventListener('tucured:rubro-selected', (e) => {
-    if (!e.detail?.rubro) return;
-    selectedRubro = normalizeRubro(e.detail.rubro);
-    syncLaunchHref();
-  }, { signal });
-
-  window.addEventListener('tucured:level-selected', (e) => {
-    if (!e.detail?.level) return;
-    selectedLevel = normalizeLevel(e.detail.level);
-    syncLaunchHref();
-  }, { signal });
-
-  syncLaunchHref();
+  const btn = document.getElementById('btn-funnel-launch');
+  if (btn) btn.setAttribute('href', '/empezar.html');
 }

@@ -1,155 +1,120 @@
 // Archivo: scripts/verify_bloque2b_empezar.js
-// Compuerta local Bloque 2B: Pasos 1-11, Lumi Failure-to-Gate (Desktop+Mobile) y Brick (< 195L)
+// Compuerta local Pulido B: Landing CTA, Acto 1 manual, Pasos 1-11, Lumi Gate Desktop+Mobile (< 180L)
 
 import fs from 'fs';
 import path from 'path';
-import http from 'http';
-import { execSync, spawn } from 'child_process';
+import { spawn } from 'child_process';
+import { BASE, PORT_CDP, CHROME, wait, reqJson, Cdp, assertLumiVisible, runStaticAudit } from './verify_bloque2b_helpers.js';
 
-const BASE = 'http://127.0.0.1:5174', PORT_CDP = 9286;
-const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const reqJson = (u, m = 'GET') => new Promise((res, rej) => { const q = http.request(u, { method: m }, (r) => { let d = ''; r.on('data', (c) => d += c); r.on('end', () => res(JSON.parse(d || '{}'))); }); q.on('error', rej); q.end(); });
 let pass = 0, fail = 0;
 const ok = (c, m) => (c ? (pass++, console.log(`  [PASS] ${m}`)) : (fail++, console.error(`  [FAIL] ${m}`)));
 
-class Cdp {
-  constructor(ws) { this.ws = new WebSocket(ws); this.id = 0; this.pending = new Map(); this.errors = []; this.httpBad = []; }
-  async connect() {
-    await new Promise((r, j) => { this.ws.addEventListener('open', r, { once: true }); this.ws.addEventListener('error', j, { once: true }); });
-    this.ws.addEventListener('message', (ev) => {
-      const m = JSON.parse(ev.data);
-      if (m.id && this.pending.has(m.id)) { const p = this.pending.get(m.id); this.pending.delete(m.id); m.error ? p.rej(new Error(m.error.message)) : p.res(m.result); }
-      else if (m.method === 'Runtime.exceptionThrown') this.errors.push(m.params?.exceptionDetails?.text || 'Exception');
-      else if (m.method === 'Log.entryAdded' && m.params?.entry?.level === 'error') { const u = m.params.entry.url || ''; if ((!u || u.startsWith(BASE)) && !/mercadopago/i.test(m.params.entry.text)) this.errors.push(m.params.entry.text); }
-      else if (m.method === 'Network.responseReceived' && m.params?.response?.url?.startsWith(BASE) && !m.params.response.url.endsWith('/favicon.ico') && m.params.response.status >= 400) this.httpBad.push(`${m.params.response.status} ${m.params.response.url}`);
-    });
-    await this.send('Page.enable'); await this.send('Runtime.enable'); await this.send('Network.enable'); await this.send('Log.enable');
-    await this.send('Page.addScriptToEvaluateOnNewDocument', { source: "window.TUCU_ENGINE_URL='https://engine.tucured.com.ar';" });
-  }
-  send(method, params = {}) { const id = ++this.id; return new Promise((res, rej) => { this.pending.set(id, { res, rej }); this.ws.send(JSON.stringify({ id, method, params })); }); }
-  async goto(u) { await this.send('Page.navigate', { url: BASE + u }); for (let i = 0; i < 40; i++) { await wait(120); if (await this.evalJs("document.readyState==='complete' && Boolean(document.getElementById('empezar-step-mount'))").catch(() => false)) break; } await wait(250); }
-  async evalJs(e) { const r = await this.send('Runtime.evaluate', { expression: e, returnByValue: true, awaitPromise: true }); if (r.exceptionDetails) throw new Error(r.exceptionDetails.text || 'Eval error'); return r.result?.value; }
-  close() { try { this.ws.close(); } catch {} }
-}
-
-async function assertLumiVisible(cdp, label, minSize) {
-  let m = {};
-  for (let i = 0; i < 12; i++) {
-    m = await cdp.evalJs(`(()=>{const a=document.getElementById('tucu-mascot-actor'),h=document.getElementById('emp-header');if(!a||!h)return{ok:false,reason:'missing'};const r=a.getBoundingClientRect(),hb=h.getBoundingClientRect().bottom,cs=getComputedStyle(a),m=a.querySelector('.tucu-mascot-media.is-clip-active'),mcs=m?getComputedStyle(m):null,vw=window.innerWidth,vh=window.innerHeight,dimOk=r.width>=${minSize}&&r.height>=${minSize},stOk=cs.display!=='none'&&cs.visibility!=='hidden'&&parseFloat(cs.opacity)>0.9&&Boolean(mcs)&&mcs.display!=='none'&&mcs.visibility!=='hidden'&&parseFloat(mcs.opacity)>0.9,posOk=r.top>=hb-1&&r.left>=-1&&r.right<=vw+1&&r.bottom<=vh+1,medOk=Boolean(m&&(m.tagName==='VIDEO'?(m.readyState>=2&&m.videoWidth>0):(m.complete&&m.naturalWidth>0))),hit=(r.width>0&&r.height>0)?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null,unocc=Boolean(hit&&(hit===a||a.contains(hit)));return{ok:dimOk&&stOk&&posOk&&medOk&&unocc,w:Math.round(r.width),h:Math.round(r.height),top:Math.round(r.top),hb:Math.round(hb),op:mcs?mcs.opacity:'0',medOk,unocc,posOk,clip:m?.dataset?.clipKey||'',tag:m?.tagName||''};})()`);
-    if (m.ok) break;
-    await wait(100);
-  }
-  ok(m.ok, `Lumi visible [${label}]: ${m.w}x${m.h} op=${m.op} mediaDecoded=${m.medOk} unoccluded=${m.unocc} top(${m.top})>=hb(${m.hb}) [${m.tag}:${m.clip}]`);
-}
-
-function runStatic() {
-  console.log('\n=== 1. AUDITORÍA ESTÁTICA (<200L, AST, CLICHÉS, .tucured.com.ar) ===');
-  const files = ['public/css/empezar_mascot.css', 'public/js/empezar_mascot_stage.js', 'public/js/empezar_mascot.js', 'public/js/empezar_lumi_advisor.js', 'public/js/empezar_preview_styles.js', 'public/js/empezar/empezar_preview.js', 'public/js/empezar/empezar_state.js', 'public/js/empezar_covers.js', 'public/js/empezar_tagline_assist.js', 'public/js/empezar_tones.js', 'public/js/activar/activar_geo.js', 'public/js/empezar/empezar_media.js', 'public/js/empezar_services_step.js', 'public/js/empezar_micro_steps.js', 'public/js/empezar_checkout_ui.js', 'public/js/empezar_mp_brick.js', 'public/js/empezar_step11.js', 'public/js/empezar/empezar_steps.js', 'public/js/empezar/empezar_submit.js', 'public/js/empezar/empezar_events.js', 'public/js/empezar/empezar_app.js', 'public/empezar.html', 'scripts/verify_bloque2b_empezar.js'];
-  const badLen = [], badAst = [];
-  for (const rel of files) {
-    const abs = path.resolve(rel), txt = fs.readFileSync(abs, 'utf8'), lines = txt.split(/\r?\n/);
-    console.log(`    ${rel.padEnd(42)} ${String(lines.length).padStart(3)}L`);
-    if (lines.length >= 200 || !/Archivo:/i.test(lines[0])) badLen.push(`${rel}:${lines.length}L`);
-    if (rel.endsWith('.js')) { try { execSync(`node --check "${abs}"`, { stdio: 'pipe' }); } catch { badAst.push(rel); } }
-  }
-  ok(badLen.length === 0, `Todos los archivos <200L y con cabecera Archivo (${files.length}; fallos=${badLen.join(',') || '0'})`);
-  ok(badAst.length === 0, `AST node --check OK (fallos=${badAst.join(',') || '0'})`);
-  const empTargets = files.filter((f) => f.startsWith('public/') && !f.endsWith('activar_geo.js'));
-  const banned = /El m[aá]s elegido|Control total|24\s*hs|24\/7|0%\s*comisi|Para arrancar solo|Cierra ma[nñ]ana|Cierra tarde|Direcci[oó]n web deseada|\bclima\b|Video loop en vivo|Ver las 12|Plan Esencial|Admin · Esencial|bg-stone-900/i;
-  const badCl = empTargets.filter((f) => banned.test(fs.readFileSync(path.resolve(f), 'utf8')));
-  const badDom = empTargets.filter((f) => /[a-z0-9}-]+\.tucured\.ar\b/i.test(fs.readFileSync(path.resolve(f), 'utf8')));
-  ok(badCl.length === 0, `0 clichés ni bg-stone-900 en /empezar (fallos=${badCl.join(',') || '0'})`);
-  ok(badDom.length === 0, `0 subdominios .tucured.ar en /empezar (fallos=${badDom.join(',') || '0'})`);
-  const distMascot = fs.existsSync('dist/assets/mascot') ? fs.readdirSync('dist/assets/mascot') : [];
-  ok(distMascot.length === 13 && !fs.existsSync('dist/assets/mascot/raw') && !fs.existsSync('dist/lab'), 'dist/ limpio con 13 assets de Lumi sin raw ni lab');
-}
-
 async function runDesktopE2E(cdp) {
-  console.log('\n=== 2. E2E DESKTOP 1280x800 (PASOS 1-11 + LUMI GATE + BRICK) ===');
+  console.log('\n=== 2. E2E DESKTOP 1280x800 (LANDING + ACTO 1 MANUAL + PASOS 1-11 + LUMI GATE) ===');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await cdp.goto('/', "document.readyState==='complete' && Boolean(document.getElementById('btn-funnel-launch'))");
+  const land = await cdp.evalJs("(()=>{const b=document.getElementById('btn-funnel-launch'),t=document.getElementById('funnel')?.innerText||'';return{href:b?.getAttribute('href')||'',hasTono:/tono de voz/i.test(t),hasZero:/0% comisi/i.test(t)};})()");
+  ok(land.href === '/empezar.html' && !land.hasTono && !land.hasZero, `Landing CTA=${land.href}, sin tono de voz ni 0% comisiones`);
+
   await cdp.goto('/empezar.html'); await cdp.evalJs('localStorage.clear(); sessionStorage.clear();'); await cdp.goto('/empezar.html');
-  await assertLumiVisible(cdp, 'Desktop Acto 1', 72);
+  await assertLumiVisible(cdp, 'Desktop Acto 1', 72, ok);
+  await wait(5200);
+  const stillAct1 = await cdp.evalJs("Boolean(document.getElementById('btn-skip-lumi-intro')) && !document.getElementById('emp-comercio')");
+  ok(stillAct1, 'Acto 1 NO salta automáticamente tras 5.2s (avance 100% manual)');
   await cdp.evalJs("document.getElementById('btn-skip-lumi-intro')?.click()"); await wait(250);
-  await assertLumiVisible(cdp, 'Desktop Paso 1', 72);
-  await cdp.evalJs("const i=document.getElementById('emp-comercio');i.value='La Barbería de Don Julio';i.dispatchEvent(new Event('input',{bubbles:true}));");
-  const p1 = await cdp.evalJs("({cta:Boolean(document.getElementById('preview-cta-btn')),tabs:Boolean(document.getElementById('preview-mode-tabs'))})");
-  ok(!p1.cta && !p1.tabs, 'P1 lienzo limpio sin CTA ni tabs Portada|Turnero');
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  const p2 = await cdp.evalJs("document.body.innerText.includes('DIRECCIÓN WEB SUGERIDA') || document.body.innerText.includes('Dirección web sugerida')");
-  ok(!p2, 'P2 sin bloque Dirección web sugerida');
+  await assertLumiVisible(cdp, 'Desktop Paso 1', 72, ok);
+
+  await cdp.evalJs("const i=document.getElementById('emp-comercio');i.value='La Barbería de Don Julio';i.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('btn-emp-next').click();"); await wait(200);
   await cdp.evalJs("document.querySelector('[data-emp-rubro=\"deportes\"]').click();"); await wait(120);
+  await cdp.evalJs("document.querySelector('[data-emp-spec=\"Pádel\"]')?.click();"); await wait(100);
+  const p2Clean = await cdp.evalJs("document.querySelectorAll('#preview-phone-chassis .rounded-full').length === 0");
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(250);
-  await cdp.evalJs("window.scrollTo(0,260);"); await wait(160);
-  await assertLumiVisible(cdp, 'Desktop Paso 3 + Scroll', 72);
-  await cdp.evalJs("window.scrollTo(0,0);"); await wait(100);
-  const p3 = await cdp.evalJs("({first:document.querySelector('[data-emp-cover-id]')?.getAttribute('aria-label')||'',disp:document.getElementById('empezar-step-mount').innerText.includes('Disponible')})");
-  await cdp.evalJs("document.querySelector('[data-emp-cover-id]').click()"); await wait(120);
-  const rubAfterCov = await cdp.evalJs("window.TucuEmpezarApp.getState().rubro");
-  ok(p3.first.includes('deportes') && !p3.disp && rubAfterCov === 'deportes', `P3 ordena deportes primero, sin pill Disponible y mantiene rubro=${rubAfterCov}`);
+  await assertLumiVisible(cdp, 'Desktop Paso 3', 72, ok);
+
+  const p3 = await cdp.evalJs("({hasStyle:Boolean(document.querySelector('[data-emp-cover-style]')),excl:document.body.innerText.includes('queda reservada solo para tu marca'),cta:document.getElementById('preview-cta-btn')?.innerText||''})");
+  await cdp.evalJs("document.getElementById('btn-emp-cover-temp')?.click()"); await wait(280);
+  const tempImg = await cdp.evalJs("(()=>{const img=document.querySelector('#preview-phone-chassis img[data-temp-cover=\"1\"]');return{src:img?.getAttribute('src')||'',ok:Boolean(img&&img.complete&&img.naturalWidth>0),ph:document.getElementById('preview-phone-chassis').innerText.includes('Portada temporal')};})()");
+  ok(p2Clean && !p3.hasStyle && p3.excl && p3.cta.includes('Reservar cancha') && tempImg.src.endsWith('temp_deportes.webp') && tempImg.ok && !tempImg.ph, `P2-P3 sin badge rubro, sin Estilo en P3, CTA "${p3.cta}", temporal=${tempImg.src} ok=${tempImg.ok}`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  ok(await cdp.evalJs("Boolean(document.getElementById('preview-mode-tabs'))"), 'P4 activa switch Portada | Turnero');
+  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"turnero\"]')?.click()"); await wait(120);
+  const bandBg = await cdp.evalJs("getComputedStyle(document.getElementById('preview-turnero-header-band')).backgroundColor");
+  ok(bandBg === 'rgb(255, 255, 255)', `P4 banda superior Turnero blanco puro (${bandBg})`);
+
+  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(220);
+  const p5a = await cdp.evalJs("({mode:window.TucuEmpezarApp.getState().previewMode,count:document.querySelectorAll('[data-emp-tagline-idea]').length,first:document.querySelector('[data-emp-tagline-idea]')?.dataset?.empTaglineIdea||''})");
+  await cdp.evalJs("document.getElementById('btn-emp-phrases-next')?.click()"); await wait(120);
+  const p5b = await cdp.evalJs("({first:document.querySelector('[data-emp-tagline-idea]')?.dataset?.empTaglineIdea||'',rem:window.TucuEmpezarTaglineAssist.getRemaining()})");
+  await cdp.evalJs("document.querySelectorAll('[data-emp-tagline-kw]')[0]?.click();document.getElementById('btn-emp-ai-run')?.click();");
+  for (let i = 0; i < 40; i++) { await wait(150); if (await cdp.evalJs("Boolean(document.getElementById('btn-emp-ai-use'))")) break; }
+  await cdp.evalJs("document.getElementById('btn-emp-ai-use')?.click()"); await wait(120);
+  const p5used = await cdp.evalJs("document.getElementById('emp-bajada')?.value||''");
+  ok(p5a.mode === 'cover' && p5a.count === 3 && p5b.first !== p5a.first && p5b.rem === 5 && p5used.length > 0, `P5 auto-portada, 3 ideas + Ver otras 3 gratis (rem=${p5b.rem}), IA separada "${p5used}"`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await cdp.evalJs("document.querySelectorAll('[data-emp-tagline-kw]')[0]?.click();document.querySelectorAll('[data-emp-tagline-kw]')[1]?.click();"); await wait(120);
-  const p5 = await cdp.evalJs("({kws:window.TucuEmpezarApp.getState().keywords.length,pressed:document.querySelectorAll('[data-emp-tagline-kw][aria-pressed=\"true\"]').length,ai:document.getElementById('btn-emp-ai-run')?.innerText||''})");
-  ok(p5.kws === 2 && p5.pressed === 2 && p5.ai.includes('5 de 5 disponibles'), `P5 keywords activos (${p5.kws}) y cupo IA "${p5.ai}"`);
-  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await assertLumiVisible(cdp, 'Desktop Paso 6', 72);
-  await cdp.evalJs("const d=document.getElementById('emp-direccion');d.value='25 de Mayo 480';d.dispatchEvent(new Event('input',{bubbles:true}));");
+  await assertLumiVisible(cdp, 'Desktop Paso 6', 72, ok);
+  await cdp.evalJs("(()=>{const d=document.getElementById('emp-direccion');d.value='25 de Mayo 480';d.dispatchEvent(new Event('input',{bubbles:true}));const p=document.getElementById('emp-piso-depto');p.value='2, A';p.dispatchEvent(new Event('input',{bubbles:true}));p.dispatchEvent(new FocusEvent('focusout',{bubbles:true}));})()");
   for (let i = 0; i < 30; i++) { await wait(150); if (await cdp.evalJs("Boolean(document.querySelector('#emp-geo-dropdown [data-geo-i]'))")) break; }
   await cdp.evalJs("const o=document.querySelector('#emp-geo-dropdown [data-geo-i]');if(o)o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));"); await wait(200);
-  await cdp.evalJs("const p=document.getElementById('emp-piso-depto');p.value='Local 2';p.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('[data-emp-sched=\"partido\"]').click();"); await wait(180);
-  const p6 = await cdp.evalJs("({ver:Boolean(document.getElementById('emp-geo-verified-pill')),o1:document.getElementById('emp-open1')?.value,c1:document.getElementById('emp-close1')?.value,o2:document.getElementById('emp-open2')?.value,c2:document.getElementById('emp-close2')?.value})");
-  ok(p6.ver && p6.o1 === '09:00' && p6.c1 === '13:00' && p6.o2 === '17:00' && p6.c2 === '21:00', `P6 verificado + Partido ${p6.o1}-${p6.c1} / ${p6.o2}-${p6.c2}`);
+  const p6Fmt = await cdp.evalJs("document.getElementById('emp-piso-depto')?.value||''");
+  ok(p6Fmt === 'Piso 2, Depto A', `P6 autoformateo piso/depto -> "${p6Fmt}"`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  await cdp.evalJs("document.getElementById('btn-emp-add-service')?.click()"); await wait(100);
-  await cdp.evalJs("document.getElementById('emp-assist-check')?.click()"); await wait(100);
-  const p7wa = await cdp.evalJs("!document.getElementById('emp-services-list') && document.body.innerText.includes('Te la mando por WhatsApp al terminar')");
-  await cdp.evalJs("document.getElementById('emp-assist-check')?.click();document.getElementById('btn-emp-next').click()"); await wait(250);
-  ok(p7wa && await cdp.evalJs("window.TucuEmpezarApp.getState().servicios.every(s=>s.name.trim().length>0)"), 'P7 colapsa ejemplos con WhatsApp y descarta filas vacías al avanzar');
-  const p8 = await cdp.evalJs("({suf:document.getElementById('empezar-step-mount').innerText.includes('.tucured.com.ar'),badge:Boolean(document.getElementById('preview-plan-badge'))})");
-  ok(p8.suf && p8.badge, 'P8 muestra .tucured.com.ar y badge de plan');
+  await cdp.evalJs("document.getElementById('emp-srv-nopr-0')?.click();"); await wait(100);
+  await cdp.evalJs("document.getElementById('emp-srv-notm-0')?.click();"); await wait(100);
+  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"turnero\"]')?.click()"); await wait(120);
+  const p7Res = await cdp.evalJs("(()=>{const r0=document.querySelector('#preview-service-chip > div');return{waTxt:document.getElementById('empezar-step-mount').innerText.includes('Despreocupate ahora'),prev:r0?.innerText||'',spans:r0?r0.querySelectorAll('span').length:0};})()");
+  ok(p7Res.waTxt && p7Res.prev.includes('Consultar') && p7Res.spans === 2, `P7 Sin precio/tiempo (spans=${p7Res.spans}) y nuevo copy WA`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
-  const p9noEmail = await cdp.evalJs("document.querySelectorAll('input[type=\"email\"]').length === 0");
+  const p8Bullets = await cdp.evalJs("[...document.querySelectorAll('[data-emp-plan]')].map(b=>b.querySelectorAll('li').length)");
+  await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(200);
+  await cdp.evalJs("document.querySelector('[data-emp-preview-mode=\"cover\"]')?.click()"); await wait(100);
   await cdp.evalJs("for(const [id,v] of [['emp-first','Julio'],['emp-last','Sosa'],['emp-whatsapp','3815554321'],['emp-instagram','@brava']]){const e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}"); await wait(120);
-  ok(p9noEmail && await cdp.evalJs("Boolean(document.querySelector('[data-preview-wa]')) && Boolean(document.querySelector('[data-preview-ig]'))"), 'P9 sin input email y activa íconos WA/IG en preview');
+  const p9 = await cdp.evalJs("({ttl:document.getElementById('empezar-step-mount').innerText.includes('Tus datos de contacto'),glass:document.querySelectorAll('#empezar-live-preview .wg-social-glass').length})");
+  ok(p8Bullets.every((n) => n === 4) && p9.ttl && p9.glass === 2, `P8 4 beneficios/plan, P9 contacto + ${p9.glass} botones glass`);
+
   await cdp.evalJs("document.getElementById('btn-emp-next').click()"); await wait(250);
-  const p10 = await cdp.evalJs("({chk:document.getElementById('emp-terms')?.checked,tit:document.getElementById('empezar-step-mount').innerText.includes('Leonardo Laricchiuta')})");
-  await cdp.evalJs("document.querySelector('[data-emp-jump-step=\"1\"]')?.click()"); await wait(150);
-  await cdp.evalJs("document.getElementById('btn-emp-return-summary')?.click()"); await wait(150);
-  const jumpedBackOk = await cdp.evalJs("window.TucuEmpezarApp.getState().step === 10");
+  await assertLumiVisible(cdp, 'Desktop Paso 10', 72, ok);
+  await cdp.evalJs("document.querySelector('[data-emp-cover-style=\"poster\"]')?.click()"); await wait(150);
+  await cdp.evalJs("document.getElementById('btn-open-terms-modal')?.click()"); await wait(120);
+  const modalTxt = await cdp.evalJs("document.getElementById('emp-terms-modal')?.innerText||''");
+  await cdp.evalJs("document.getElementById('btn-close-terms-modal')?.click()"); await wait(120);
+  const p10Btn = await cdp.evalJs("({hasStyle:Boolean(document.getElementById('emp-step10-style-selector')),tone:document.getElementById('preview-poster-card')?.dataset?.posterTone||'',btnOk:document.getElementById('btn-empezar-submit')?.classList?.contains('wg-btn-emerald')})");
   await cdp.evalJs("document.querySelector('[data-emp-pay-method=\"mp\"]')?.click()");
   let mpMounted = false;
-  for (let i = 0; i < 45; i++) { await wait(250); mpMounted = await cdp.evalJs("Boolean(document.querySelector('#emp-mp-brick-container iframe, #emp-mp-brick-container form, #emp-mp-brick-container [data-testid]'))"); if (mpMounted) break; }
-  ok(p10.chk === false && p10.tit && jumpedBackOk && mpMounted, `P10 términos destildados, Cambiar->Volver, titular Leonardo Laricchiuta y Brick MP=${mpMounted}`);
-  await cdp.evalJs("document.querySelector('[data-emp-pay-method=\"transfer\"]')?.click();"); await wait(180);
-  await cdp.evalJs("const st=window.TucuEmpezarApp.getState();st.coverMode='temp';st.coverId='temp_deportes';const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));"); await wait(120);
-  await cdp.evalJs("document.getElementById('btn-empezar-submit')?.click()"); await wait(600);
-  const p11 = await cdp.evalJs("({conf:Boolean(document.getElementById('emp-confetti-canvas')),dom:document.getElementById('emp-success-domain')?.innerText||'',wa:Boolean(document.getElementById('btn-open-wa-now'))})");
-  ok(p11.conf && p11.dom.includes('.tucured.com.ar') && p11.wa, `P11 confetti + link "${p11.dom}" + botón WhatsApp`);
-  await assertLumiVisible(cdp, 'Desktop Paso 11', 72);
+  for (let i = 0; i < 40; i++) { await wait(250); mpMounted = await cdp.evalJs("Boolean(document.querySelector('#emp-mp-brick-container iframe, #emp-mp-brick-container form, #emp-mp-brick-container [data-testid]'))"); if (mpMounted) break; }
+  ok(p10Btn.hasStyle && ['dark', 'light'].includes(p10Btn.tone) && modalTxt.includes('v1.1') && p10Btn.btnOk && mpMounted, `P10 Estilo, Póster (${p10Btn.tone}), Modal T&C v1.1, botón verde y Brick MP=${mpMounted}`);
+
+  await cdp.evalJs("document.querySelector('[data-emp-pay-method=\"transfer\"]')?.click()"); await wait(150);
+  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(600);
+  await assertLumiVisible(cdp, 'Desktop Paso 11', 72, ok);
+  const p11 = await cdp.evalJs("({txt:document.getElementById('empezar-step-mount').innerText,waTarget:document.getElementById('btn-open-wa-now')?.getAttribute('target')||'',domCls:document.getElementById('emp-success-domain')?.className||'',back:Boolean(document.getElementById('btn-emp-back-home'))})");
+  ok(p11.txt.includes('Reserva pendiente') && p11.txt.includes('¡Tu diseño y link están reservados!') && p11.waTarget === '_blank' && p11.domCls.includes('break-all') && p11.back, 'P11 estado Transferencia 24hs, link break-all, WA _blank y Volver a tucured.ar');
 }
 
 async function runMobileCheck(cdp) {
-  console.log('\n=== 3. E2E MOBILE 375x667 (LUMI GATE ACTO1->P1->P3->P6->P11 + OVERFLOW 0) ===');
+  console.log('\n=== 3. E2E MOBILE 375x667 (NO STICKY, LUMI GATE ACTO1->P1->P3->P6->P10->P11, OVERFLOW 0) ===');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 375, height: 667, deviceScaleFactor: 1, mobile: true });
   await cdp.goto('/empezar.html'); await cdp.evalJs('localStorage.clear(); sessionStorage.clear();'); await cdp.goto('/empezar.html');
-  await assertLumiVisible(cdp, 'Mobile Acto 1', 60);
+  await assertLumiVisible(cdp, 'Mobile Acto 1', 60, ok);
   await cdp.evalJs("document.getElementById('btn-skip-lumi-intro')?.click()"); await wait(250);
-  await assertLumiVisible(cdp, 'Mobile Paso 1', 60);
-  ok(await cdp.evalJs("document.documentElement.scrollWidth<=document.documentElement.clientWidth"), 'Mobile 375 sin overflow horizontal en Paso 1');
-  await cdp.evalJs("(()=>{const s=window.TucuEmpezarApp.getState();s.comercio='Barberia Norte';s.slug='barberia-norte';s.step=3;window.TucuEmpezarApp.renderAll();})()"); await wait(200);
-  await cdp.evalJs("window.scrollTo(0,260);"); await wait(160);
-  await assertLumiVisible(cdp, 'Mobile Paso 3 + Scroll', 60);
-  await cdp.evalJs("(()=>{window.scrollTo(0,0);const s=window.TucuEmpezarApp.getState();s.step=6;window.TucuEmpezarApp.renderAll();})()"); await wait(200);
-  await assertLumiVisible(cdp, 'Mobile Paso 6', 60);
-  await cdp.evalJs("(()=>{const s=window.TucuEmpezarApp.getState();Object.assign(s,{direccion:'25 de Mayo 480',direccionLat:'-26.82',direccionLng:'-65.20',geoVerified:true,titularNombre:'Julio',titularApellido:'Sosa',whatsapp:'3815554321',coverMode:'temp',coverId:'temp_peluqueria',termsAccepted:true,step:10});window.TucuEmpezarApp.renderAll();})()"); await wait(200);
-  await cdp.evalJs("document.getElementById('btn-empezar-submit')?.click()"); await wait(600);
-  await assertLumiVisible(cdp, 'Mobile Paso 11', 60);
+  await assertLumiVisible(cdp, 'Mobile Paso 1', 60, ok);
+  const mobP1 = await cdp.evalJs("({ov:document.documentElement.scrollWidth<=document.documentElement.clientWidth,pos:getComputedStyle(document.getElementById('empezar-mascot-mount')).position,hint:getComputedStyle(document.querySelector('.emp-enter-hint')).display})");
+  ok(mobP1.ov && mobP1.pos !== 'sticky' && mobP1.hint === 'none', `Mobile 375 overflow=0, mascot pos=${mobP1.pos}, enterHint=${mobP1.hint}`);
+
+  for (const [stNum, lbl] of [[3, 'Mobile Paso 3'], [6, 'Mobile Paso 6'], [10, 'Mobile Paso 10']]) {
+    await cdp.evalJs(`(()=>{window.scrollTo(0,0);const s=window.TucuEmpezarApp.getState();Object.assign(s,{comercio:'Barberia Norte',slug:'barberia-norte',rubro:'peluqueria',coverMode:'temp',coverId:'temp_peluqueria',direccion:'25 de Mayo 480',direccionLat:'-26.82',direccionLng:'-65.20',geoVerified:true,titularNombre:'Julio',titularApellido:'Sosa',whatsapp:'3815554321',step:${stNum}});window.TucuEmpezarApp.renderAll();})()`);
+    await wait(220); await assertLumiVisible(cdp, lbl, 60, ok);
+  }
+  const mobStylePrev = await cdp.evalJs("Boolean(document.querySelector('#emp-step10-mobile-style-preview img[data-temp-cover=\"1\"]'))");
+  ok(mobStylePrev, 'Mobile P10 renderiza mini-preview inline de estilo con portada temporal .webp');
+  await cdp.evalJs("const t=document.getElementById('emp-terms');t.checked=true;t.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('btn-empezar-submit')?.click();"); await wait(600);
+  await assertLumiVisible(cdp, 'Mobile Paso 11', 60, ok);
 }
 
 async function main() {
-  runStatic();
+  runStaticAudit(ok);
   const userDataDir = path.resolve('.tmp-cdp-2b'); try { fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 3 }); } catch {}
   const chrome = spawn(CHROME, [`--remote-debugging-port=${PORT_CDP}`, `--user-data-dir=${userDataDir}`, '--headless=new', '--disable-gpu', '--no-first-run', 'about:blank'], { stdio: 'ignore' });
   try {

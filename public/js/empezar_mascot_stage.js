@@ -1,5 +1,5 @@
 // Archivo: public/js/empezar_mascot_stage.js
-// Escenario de Lumi v2 (6 gestos WebM VP9 alpha + WebP fallback, sin nodos huérfanos) (< 180L)
+// Escenario de Lumi v2 (6 gestos WebM VP9 alpha + WebP fallback, nacimiento desde logo en Acto 1) (< 185L)
 
 (function (global) {
   const CLIPS = {
@@ -11,7 +11,7 @@
     advisor: { webm: '/assets/mascot/advisor.webm', webp: '/assets/mascot/advisor.webp', loop: true, duration: 0 }
   };
 
-  let layer = null, actor = null, posterEl = null, format = null;
+  let layer = null, actor = null, posterEl = null, introLogoEl = null, format = null;
   let currentClip = 'idle', currentAnchor = 'header', clipTimer = null;
   const mediaPool = new Map();
 
@@ -22,6 +22,15 @@
     const v = document.createElement('video');
     format = (Boolean(v.canPlayType && v.canPlayType('video/webm; codecs="vp9"')) && !isApple) ? 'webm' : 'webp';
     return format;
+  }
+
+  function createStaticImg(src, key, cls) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'TucuRed';
+    img.className = cls;
+    img.dataset.clipKey = key;
+    return img;
   }
 
   function ensureLayer() {
@@ -38,16 +47,15 @@
       actor = document.getElementById('tucu-mascot-actor') || document.createElement('div');
       actor.id = 'tucu-mascot-actor';
     }
+    if (!introLogoEl || introLogoEl.parentElement !== actor) {
+      introLogoEl = actor.querySelector('[data-clip-key="intro-logo"]')
+        || createStaticImg('/assets/tucu_red_logo.svg', 'intro-logo', 'tucu-mascot-media p-3');
+      if (introLogoEl.parentElement !== actor) actor.appendChild(introLogoEl);
+    }
     if (!posterEl || posterEl.parentElement !== actor) {
-      posterEl = actor.querySelector('[data-clip-key="poster"]');
-      if (!posterEl) {
-        posterEl = document.createElement('img');
-        posterEl.src = '/assets/mascot/mascot_poster.webp';
-        posterEl.alt = 'Lumi';
-        posterEl.className = 'tucu-mascot-media is-clip-active';
-        posterEl.dataset.clipKey = 'poster';
-        actor.appendChild(posterEl);
-      }
+      posterEl = actor.querySelector('[data-clip-key="poster"]')
+        || createStaticImg('/assets/mascot/mascot_poster.webp', 'poster', 'tucu-mascot-media is-clip-active');
+      if (posterEl.parentElement !== actor) actor.appendChild(posterEl);
     }
     if (!document.body.contains(actor)) (document.getElementById('tucu-mascot-anchor') || layer).appendChild(actor);
     return layer;
@@ -128,10 +136,12 @@
     positionActor(options.anchor || 'header');
     const el = getOrCreateMedia(target);
     currentClip = target;
+    const standby = target === 'intro' ? introLogoEl : posterEl;
+
     if (el.tagName === 'VIDEO') {
       if (el.readyState >= 2 && el.videoWidth > 0) activateNode(el);
       else {
-        activateNode(posterEl);
+        activateNode(standby);
         const reveal = () => { if (currentClip === target && el.parentElement === actor && format === 'webm') activateNode(el); };
         el.addEventListener('loadeddata', reveal, { once: true });
         el.addEventListener('canplay', reveal, { once: true });

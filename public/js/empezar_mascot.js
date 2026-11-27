@@ -1,20 +1,20 @@
 // Archivo: public/js/empezar_mascot.js
-// Controlador conversacional de Lumi v2 (LUMI · TU GUIA TUCURED, Acto 1->2 y mapeo exacto 1-11) (< 170L)
+// Controlador conversacional de Lumi v2 (Acto 1 manual desde logo y mapeo 1-11) (< 170L)
 
 (function (global) {
   const SESSION_INTRO_KEY = 'tucu_lumi_intro_played_v2';
   const STEP_LINES = {
     1: 'Hola, soy Lumi. Contame el nombre de tu negocio para empezar.',
     2: 'Elegí tu rubro y especialidades para adaptar el diseño a tu actividad.',
-    3: 'Elegí una portada exclusiva para tu negocio o subí tu propia foto.',
+    3: 'Elegí una portada o subí tu foto. Cada portada disponible queda reservada solo para tu marca cuando confirmás el alta.',
     4: 'Sumá tu logo sobre blanco y definí el color que te identifica.',
     5: 'Definí una frase corta que cuente lo que hace especial a tu lugar.',
     6: 'Contame dónde está tu local y en qué horarios recibís turnos.',
     7: 'Sumá tus primeros servicios o elegí mandarnos tu lista por WhatsApp.',
     8: 'Elegí solo lo que tu negocio necesita hoy; si más adelante crecés, podés cambiar de plan sin perder nada.',
     9: 'Dejanos tu nombre y WhatsApp para activar tu portada y enviarte los accesos.',
-    10: 'Revisá el resumen completo, elegí cómo abonar y activá tu Mes Fundador.',
-    11: '¡Felicitaciones! Tu App ya está en marcha y lista para compartir.'
+    10: 'Elegí el estilo visual de tu portada, revisá cada detalle y activá tu Mes Fundador.',
+    11: '¡Felicitaciones! Tu espacio quedó registrado y listo para compartir.'
   };
 
   let typingTimer = null;
@@ -120,13 +120,12 @@
     sessionStorage.setItem(SESSION_INTRO_KEY, '1');
     dockMount?.classList.add('hidden');
     stepMountEl.innerHTML = `
-      <div id="lumi-intro-stage-anchor" class="wg-card rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center space-y-3.5">
-        <img src="/assets/tucu_red_logo.svg" alt="TucuRed" class="h-7 sm:h-8 w-auto mx-auto" />
+      <div id="lumi-intro-stage-anchor" class="wg-card rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center space-y-4">
         <div id="lumi-intro-media-slot" class="w-36 h-36 sm:w-44 sm:h-44 mx-auto relative lumi-intro-emerge"></div>
         <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-[#EA580C]">LUMI · TU GUÍA TUCURED</span>
-        <h2 class="font-headline font-extrabold text-xl sm:text-2xl text-stone-900">Hola, vamos a crear el turnero de tu negocio</h2>
-        <p class="text-sm text-stone-600 max-w-md">Avanzamos con una decisión simple por pantalla mientras ves todo en vivo en tu celular.</p>
-        <button type="button" id="btn-skip-lumi-intro" class="wg-btn-primary px-5 py-2.5 rounded-2xl text-xs font-bold cursor-pointer">Empezar ahora</button>
+        <h2 class="font-headline font-extrabold text-xl sm:text-2xl text-stone-900">¡Hola! Soy Lumi, tu guía en Tucu Red</h2>
+        <p class="text-sm text-stone-600 max-w-md">Te acompaño paso a paso a diseñar tu App de turnos mientras la ves cobrar vida en tu celular.</p>
+        <button type="button" id="btn-skip-lumi-intro" class="wg-btn-primary px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold cursor-pointer">Empezar ahora</button>
       </div>`;
     global.TucuMascotStage?.setClip('intro', { anchor: 'center' });
     let finished = false;
@@ -139,14 +138,13 @@
       onFinish?.();
     };
     document.getElementById('btn-skip-lumi-intro')?.addEventListener('click', finish);
-    setTimeout(finish, 3100);
   }
 
   function init(container, opts) {
     adviceApiRef = opts?.adviceApi || null;
     renderDock(container);
     global.TucuMascotStage?.mountLayer();
-    global.TucuMascotStage?.setClip('idle', { anchor: 'header' });
+    if (!opts?.deferIdle) global.TucuMascotStage?.setClip('idle', { anchor: 'header' });
     document.getElementById('btn-lumi-advice')?.addEventListener('click', () => {
       opts?.onAdviceClick?.();
     });

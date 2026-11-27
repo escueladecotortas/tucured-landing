@@ -6,8 +6,7 @@ import { WA_FALLBACK_URL } from '../utils/whatsapp_link.js';
 
 export { EXPANDED_RUBROS, EXPANDED_RUBROS as FUNNEL_RUBROS, FUNNEL_LEVELS };
 
-export function getFunnelMarkup(_draft = {}, selectedRubro = 'peluqueria', selectedLevel = 'l2') {
-  const launchHref = `/empezar.html?plan=${encodeURIComponent(selectedLevel)}&rubro=${encodeURIComponent(selectedRubro)}`;
+export function getFunnelMarkup() {
   return `
     <section id="funnel" class="py-16 lg:py-24 max-w-[1040px] mx-auto px-4 sm:px-8">
       <div class="bg-white rounded-[2.25rem] p-6 sm:p-10 lg:p-12 shadow-xl border border-stone-200/90">
@@ -26,13 +25,13 @@ export function getFunnelMarkup(_draft = {}, selectedRubro = 'peluqueria', selec
                 Armá tu App de turnos en 2 minutos y mirala cobrar vida paso a paso
               </h2>
               <p class="text-sm text-stone-600 leading-relaxed">
-                Elegís tu portada, color, tono de voz y primeros servicios con vista previa en vivo. Activás tu Mes Fundador por $4.999 y 0% comisiones.
+                Elegís tu portada, color, frase y primeros servicios con vista previa en vivo. Activás tu Mes Fundador por $4.999 el primer mes.
               </p>
             </div>
           </div>
 
           <div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 lg:min-w-[270px]">
-            <a id="btn-funnel-launch" href="${launchHref}" class="px-6 py-4 rounded-2xl bg-stone-900 hover:bg-orange-600 text-white font-headline font-extrabold text-sm sm:text-base text-center transition-colors shadow-md">
+            <a id="btn-funnel-launch" href="/empezar.html" class="px-6 py-4 rounded-2xl bg-stone-900 hover:bg-orange-600 text-white font-headline font-extrabold text-sm sm:text-base text-center transition-colors shadow-md">
               Crear mi App de turnos ahora →
             </a>
             <a id="btn-funnel-wa" href="${WA_FALLBACK_URL}" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-2xl bg-[#FAF8F5] hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs sm:text-sm font-bold text-center transition-colors">

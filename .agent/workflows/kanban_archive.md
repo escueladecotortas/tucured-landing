@@ -1,7 +1,7 @@
 // Archivo: .agent/workflows/kanban_archive.md
 # Histórico Consolidado de Tareas Kanban — tucured-landing
 
-> Archivo maestro de tareas `[DONE]` rotadas cronológicamente (**124** bloques históricos consolidados; rotación automática Nexus OS).
+> Archivo maestro de tareas `[DONE]` rotadas cronológicamente (**125** bloques históricos consolidados; rotación automática Nexus OS).
 
 ## [DONE_ARCHIVE]
 
@@ -255,3 +255,4 @@
 - [x] **[TASK-112F]** Módulo Compartido de Horarios Semanales (`admin_weekly_schedule.js` `126L`) en L1/L2/L3 tomando L2 como Template: extracción de `window.TucuWeeklySchedule` con 1 columna responsiva `< 1280px` y campos `min-w-0` (`0` recorte en `375px`/`600px`/`1280px`), conexión arriba de `Feriados Nacionales 2026` en Tab 2 (`Horarios & Feriados`) de `public/admin_l1.html` (`183L`) + `admin_l1_config.js` (`154L`), `public/admin_l2.html` (`175L`) + `admin_l2_schedule.js` (`75L`) y `public/admin_l3.html` (`76L`) + `view_system.js` (`194L`, persistencia en `tucu_l3_schedule*` y `state.config.schedule`); paridad SHA-256 `7/7 MATCH (100%)` con `tucured-engine`; `vite build` (`694ms`) + `scripts/verify_task112f_shared_schedule.js` (`127L`): `29/29 PASS | FAIL=0` (incluyendo `Clonar Lun a Vie` y persistencia tras recarga en L1/L2/L3). *(23/11/2026, 04:45:44)*
 - [x] **[TASK-112G]** Bloqueos Modulares L3 (`admin_blocks_ui.js` `85L` + `view_system.js` `162L` `< 165L` + `admin_l3.html` `76L` `< 95L`), Limpieza Copy Showroom (`showcase_admin_ui.js` `113L`, remoción de `Módulos enchufables a medida` / `Mercado Pago`), Consolidación Documental (`.agent/audit/audit_features_l1_l2_l3.md` `40L` como SSOT y eliminación de `.agent/specs/turneros_v15_matrix.md`), paridad SHA-256 `3/3 MATCH (100%)` con `tucured-engine`, `vite build` (`756ms`) + `scripts/verify_task112g_release_close.js` (`139L`): `16/16 PASS | FAIL=0` (`375x667`, `600x760`, `1280x800`), push producción `tucured-landing` (`ee53f54`) + `tucured-engine` (`487d025`) y deploy Netlify `https://tucured.ar/` HTTP `200`. *(23/11/2026, 05:15:30)*
 - [x] **[TASK-113B]** Wizard `/empezar.html`: rediseño integral Warm Glass, Lumi v2 visible y blindada con `Failure-to-Gate`, 3 estilos de portada, Payment Brick Sandbox y renombre global a `Plan Turnos`. _(2026-11-26)_
+- [x] **[TASK-113C]** Pulido B Integral: 5 portadas temporales `.webp` (`<= 90 KB`), Acto 1 manual desde logo, especialidades dinámicas, moderación visual, banco curado P5 + IA separada, Estilo Visual en P10 con contraste automático, Modal interno T&C `v1.1`, 2 estados reales P11, WhatsApp link corto y `/activar.html?s=<slug>`. _(2026-11-27)_
